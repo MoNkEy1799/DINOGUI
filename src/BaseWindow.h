@@ -1,70 +1,44 @@
 #pragma once
 
+#include "TemplateBaseClass.h"
+
 #include <Windows.h>
+#include <d2d1.h>
+
+#include <string>
+#include <vector>
+#include <iostream>
 
 namespace DINOGUI
 {
-	template<class CLASS_TYPE>
-	class BaseWindow
-	{
-	public:
-		static LRESULT CALLBACK WindowProc(HWND windowHandle, UINT messageCode, WPARAM wParam, LPARAM lParam)
-		{
-			CLASS_TYPE* mainThis = nullptr;
 
-			if (messageCode == WM_NCCREATE)
-			{
-				CREATESTRUCT* createStruct = (CREATESTRUCT*)lParam;
-				mainThis = (CLASS_TYPE*)createStruct->lpCreateParams;
-				SetWindowLongPtr(windowHandle, GWLP_USERDATA, (LONG_PTR)mainThis);
+class Widget;
 
-				mainThis->m_windowHandle = windowHandle;
-			}
+class Base : public TemplateWindow<Base>
+{
+public:
+	Base(const std::string& windowName = "DINOGUI");
+	int run();
 
-			else
-			{
-				mainThis = (CLASS_TYPE*)GetWindowLongPtr(windowHandle, GWLP_USERDATA);
-			}
+	LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam);
 
-			if (mainThis)
-			{
-				return mainThis->HandleMessage(messageCode, wParam, lParam);
-			}
+	void addChild(DINOGUI::Widget* child) { m_childWidgets.push_back(child); };
 
-			else
-			{
-				return DefWindowProc(windowHandle, messageCode, wParam, lParam);
-			}
-		}
+private:
+	ID2D1Factory* m_factory;
+	ID2D1HwndRenderTarget* m_renderTarget;
+	ID2D1SolidColorBrush* m_colorBrush;
+	std::string m_windowName;
+	PCWSTR m_pcwName;
 
-		BaseWindow() : m_windowHandle(nullptr) { }
+	std::vector<DINOGUI::Widget*> m_childWidgets;
 
-		bool createWindow(PCWSTR windowName, DWORD windowStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int width = CW_USEDEFAULT, int height = CW_USEDEFAULT)
-		{
-			WNDCLASS windowClass = { 0 };
+	void paintChildren();
 
-			windowClass.lpfnWndProc = CLASS_TYPE::WindowProc;
-			windowClass.hInstance = GetModuleHandle(0);
-			windowClass.lpszClassName = L"BaseWindow";
+	PCWSTR getWindowName();
 
-			RegisterClass(&windowClass);
+	HRESULT	createGraphicsResource();
+	void destroyGraphicsResources();
+};
 
-			m_windowHandle = CreateWindowEx(0, L"BaseWindow", windowName, windowStyle, x, y, width, height, 0, 0, GetModuleHandle(0), this);
-
-			return (m_windowHandle ? true : false);
-		}
-
-		HWND getWindowHandle() const { return m_windowHandle; };
-
-	protected:
-		virtual LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam) = 0;
-
-		HWND m_windowHandle;
-	};
-
-	class MainWindow : public BaseWindow<MainWindow>
-	{
-	public:
-		LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam);
-	};
 }
