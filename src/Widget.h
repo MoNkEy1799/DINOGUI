@@ -11,7 +11,7 @@ class Widget
 {
 public:
 	virtual void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) = 0;
-	virtual void place(Widget& widget, int row, int col) = 0;
+	virtual void place(int row, int col, int rowSpan, int colSpan) = 0;
 };
 
 }

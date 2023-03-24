@@ -2,16 +2,20 @@
 
 #include <d2d1.h>
 
-DINOGUI::Button::Button(DINOGUI::Base& base)
+DINOGUI::Button::Button(DINOGUI::Base* base)
 	: m_base(base)
 {
+	m_color = D2D1::ColorF(1.0f, 1.0f, 0.0f);
+	m_rect = D2D1::RectF(60.0f, 60.0f, 100.0f, 100.0f);
 }
 
 void DINOGUI::Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-	renderTarget->FillRectangle(D2D1::RectF(50.0f, 50.0f, 70.0f, 70.0f), brush);
+	brush->SetColor(m_color);
+	renderTarget->FillRectangle(m_rect, brush);
 }
 
-void DINOGUI::Button::place(Widget& widget, int row, int col)
+void DINOGUI::Button::place(int row, int col, int rowSpan, int colSpan)
 {
+	m_base->addChild(this);
 }

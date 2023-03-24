@@ -50,13 +50,14 @@ public:
 		}
 	}
 
-	bool createWindow(PCWSTR windowName, DWORD windowStyle, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT, int width = CW_USEDEFAULT, int height = CW_USEDEFAULT)
+	bool createWindow(PCWSTR windowName, DWORD windowStyle, int width = CW_USEDEFAULT, int height = CW_USEDEFAULT, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT)
 	{
 		WNDCLASS windowClass = { 0 };
 
 		windowClass.lpfnWndProc = CLASS_TYPE::WindowProc;
 		windowClass.hInstance = GetModuleHandle(0);
 		windowClass.lpszClassName = L"BaseWindow";
+		windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
 		RegisterClass(&windowClass);
 
@@ -64,6 +65,8 @@ public:
 
 		return (m_windowHandle ? true : false);
 	}
+
+	HWND getWindowHandle() { return m_windowHandle; };
 
 protected:
 	virtual LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam) = 0;
