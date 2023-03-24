@@ -10,12 +10,8 @@ namespace DINOGUI
 class Widget
 {
 public:
-	Widget(DINOGUI::Base& base) : m_base(base) { base.addChild(this); };
-	
 	virtual void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) = 0;
-
-protected:
-	DINOGUI::Base& m_base;
+	virtual void place(Widget& widget, int row, int col) = 0;
 };
 
 }

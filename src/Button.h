@@ -14,11 +14,12 @@ public:
 	Button(DINOGUI::Base& base);
 
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void place(Widget& widget, int row, int col) override;
 
 private:
-	DINOGUI::Position m_position;
-	DINOGUI::Size m_size;
+	DINOGUI::Rect m_rect;
 	DINOGUI::Color m_color;
+	DINOGUI::Base m_base;
 };
 
 }
