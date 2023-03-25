@@ -4,6 +4,7 @@
 
 #include <Windows.h>
 #include <d2d1.h>
+#include <dwrite.h>
 
 #include <string>
 #include <vector>
@@ -26,10 +27,15 @@ public:
 	int DEBUGchildCount() { return (int)m_childWidgets.size(); };
 
 private:
+	IDWriteFactory* m_writeFactory;
+	IDWriteTextFormat* m_textFormat;
 	ID2D1Factory* m_factory;
 	ID2D1HwndRenderTarget* m_renderTarget;
 	ID2D1SolidColorBrush* m_colorBrush;
 	D2D1_POINT_2F m_mousePosition;
+
+	std::wstring testText;
+	uint32_t textLength;
 
 	std::vector<DINOGUI::Widget*> m_childWidgets;
 	std::string m_windowName;
@@ -39,6 +45,7 @@ private:
 	void destroyWindow();
 	void resizeWindow();
 	void paintChildren();
+	void mouseMove(int posX, int posY, DWORD flags);
 	void leftClick(int posX, int posY, DWORD flags);
 
 	D2D1_SIZE_U getCurrentWindowSize();

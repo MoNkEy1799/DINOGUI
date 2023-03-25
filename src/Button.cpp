@@ -19,3 +19,19 @@ void DINOGUI::Button::place(int row, int col, int rowSpan, int colSpan)
 {
 	m_base->addChild(this);
 }
+
+void DINOGUI::Button::hover(int x, int y)
+{
+	if (insideRect(x, y))
+	{
+		m_color = D2D1::ColorF(1.0f, 0.0f, 0.0f);
+		InvalidateRect(m_base->getWindowHandle(), nullptr, false);
+	}
+}
+
+bool DINOGUI::Button::insideRect(int x, int y)
+{
+	bool containsX = (x > m_rect.left && x < m_rect.right);
+	bool containsY = (y > m_rect.top && y < m_rect.bottom);
+	return (containsX && containsY);
+}

@@ -4,6 +4,7 @@
 
 #include <Windows.h>
 #include <Windowsx.h>
+#include <dwrite.h>
 #include <d2d1.h>
 #include <iostream>
 #include <stdexcept>
@@ -56,8 +57,13 @@ LRESULT DINOGUI::Base::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lPa
         resizeWindow();
         return 0;
 
+    case WM_MOUSEMOVE:
+        mouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
+
     case WM_LBUTTONDOWN:
         leftClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
 
     default:
         return DefWindowProc(m_windowHandle, messageCode, wParam, lParam);
@@ -72,6 +78,12 @@ int DINOGUI::Base::createFactoryAndDPI()
     {
         return -1;
     }
+
+    if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), (IUnknown**)&m_writeFactory)))
+    {
+        return -1;
+    }
+
     DINOGUI::DPIConverter::Initialize(m_windowHandle);
     return 0;
 }
@@ -94,7 +106,13 @@ void DINOGUI::Base::resizeWindow()
 
 void DINOGUI::Base::paintChildren()
 {
+    std::cout << "draw call" << std::endl;
     HRESULT hResult = createGraphicsResource();
+
+    testText = L"Test Text";
+    textLength = testText.size();
+    D2D1_RECT_F rect = D2D1::RectF(200, 200, 300, 250);
+
 
     if (SUCCEEDED(hResult))
     {
@@ -102,6 +120,7 @@ void DINOGUI::Base::paintChildren()
         BeginPaint(m_windowHandle, &painStruct);
         m_renderTarget->BeginDraw();
         m_renderTarget->Clear(D2D1::ColorF(0.8f, 0.8f, 0.8f));
+        m_renderTarget->DrawText(testText.c_str(), textLength, m_textFormat, rect, m_colorBrush);
 
         for (DINOGUI::Widget* child : m_childWidgets)
         {
@@ -116,6 +135,14 @@ void DINOGUI::Base::paintChildren()
         }
 
         EndPaint(m_windowHandle, &painStruct);
+    }
+}
+
+void DINOGUI::Base::mouseMove(int posX, int posY, DWORD flags)
+{
+    for (Widget* widget : m_childWidgets)
+    {
+        widget->hover(posX, posY);
     }
 }
 
@@ -147,6 +174,30 @@ HRESULT DINOGUI::Base::createGraphicsResource()
         }
     }
 
+    if (!m_textFormat)
+    {
+        hResult = m_writeFactory->CreateTextFormat(
+            L"Consolas",                // Font family name.
+            NULL,                       // Font collection (NULL sets it to use the system font collection).
+            DWRITE_FONT_WEIGHT_REGULAR,
+            DWRITE_FONT_STYLE_NORMAL,
+            DWRITE_FONT_STRETCH_NORMAL,
+            12.0f,
+            L"en-us",
+            &m_textFormat
+        );
+
+        if (SUCCEEDED(hResult))
+        {
+            hResult = m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+        }
+
+        if (SUCCEEDED(hResult))
+        {
+            hResult = m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        }
+    }
+
     return hResult;
 }
 
@@ -154,4 +205,5 @@ void DINOGUI::Base::destroyGraphicsResources()
 {
     DINOGUI::safeReleaseInterface(&m_renderTarget);
     DINOGUI::safeReleaseInterface(&m_colorBrush);
+    DINOGUI::safeReleaseInterface(&m_textFormat);
 }
