@@ -109,18 +109,12 @@ void DINOGUI::Base::paintChildren()
     std::cout << "draw call" << std::endl;
     HRESULT hResult = createGraphicsResource();
 
-    testText = L"Test Text";
-    textLength = testText.size();
-    D2D1_RECT_F rect = D2D1::RectF(200, 200, 300, 250);
-
-
     if (SUCCEEDED(hResult))
     {
         PAINTSTRUCT painStruct;
         BeginPaint(m_windowHandle, &painStruct);
         m_renderTarget->BeginDraw();
         m_renderTarget->Clear(D2D1::ColorF(0.8f, 0.8f, 0.8f));
-        m_renderTarget->DrawText(testText.c_str(), textLength, m_textFormat, rect, m_colorBrush);
 
         for (DINOGUI::Widget* child : m_childWidgets)
         {
@@ -174,30 +168,6 @@ HRESULT DINOGUI::Base::createGraphicsResource()
         }
     }
 
-    if (!m_textFormat)
-    {
-        hResult = m_writeFactory->CreateTextFormat(
-            L"Consolas",                // Font family name.
-            NULL,                       // Font collection (NULL sets it to use the system font collection).
-            DWRITE_FONT_WEIGHT_REGULAR,
-            DWRITE_FONT_STYLE_NORMAL,
-            DWRITE_FONT_STRETCH_NORMAL,
-            12.0f,
-            L"en-us",
-            &m_textFormat
-        );
-
-        if (SUCCEEDED(hResult))
-        {
-            hResult = m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-        }
-
-        if (SUCCEEDED(hResult))
-        {
-            hResult = m_textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-        }
-    }
-
     return hResult;
 }
 
@@ -205,5 +175,4 @@ void DINOGUI::Base::destroyGraphicsResources()
 {
     DINOGUI::safeReleaseInterface(&m_renderTarget);
     DINOGUI::safeReleaseInterface(&m_colorBrush);
-    DINOGUI::safeReleaseInterface(&m_textFormat);
 }

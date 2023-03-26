@@ -26,16 +26,14 @@ public:
 	void addChild(DINOGUI::Widget* child) { m_childWidgets.push_back(child); };
 	int DEBUGchildCount() { return (int)m_childWidgets.size(); };
 
+	IDWriteFactory* getWriteFactory() { return m_writeFactory; };
+
 private:
 	IDWriteFactory* m_writeFactory;
-	IDWriteTextFormat* m_textFormat;
 	ID2D1Factory* m_factory;
 	ID2D1HwndRenderTarget* m_renderTarget;
 	ID2D1SolidColorBrush* m_colorBrush;
 	D2D1_POINT_2F m_mousePosition;
-
-	std::wstring testText;
-	uint32_t textLength;
 
 	std::vector<DINOGUI::Widget*> m_childWidgets;
 	std::string m_windowName;

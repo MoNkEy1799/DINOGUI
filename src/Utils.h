@@ -2,6 +2,7 @@
 
 #include <d2d1.h>
 #include <array>
+#include <string>
 
 namespace DINOGUI
 {
@@ -33,14 +34,11 @@ private:
     static float scaleY;
 };
 
-struct Rect
+struct Font
 {
-	int x, y, width, height;
-};
-
-struct Color
-{
-	float r, g, b;
+    float size;
+    std::string family;
+    int weight;
 };
 
 }
