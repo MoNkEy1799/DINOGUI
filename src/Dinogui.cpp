@@ -7,3 +7,4 @@
 #include <dwrite.h>
 
 float DINOGUI::DPIConverter::scale = 1.0f;
+D2D1_COLOR_F DINOGUI::Style::windowBackground = DINOCOLOR_MAIN_BACKGROUND;

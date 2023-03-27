@@ -18,6 +18,7 @@ int DINOGUI::Base::run()
 {
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp = std::wstring(m_windowName.begin(), m_windowName.end());
+
     if (!createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, m_width, m_height, m_xPos, m_yPos))
     {
         throw std::runtime_error("Could not create Window");
@@ -97,7 +98,7 @@ void DINOGUI::Base::resizeWindow()
     if (m_renderTarget)
     {
         m_renderTarget->Resize(getCurrentWindowSize());
-        InvalidateRect(m_windowHandle, NULL, FALSE);
+        redrawScreen();
     }
 }
 
@@ -111,7 +112,7 @@ void DINOGUI::Base::paintWidgets()
         PAINTSTRUCT painStruct;
         BeginPaint(m_windowHandle, &painStruct);
         m_renderTarget->BeginDraw();
-        m_renderTarget->Clear(D2D1::ColorF(0.8f, 0.8f, 0.8f));
+        m_renderTarget->Clear(DINOGUI::Style::windowBackground);
 
         for (DINOGUI::Widget* widget : m_displayWidgets)
         {
@@ -135,25 +136,26 @@ void DINOGUI::Base::mouseMove(int posX, int posY, DWORD flags)
     float y = DPIConverter::PixelsToDips(posY);
 
     DINOGUI::Widget* underMouse = getWidgetUnderMouse(x, y);
-
     if (m_hoverWidget != underMouse)
     {
         if (underMouse)
         {
             underMouse->setWidgetState(WidgetState::HOVER);
         }
+
         else
         {
             m_hoverWidget->setWidgetState(WidgetState::NORMAL);
         }
 
-        InvalidateRect(m_windowHandle, nullptr, false);
         m_hoverWidget = underMouse;
+        redrawScreen();
     }
 }
 
 void DINOGUI::Base::leftClick(int posX, int posY, DWORD flags)
 {
+    reinterpret_cast<DINOGUI::Button*>(m_displayWidgets[0])->clicked();
 }
 
 D2D1_SIZE_U DINOGUI::Base::getCurrentWindowSize()

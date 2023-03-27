@@ -60,6 +60,19 @@ void DINOGUI::Button::place(int x, int y)
     m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
 }
 
+void DINOGUI::Button::clicked()
+{
+    if (m_click)
+    {
+        m_click();
+    }
+}
+
+void DINOGUI::Button::connect(void(*func)())
+{
+    m_click = func;
+}
+
 bool DINOGUI::Button::createFontFormat()
 {
     HRESULT hResult = m_base->getWriteFactory()->CreateTextFormat(

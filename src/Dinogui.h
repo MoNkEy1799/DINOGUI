@@ -21,7 +21,7 @@ class Label;
 class LineEdit;
 class Checkbox;
 class Image;
-enum class WidgetState { NORMAL, HOVER, CLICK, SELECT };
+enum class WidgetState { NORMAL, HOVER, CLICKED, SELECTED };
 
 class Base : public TemplateWindow<Base>
 {
@@ -32,6 +32,7 @@ public:
 	LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam);
 
 	void addWidget(DINOGUI::Widget* widget) { m_displayWidgets.push_back(widget); };
+	void redrawScreen() { InvalidateRect(m_windowHandle, nullptr, false); };
 
 	IDWriteFactory* getWriteFactory() { return m_writeFactory; };
 
@@ -99,8 +100,12 @@ public:
 	void grid(int row, int col, int rowSpan, int colSpan) override;
 	void place(int x, int y) override;
 
+	void clicked();
+	void connect(void (*func)());
+
 private:
 	std::wstring m_text;
+	void (*m_click)();
 
 	bool createFontFormat();
 };
