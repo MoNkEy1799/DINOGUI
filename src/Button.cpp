@@ -1,17 +1,16 @@
-#include "Button.h"
-#include "BaseWindow.h"
+#include "Dinogui.h"
 #include "Utils.h"
 
+#include <Windows.h>
 #include <d2d1.h>
-#include <string>
 #include <dwrite.h>
+#include <string>
+#include <stdexcept>
 
-DINOGUI::Button::Button(DINOGUI::Base* base, std::string text, DINOGUI::Font font)
-	: m_base(base), m_color(), m_rect(), m_fontFormat(nullptr), m_text(), m_font(font)
+DINOGUI::Button::Button(DINOGUI::Base* base, std::string text)
+    : m_text(toWideString(text))
 {
-	m_text = toWideString(text);
-	m_color = D2D1::ColorF(1.0f, 1.0f, 0.0f);
-	m_rect = D2D1::RectF(60.0f, 60.0f, 100.0f, 100.0f);
+    m_base = base;
 }
 
 DINOGUI::Button::~Button()
@@ -21,52 +20,66 @@ DINOGUI::Button::~Button()
 
 void DINOGUI::Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-	brush->SetColor(m_color);
-	renderTarget->FillRectangle(m_rect, brush);
-    brush->SetColor(D2D1::ColorF(1.0f, 0.0f, 1.0f));
+    D2D1_COLOR_F background = m_style.background;
+    D2D1_COLOR_F border = m_style.border;
+    D2D1_COLOR_F text = m_style.text;
+    D2D1_RECT_F rectangle = rect();
+
+    if (m_state == WidgetState::HOVER)
+    {
+        background = m_style.background_Hover;
+        border = m_style.border_Hover;
+        text = m_style.text_Hover;
+    }
+
+    brush->SetColor(background);
+    renderTarget->FillRectangle(rectangle, brush);
+    brush->SetColor(border);
+    renderTarget->DrawRectangle(rectangle, brush);
 
     if (!m_fontFormat)
     {
-        createFontFormat();
+        if (!createFontFormat())
+        {
+            throw std::runtime_error("Could not create Font Format");
+        }
     }
 
-    renderTarget->DrawText(m_text.c_str(), m_text.size(), m_fontFormat, m_rect, brush);
+    brush->SetColor(text);
+    renderTarget->DrawText(m_text.c_str(), m_text.size(), m_fontFormat, rectangle, brush);
 }
 
-void DINOGUI::Button::place(int row, int col, int rowSpan, int colSpan)
+void DINOGUI::Button::grid(int row, int col, int rowSpan, int colSpan)
 {
-	m_base->addChild(this);
+    m_base->addWidget(this);
 }
 
-void DINOGUI::Button::hover(int x, int y)
+void DINOGUI::Button::place(int x, int y)
 {
-	if (insideRect(x, y))
-	{
-		m_color = D2D1::ColorF(1.0f, 0.0f, 0.0f);
-		InvalidateRect(m_base->getWindowHandle(), nullptr, false);
-	}
+    m_base->addWidget(this);
+    m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
 }
 
-bool DINOGUI::Button::insideRect(int x, int y)
-{
-	bool containsX = (x > m_rect.left && x < m_rect.right);
-	bool containsY = (y > m_rect.top && y < m_rect.bottom);
-	return (containsX && containsY);
-}
-
-void DINOGUI::Button::createFontFormat()
+bool DINOGUI::Button::createFontFormat()
 {
     HRESULT hResult = m_base->getWriteFactory()->CreateTextFormat(
-        toWideString(m_font.family).c_str(), NULL, (DWRITE_FONT_WEIGHT)m_font.weight,
-        DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, m_font.size, L"en-us", &m_fontFormat);
+        toWideString(m_style.fontFamily).c_str(), NULL, m_style.fontWeight,
+        DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, m_style.fontSize, L"en-us", &m_fontFormat);
 
-    if (SUCCEEDED(hResult))
+    if (FAILED(hResult))
     {
-        hResult = m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+        return false;
     }
 
-    if (SUCCEEDED(hResult))
+    if (!SUCCEEDED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER)))
     {
-        hResult = m_fontFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+        return false;
     }
+
+    if (!SUCCEEDED(m_fontFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER)))
+    {
+        return false;
+    }
+
+    return true;
 }

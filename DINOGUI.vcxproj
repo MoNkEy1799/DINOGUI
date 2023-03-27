@@ -126,21 +126,20 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);D2d1.lib;Dwrite.lib</AdditionalDependencies>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\BaseWindow.cpp" />
+    <ClCompile Include="Example.cpp" />
     <ClCompile Include="src\Button.cpp" />
-    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Core.cpp" />
+    <ClCompile Include="src\Dinogui.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\BaseWindow.h" />
-    <ClInclude Include="src\Button.h" />
-    <ClInclude Include="src\TemplateBaseClass.h" />
+    <ClInclude Include="src\Dinogui.h" />
     <ClInclude Include="src\Utils.h" />
-    <ClInclude Include="src\Widget.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,25 +1,22 @@
-#include "BaseWindow.h"
-#include "Widget.h"
+#include "Dinogui.h"
 #include "Utils.h"
 
 #include <Windows.h>
 #include <Windowsx.h>
-#include <dwrite.h>
 #include <d2d1.h>
-#include <iostream>
-#include <stdexcept>
-
-float DINOGUI::DPIConverter::scaleX = 1.0f;
-float DINOGUI::DPIConverter::scaleY = 1.0f;
+#include <dwrite.h>
+#include <string>
 
 DINOGUI::Base::Base(const std::string& windowName, int width, int height, int x, int y)
     : m_factory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr),
-    m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y)
+    m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y),
+    m_hoverWidget(nullptr), m_clickWidget(nullptr)
 {
 }
 
 int DINOGUI::Base::run()
 {
+    SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp = std::wstring(m_windowName.begin(), m_windowName.end());
     if (!createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, m_width, m_height, m_xPos, m_yPos))
     {
@@ -50,7 +47,7 @@ LRESULT DINOGUI::Base::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lPa
         return 0;
 
     case WM_PAINT:
-        paintChildren();
+        paintWidgets();
         return 0;
 
     case WM_SIZE:
@@ -104,7 +101,7 @@ void DINOGUI::Base::resizeWindow()
     }
 }
 
-void DINOGUI::Base::paintChildren()
+void DINOGUI::Base::paintWidgets()
 {
     std::cout << "draw call" << std::endl;
     HRESULT hResult = createGraphicsResource();
@@ -116,9 +113,9 @@ void DINOGUI::Base::paintChildren()
         m_renderTarget->BeginDraw();
         m_renderTarget->Clear(D2D1::ColorF(0.8f, 0.8f, 0.8f));
 
-        for (DINOGUI::Widget* child : m_childWidgets)
+        for (DINOGUI::Widget* widget : m_displayWidgets)
         {
-            child->draw(m_renderTarget, m_colorBrush);
+            widget->draw(m_renderTarget, m_colorBrush);
         }
 
         hResult = m_renderTarget->EndDraw();
@@ -134,9 +131,24 @@ void DINOGUI::Base::paintChildren()
 
 void DINOGUI::Base::mouseMove(int posX, int posY, DWORD flags)
 {
-    for (Widget* widget : m_childWidgets)
+    float x = DPIConverter::PixelsToDips(posX);
+    float y = DPIConverter::PixelsToDips(posY);
+
+    DINOGUI::Widget* underMouse = getWidgetUnderMouse(x, y);
+
+    if (m_hoverWidget != underMouse)
     {
-        widget->hover(posX, posY);
+        if (underMouse)
+        {
+            underMouse->setWidgetState(WidgetState::HOVER);
+        }
+        else
+        {
+            m_hoverWidget->setWidgetState(WidgetState::NORMAL);
+        }
+
+        InvalidateRect(m_windowHandle, nullptr, false);
+        m_hoverWidget = underMouse;
     }
 }
 
@@ -149,6 +161,19 @@ D2D1_SIZE_U DINOGUI::Base::getCurrentWindowSize()
     RECT rect;
     GetClientRect(m_windowHandle, &rect);
     return D2D1::SizeU(rect.right, rect.bottom);
+}
+
+DINOGUI::Widget* DINOGUI::Base::getWidgetUnderMouse(int x, int y)
+{
+    for (Widget* widget : m_displayWidgets)
+    {
+        if (widget->contains(x, y))
+        {
+            return widget;
+        }
+    }
+
+    return nullptr;
 }
 
 HRESULT DINOGUI::Base::createGraphicsResource()
