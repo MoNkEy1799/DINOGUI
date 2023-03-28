@@ -7,13 +7,22 @@
 #include <iostream>
 
 #define DINOCOLOR_LIGHTGRAY D2D1::ColorF(0.7f, 0.7f, 0.7f)
-#define DINOCOLOR_MAIN_BACKGROUND D2D1::ColorF(0.1412f, 0.1451f, 0.1804f)
+#define DINOCOLOR_WINDOW_DARK D2D1::ColorF(0.1412f, 0.1451f, 0.1804f)
+#define DINOCOLOR_WINDOW_LIGHT D2D1::ColorF(0.95f, 0.95f, 0.95f)
 
 #define DINOGUI_STYLE_DARK \
 { \
 	DINOCOLOR_LIGHTGRAY, D2D1::ColorF(0.3f, 0.3f, 0.3f), D2D1::ColorF(0.1f, 0.1f, 0.1f), \
 	DINOCOLOR_LIGHTGRAY, D2D1::ColorF(0.99f, 0.4f, 0.4f), D2D1::ColorF(0.1f, 0.1f, 0.1f), \
 	DINOCOLOR_LIGHTGRAY, D2D1::ColorF(0.3f, 0.3f, 0.3f), D2D1::ColorF(0.1f, 0.1f, 0.1f), \
+	12.0f, "Segoe UI", DWRITE_FONT_WEIGHT_NORMAL \
+}
+
+#define DINOGUI_STYLE_LIGHT \
+{ \
+	D2D1::ColorF(0.0f, 0.0f, 0.0f), D2D1::ColorF(0.9412f, 0.9412f, 0.9412f), D2D1::ColorF(0.6784f, 0.6784f, 0.6784f), \
+	D2D1::ColorF(0.0f, 0.0f, 0.0f), D2D1::ColorF(0.8980f, 0.9451f, 0.9843f), D2D1::ColorF(0.0f, 0.4706f, 0.8431f), \
+	D2D1::ColorF(0.0f, 0.0f, 0.0f), D2D1::ColorF(0.3f, 0.3f, 0.3f), D2D1::ColorF(0.0f, 0.3333f, 0.6078f), \
 	12.0f, "Segoe UI", DWRITE_FONT_WEIGHT_NORMAL \
 }
 
@@ -47,7 +56,6 @@ struct Style
 	float fontSize;
 	std::string fontFamily;
 	DWRITE_FONT_WEIGHT fontWeight;
-	static D2D1_COLOR_F windowBackground;
 };
 
 template<class C>

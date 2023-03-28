@@ -1,6 +1,7 @@
 #pragma once
 #pragma comment(lib, "D2d1.lib")
 #pragma comment(lib, "Dwrite.lib")
+#pragma comment(lib, "Dwmapi.lib")
 #pragma comment(linker, "/ENTRY:mainCRTStartup")
 
 #include "Utils.h"
@@ -84,10 +85,10 @@ protected:
 	D2D1_POINT_2F m_point = { 0.0f, 0.0f };
 	D2D1_SIZE_F m_size = { 60.0f, 20.0f };
 	DINOGUI::Base* m_base = nullptr;
-	DINOGUI::Style m_style = DINOGUI_STYLE_DARK;
+	DINOGUI::Style m_style = DINOGUI_STYLE_LIGHT;
 	WidgetState m_state = WidgetState::NORMAL;
 
-	D2D1_RECT_F rect() { return D2D1::RectF(m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height); };
+	D2D1_RECT_F rect() { return D2D1::Rect(m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height); };
 };
 
 class Button : public Widget

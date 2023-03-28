@@ -5,6 +5,7 @@
 #include <Windowsx.h>
 #include <d2d1.h>
 #include <dwrite.h>
+#include <dwmapi.h>
 #include <string>
 
 DINOGUI::Base::Base(const std::string& windowName, int width, int height, int x, int y)
@@ -112,7 +113,8 @@ void DINOGUI::Base::paintWidgets()
         PAINTSTRUCT painStruct;
         BeginPaint(m_windowHandle, &painStruct);
         m_renderTarget->BeginDraw();
-        m_renderTarget->Clear(DINOGUI::Style::windowBackground);
+        m_renderTarget->Clear(DINOCOLOR_WINDOW_LIGHT);
+        m_renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
         for (DINOGUI::Widget* widget : m_displayWidgets)
         {
@@ -156,6 +158,7 @@ void DINOGUI::Base::mouseMove(int posX, int posY, DWORD flags)
 void DINOGUI::Base::leftClick(int posX, int posY, DWORD flags)
 {
     reinterpret_cast<DINOGUI::Button*>(m_displayWidgets[0])->clicked();
+    std::cout << DPIConverter::PixelsToDips(posX) << " | " << DPIConverter::PixelsToDips(posY) << std::endl;
 }
 
 D2D1_SIZE_U DINOGUI::Base::getCurrentWindowSize()
