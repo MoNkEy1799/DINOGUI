@@ -7,30 +7,44 @@
 #include <string>
 #include <stdexcept>
 
-DINOGUI::Button::Button(DINOGUI::Base* base, std::string text)
-    : m_text(toWideString(text))
+using namespace DINOGUI;
+
+Button::Button(Base* base, const std::string& text, std::function<void()> function)
+    : m_text(text), m_click(function)
 {
     m_base = base;
+    m_base->addWidget(this);
+    m_type = WidgetType::BUTTON;
 }
 
-DINOGUI::Button::~Button()
+void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    safeReleaseInterface(&m_fontFormat);
-}
+    D2D1_COLOR_F background;
+    D2D1_COLOR_F border;
+    D2D1_COLOR_F text;
 
-void DINOGUI::Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
-{
-    D2D1_COLOR_F background = m_style.background;
-    D2D1_COLOR_F border = m_style.border;
-    D2D1_COLOR_F text = m_style.text;
-    D2D1_RECT_F rectangle = rect();
-
-    if (m_state == WidgetState::HOVER)
+    switch (m_state)
     {
-        background = m_style.background_Hover;
-        border = m_style.border_Hover;
-        text = m_style.text_Hover;
+    case WidgetState::SELECTED:
+    case WidgetState::NORMAL:
+        background = toD2DColorF(m_theme.bg);
+        border = toD2DColorF(m_theme.brd);
+        text = toD2DColorF(m_theme.txt);
+        break;
+
+    case WidgetState::HOVER:
+        background = toD2DColorF(m_theme.bg_h);
+        border = toD2DColorF(m_theme.brd_h);
+        text = toD2DColorF(m_theme.txt_h);
+        break;
+
+    case WidgetState::CLICKED:
+        background = toD2DColorF(m_theme.bg_c);
+        border = toD2DColorF(m_theme.brd_c);
+        text = toD2DColorF(m_theme.txt_c);
+        break;
     }
+    D2D1_RECT_F rectangle = currentRect();
 
     brush->SetColor(background);
     renderTarget->FillRectangle(rectangle, brush);
@@ -42,25 +56,26 @@ void DINOGUI::Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorB
         if (!createFontFormat())
         {
             throw std::runtime_error("Could not create Font Format");
+            return;
         }
     }
 
     brush->SetColor(text);
-    renderTarget->DrawText(m_text.c_str(), m_text.size(), m_fontFormat, rectangle, brush);
+    renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, rectangle, brush);
 }
 
-void DINOGUI::Button::grid(int row, int col, int rowSpan, int colSpan)
+void Button::grid(int row, int col, int rowSpan, int colSpan)
 {
-    m_base->addWidget(this);
+    show();
 }
 
-void DINOGUI::Button::place(int x, int y)
+void Button::place(int x, int y)
 {
-    m_base->addWidget(this);
+    show();
     m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
 }
 
-void DINOGUI::Button::clicked()
+void Button::clicked()
 {
     if (m_click)
     {
@@ -68,31 +83,7 @@ void DINOGUI::Button::clicked()
     }
 }
 
-void DINOGUI::Button::connect(void(*func)())
+void Button::connect(std::function<void()> function)
 {
-    m_click = func;
-}
-
-bool DINOGUI::Button::createFontFormat()
-{
-    HRESULT hResult = m_base->getWriteFactory()->CreateTextFormat(
-        toWideString(m_style.fontFamily).c_str(), NULL, m_style.fontWeight,
-        DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, m_style.fontSize, L"en-us", &m_fontFormat);
-
-    if (FAILED(hResult))
-    {
-        return false;
-    }
-
-    if (!SUCCEEDED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER)))
-    {
-        return false;
-    }
-
-    if (!SUCCEEDED(m_fontFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER)))
-    {
-        return false;
-    }
-
-    return true;
+    m_click = function;
 }

@@ -8,17 +8,19 @@
 #include <dwmapi.h>
 #include <string>
 
-DINOGUI::Base::Base(const std::string& windowName, int width, int height, int x, int y)
-    : m_factory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr),
-    m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y),
+using namespace DINOGUI;
+
+Base::Base(const std::string& windowName, int width, int height, int x, int y)
+    : m_factory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr), m_writeFactory(nullptr),
+    m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
     m_hoverWidget(nullptr), m_clickWidget(nullptr)
 {
 }
 
-int DINOGUI::Base::run()
+int Base::run()
 {
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-    std::wstring temp = std::wstring(m_windowName.begin(), m_windowName.end());
+    std::wstring temp(m_windowName.begin(), m_windowName.end());
 
     if (!createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, m_width, m_height, m_xPos, m_yPos))
     {
@@ -37,7 +39,7 @@ int DINOGUI::Base::run()
     return 0;
 }
 
-LRESULT DINOGUI::Base::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
+LRESULT Base::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
 {
     switch (messageCode)
     {
@@ -64,6 +66,10 @@ LRESULT DINOGUI::Base::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lPa
         leftClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
 
+    case WM_LBUTTONUP:
+        leftRelease(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
+
     default:
         return DefWindowProc(m_windowHandle, messageCode, wParam, lParam);
     }
@@ -71,7 +77,7 @@ LRESULT DINOGUI::Base::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lPa
     return 1;
 }
 
-int DINOGUI::Base::createFactoryAndDPI()
+int Base::createFactoryAndDPI()
 {
     if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_factory)))
     {
@@ -83,18 +89,23 @@ int DINOGUI::Base::createFactoryAndDPI()
         return -1;
     }
 
-    DINOGUI::DPIConverter::Initialize(m_windowHandle);
+    DPIConverter::Initialize(m_windowHandle);
     return 0;
 }
 
-void DINOGUI::Base::destroyWindow()
+void Base::destroyWindow()
 {
+    for (Widget* widget : m_widgets)
+    {
+        delete widget;
+    }
     destroyGraphicsResources();
-    DINOGUI::safeReleaseInterface(&m_factory);
+    safeReleaseInterface(&m_factory);
+    safeReleaseInterface(&m_writeFactory);
     PostQuitMessage(0);
 }
 
-void DINOGUI::Base::resizeWindow()
+void Base::resizeWindow()
 {
     if (m_renderTarget)
     {
@@ -103,7 +114,7 @@ void DINOGUI::Base::resizeWindow()
     }
 }
 
-void DINOGUI::Base::paintWidgets()
+void Base::paintWidgets()
 {
     std::cout << "draw call" << std::endl;
     HRESULT hResult = createGraphicsResource();
@@ -113,10 +124,10 @@ void DINOGUI::Base::paintWidgets()
         PAINTSTRUCT painStruct;
         BeginPaint(m_windowHandle, &painStruct);
         m_renderTarget->BeginDraw();
-        m_renderTarget->Clear(DINOCOLOR_WINDOW_LIGHT);
+        m_renderTarget->Clear(toD2DColorF(DINOCOLOR_WINDOW_LIGHT));
         m_renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
-        for (DINOGUI::Widget* widget : m_displayWidgets)
+        for (Widget* widget : m_displayWidgets)
         {
             widget->draw(m_renderTarget, m_colorBrush);
         }
@@ -132,43 +143,96 @@ void DINOGUI::Base::paintWidgets()
     }
 }
 
-void DINOGUI::Base::mouseMove(int posX, int posY, DWORD flags)
+void Base::mouseMove(int posX, int posY, DWORD flags)
 {
-    float x = DPIConverter::PixelsToDips(posX);
-    float y = DPIConverter::PixelsToDips(posY);
+    int x = DPIConverter::PixelsToDips(posX);
+    int y = DPIConverter::PixelsToDips(posY);
 
-    DINOGUI::Widget* underMouse = getWidgetUnderMouse(x, y);
+    if (flags & DINOGUI_ALL_MOUSE_BUTTONS)
+    {
+        return;
+    }
+
+    Widget* underMouse = getWidgetUnderMouse(x, y);
     if (m_hoverWidget != underMouse)
     {
-        if (underMouse)
+        if (underMouse && hoverableWidget(underMouse))
         {
             underMouse->setWidgetState(WidgetState::HOVER);
+            if (m_hoverWidget && hoverableWidget(m_hoverWidget))
+            {
+                m_hoverWidget->setWidgetState(WidgetState::NORMAL);
+            }
         }
-
-        else
+        else if (m_hoverWidget && hoverableWidget(m_hoverWidget))
         {
             m_hoverWidget->setWidgetState(WidgetState::NORMAL);
         }
-
         m_hoverWidget = underMouse;
-        redrawScreen();
     }
 }
 
-void DINOGUI::Base::leftClick(int posX, int posY, DWORD flags)
+void Base::leftClick(int posX, int posY, DWORD flags)
 {
-    reinterpret_cast<DINOGUI::Button*>(m_displayWidgets[0])->clicked();
-    std::cout << DPIConverter::PixelsToDips(posX) << " | " << DPIConverter::PixelsToDips(posY) << std::endl;
+    int x = DPIConverter::PixelsToDips(posX);
+    int y = DPIConverter::PixelsToDips(posY);
+
+    Widget* underMouse = getWidgetUnderMouse(x, y);
+    if (underMouse && clickableWidget(underMouse))
+    {
+        underMouse->setWidgetState(WidgetState::CLICKED);
+    }
+    m_clickWidget = underMouse;
 }
 
-D2D1_SIZE_U DINOGUI::Base::getCurrentWindowSize()
+void Base::leftRelease(int posX, int posY, DWORD flags)
+{
+    int x = DPIConverter::PixelsToDips(posX);
+    int y = DPIConverter::PixelsToDips(posY);
+
+    Widget* underMouse = getWidgetUnderMouse(x, y);
+    if (!underMouse)
+    {
+        if (m_clickWidget && clickableWidget(m_clickWidget))
+        {
+            m_clickWidget->setWidgetState(WidgetState::NORMAL);
+        }
+        m_hoverWidget = nullptr;
+        m_clickWidget = nullptr;
+        return;
+    }
+
+    if (m_clickWidget == underMouse && clickableWidget(underMouse))
+    {
+        if (m_clickWidget->getWidgetType() == WidgetType::BUTTON)
+        {
+            dynamic_cast<Button*>(m_clickWidget)->clicked();
+        }
+        m_clickWidget->setWidgetState(WidgetState::HOVER);
+    }
+    else
+    {
+        if (m_clickWidget && clickableWidget(m_clickWidget))
+        {
+            m_clickWidget->setWidgetState(WidgetState::NORMAL);
+        }
+        if (hoverableWidget(underMouse))
+        {
+            underMouse->setWidgetState(WidgetState::HOVER);
+        }
+        m_hoverWidget = underMouse;
+    }
+    m_clickWidget = nullptr;
+}
+
+D2D1_SIZE_U Base::getCurrentWindowSize()
 {
     RECT rect;
     GetClientRect(m_windowHandle, &rect);
     return D2D1::SizeU(rect.right, rect.bottom);
 }
 
-DINOGUI::Widget* DINOGUI::Base::getWidgetUnderMouse(int x, int y)
+Widget* Base::getWidgetUnderMouse(int x, int y)
 {
     for (Widget* widget : m_displayWidgets)
     {
@@ -181,7 +245,43 @@ DINOGUI::Widget* DINOGUI::Base::getWidgetUnderMouse(int x, int y)
     return nullptr;
 }
 
-HRESULT DINOGUI::Base::createGraphicsResource()
+bool Base::hoverableWidget(Widget* widget)
+{
+    switch (widget->getWidgetType())
+    {
+    case WidgetType::LABEL:
+    case WidgetType::IMAGE:
+    case WidgetType::NONE:
+        return false;
+    }
+    return true;
+}
+
+bool Base::clickableWidget(Widget* widget)
+{
+    switch (widget->getWidgetType())
+    {
+    case WidgetType::LABEL:
+    case WidgetType::IMAGE:
+    case WidgetType::NONE:
+        return false;
+    }
+    return true;
+}
+bool Base::selectableWidget(Widget* widget)
+{
+    switch (widget->getWidgetType())
+    {
+    case WidgetType::LABEL:
+    case WidgetType::IMAGE:
+    case WidgetType::BUTTON:
+    case WidgetType::NONE:
+        return false;
+    }
+    return true;
+}
+
+HRESULT Base::createGraphicsResource()
 {
     HRESULT hResult = S_OK;
 
@@ -201,8 +301,8 @@ HRESULT DINOGUI::Base::createGraphicsResource()
     return hResult;
 }
 
-void DINOGUI::Base::destroyGraphicsResources()
+void Base::destroyGraphicsResources()
 {
-    DINOGUI::safeReleaseInterface(&m_renderTarget);
-    DINOGUI::safeReleaseInterface(&m_colorBrush);
+    safeReleaseInterface(&m_renderTarget);
+    safeReleaseInterface(&m_colorBrush);
 }
