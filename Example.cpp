@@ -1,9 +1,9 @@
 #include "src/Dinogui.h"
 #include <Windows.h>
 
-void testClickFunc(DINOGUI::Button* button)
+void testClickFunc()
 {
-	std::cout << "clicked" << std::endl;
+	std::cout << "Button clicked" << std::endl;
 }
 
 int main()
@@ -13,7 +13,8 @@ int main()
 	DINOGUI::Label* label = new DINOGUI::Label(base, "Label");
 	button->place(100, 100);
 	label->place(180, 100);
-	button->connect([button] { testClickFunc(button); });
+	//label->drawBackground();
+	button->connect(&testClickFunc);
 
 	base->run();
 

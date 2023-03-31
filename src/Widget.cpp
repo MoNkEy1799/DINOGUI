@@ -11,7 +11,8 @@ Widget::Widget()
       m_theme(DINOGUI_THEME_LIGHT), m_font(DINOGUI_FONT_DEFAULT),
       m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }),
       m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
-      m_drawBackground(true), m_drawBorder(true)
+      m_drawBackground(false), m_drawBorder(false),
+      m_hover(false), m_click(false)
 {
 }
 
@@ -34,15 +35,6 @@ void Widget::setFont(const Font& font)
     m_base->redrawScreen();
 }
 
-void Widget::setWidgetState(const WidgetState& state, bool redraw)
-{
-	m_state = state;
-    if (redraw)
-    {
-        m_base->redrawScreen();
-    }
-}
-
 WidgetType Widget::getWidgetType()
 {
     return m_type;
@@ -55,26 +47,71 @@ bool Widget::contains(int x, int y)
 	return ( inX && inY );
 }
 
-void DINOGUI::Widget::show()
+void Widget::show()
 {
     m_base->addDisplayWidget(this);
     m_base->redrawScreen();
 }
 
-void DINOGUI::Widget::hide()
+void Widget::hide()
 {
     m_base->removeDisplayWidget(this);
     m_base->redrawScreen();
 }
 
-void DINOGUI::Widget::drawBorder(bool draw)
+void Widget::drawBorder(bool draw)
 {
     m_drawBorder = draw;
 }
 
-void DINOGUI::Widget::drawBackground(bool draw)
+void Widget::drawBackground(bool draw)
 {
     m_drawBackground = draw;
+}
+
+void Widget::enterEvent()
+{
+    if (hoverableWidget(m_type))
+    {
+        m_state = WidgetState::HOVER;
+        m_base->redrawScreen();
+    }
+}
+
+void Widget::leaveEvent()
+{
+    if (hoverableWidget(m_type))
+    {
+        m_state = WidgetState::NORMAL;
+        m_base->redrawScreen();
+    }
+}
+
+void Widget::clickEvent()
+{
+    if (clickableWidget(m_type))
+    {
+        m_state = WidgetState::CLICKED;
+        m_base->redrawScreen();
+    }
+}
+
+void Widget::releaseEvent()
+{
+    clicked();
+    if (hoverableWidget(m_type))
+    {
+        m_state = WidgetState::HOVER;
+        m_base->redrawScreen();
+    }
+}
+
+void Widget::selectEvent()
+{
+}
+
+void Widget::unselectEvent()
+{
 }
 
 D2D1_RECT_F Widget::currentRect()
@@ -103,5 +140,41 @@ bool Widget::createFontFormat()
         return false;
     }
 
+    return true;
+}
+
+bool Widget::hoverableWidget(const WidgetType& type)
+{
+    switch (type)
+    {
+    case WidgetType::LABEL:
+    case WidgetType::IMAGE:
+    case WidgetType::NONE:
+        return false;
+    }
+    return true;
+}
+
+bool Widget::clickableWidget(const WidgetType& type)
+{
+    switch (type)
+    {
+    case WidgetType::LABEL:
+    case WidgetType::IMAGE:
+    case WidgetType::NONE:
+        return false;
+    }
+    return true;
+}
+bool Widget::selectableWidget(const WidgetType& type)
+{
+    switch (type)
+    {
+    case WidgetType::LABEL:
+    case WidgetType::IMAGE:
+    case WidgetType::BUTTON:
+    case WidgetType::NONE:
+        return false;
+    }
     return true;
 }

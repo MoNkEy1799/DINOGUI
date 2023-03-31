@@ -56,6 +56,7 @@ private:
 	Widget* m_clickWidget;
 	std::string m_windowName;
 	int m_width, m_height, m_xPos, m_yPos;
+	int DEBUG_DrawCalls = 0;
 
 	int createFactoryAndDPI();
 	void destroyWindow();
@@ -67,9 +68,6 @@ private:
 
 	D2D1_SIZE_U getCurrentWindowSize();
 	Widget* getWidgetUnderMouse(int x, int y);
-	bool hoverableWidget(Widget* widget);
-	bool clickableWidget(Widget* widget);
-	bool selectableWidget(Widget* widget);
 
 	HRESULT	createGraphicsResource();
 	void destroyGraphicsResources();
@@ -86,21 +84,24 @@ public:
 	Widget& operator=(Widget&&) = delete;
 
 	virtual void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) = 0;
-	virtual void grid(int row, int col, int rowSpan, int colSpan) = 0;
 	virtual void place(int x, int y) = 0;
+	virtual void clicked() = 0;
 	
 	void setTheme(const ColorTheme& theme);
 	void setFont(const Font& font);
-	void setWidgetState(const WidgetState& state, bool redraw = true);
 	WidgetType getWidgetType();
 	bool contains(int x, int y);
 	void show();
 	void hide();
-	void drawBorder(bool draw);
-	void drawBackground(bool draw);
+	void drawBorder(bool draw = true);
+	void drawBackground(bool draw = true);
 
-	void DEBUGSIZE() { std::cout << "SIZE: " << m_size.width << " | " << m_size.height << std::endl; };
-	void DEBUGPOS() { std::cout << "POS: " << m_point.x << " | " << m_point.y << std::endl; };
+	void enterEvent();
+	void leaveEvent();
+	void clickEvent();
+	void releaseEvent();
+	void selectEvent();
+	void unselectEvent();
 
 protected:
 	IDWriteTextFormat* m_fontFormat;
@@ -113,9 +114,13 @@ protected:
 	WidgetType m_type;
 	std::string m_text;
 	bool m_drawBackground, m_drawBorder;
+	bool m_hover, m_click;
 
 	D2D1_RECT_F currentRect();
 	bool createFontFormat();
+	static bool hoverableWidget(const WidgetType& type);
+	static bool clickableWidget(const WidgetType& type);
+	static bool selectableWidget(const WidgetType& type);
 };
 
 class Button : public Widget
@@ -129,10 +134,9 @@ public:
 	Button& operator=(Button&&) = delete;
 
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
-	void grid(int row, int col, int rowSpan, int colSpan) override;
 	void place(int x, int y) override;
+	void clicked() override;
 
-	void clicked();
 	void connect(std::function<void()> function);
 
 private:
@@ -150,8 +154,8 @@ public:
 	Label& operator=(Label&&) = delete;
 
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
-	void grid(int row, int col, int rowSpan, int colSpan) override;
 	void place(int x, int y) override;
+	void clicked() override {};
 };
 
 class Checkbox : public Widget
@@ -165,10 +169,8 @@ public:
 	Checkbox& operator=(Checkbox&&) = delete;
 
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
-	void grid(int row, int col, int rowSpan, int colSpan) override;
 	void place(int x, int y) override;
-
-	void check();
+	void clicked() override;
 
 private:
 	D2D1_RECT_F m_box;

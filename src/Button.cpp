@@ -16,6 +16,8 @@ Button::Button(Base* base, const std::string& text, std::function<void()> functi
     m_base->addWidget(this);
     m_type = WidgetType::BUTTON;
     m_text = text;
+    m_drawBackground = true;
+    m_drawBorder = true;
 }
 
 void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
@@ -69,11 +71,6 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
 
     brush->SetColor(text);
     renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, rectangle, brush);
-}
-
-void Button::grid(int row, int col, int rowSpan, int colSpan)
-{
-    show();
 }
 
 void Button::place(int x, int y)

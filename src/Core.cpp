@@ -116,7 +116,8 @@ void Base::resizeWindow()
 
 void Base::paintWidgets()
 {
-    std::cout << "draw call" << std::endl;
+    DEBUG_DrawCalls += 1;
+    std::cout << "total draw calls: " << DEBUG_DrawCalls << std::endl;
     HRESULT hResult = createGraphicsResource();
 
     if (SUCCEEDED(hResult))
@@ -156,17 +157,13 @@ void Base::mouseMove(int posX, int posY, DWORD flags)
     Widget* underMouse = getWidgetUnderMouse(x, y);
     if (m_hoverWidget != underMouse)
     {
-        if (underMouse && hoverableWidget(underMouse))
+        if (underMouse)
         {
-            underMouse->setWidgetState(WidgetState::HOVER);
-            if (m_hoverWidget && hoverableWidget(m_hoverWidget))
-            {
-                m_hoverWidget->setWidgetState(WidgetState::NORMAL);
-            }
+            underMouse->enterEvent();
         }
-        else if (m_hoverWidget && hoverableWidget(m_hoverWidget))
+        if (m_hoverWidget)
         {
-            m_hoverWidget->setWidgetState(WidgetState::NORMAL);
+            m_hoverWidget->leaveEvent();
         }
         m_hoverWidget = underMouse;
     }
@@ -178,9 +175,9 @@ void Base::leftClick(int posX, int posY, DWORD flags)
     int y = DPIConverter::PixelsToDips(posY);
 
     Widget* underMouse = getWidgetUnderMouse(x, y);
-    if (underMouse && clickableWidget(underMouse))
+    if (underMouse)
     {
-        underMouse->setWidgetState(WidgetState::CLICKED);
+        underMouse->clickEvent();
     }
     m_clickWidget = underMouse;
 }
@@ -193,35 +190,24 @@ void Base::leftRelease(int posX, int posY, DWORD flags)
     Widget* underMouse = getWidgetUnderMouse(x, y);
     if (!underMouse)
     {
-        if (m_clickWidget && clickableWidget(m_clickWidget))
+        if (m_clickWidget)
         {
-            m_clickWidget->setWidgetState(WidgetState::NORMAL);
+            m_clickWidget->leaveEvent();
         }
         m_hoverWidget = nullptr;
         m_clickWidget = nullptr;
         return;
     }
-
-    if (m_clickWidget == underMouse && clickableWidget(underMouse))
+    if (underMouse == m_clickWidget)
     {
-        if (m_clickWidget->getWidgetType() == WidgetType::BUTTON)
-        {
-            dynamic_cast<Button*>(m_clickWidget)->clicked();
-        }
-        m_clickWidget->setWidgetState(WidgetState::HOVER);
+        underMouse->releaseEvent();
     }
-    else
+    else if (m_clickWidget)
     {
-        if (m_clickWidget && clickableWidget(m_clickWidget))
-        {
-            m_clickWidget->setWidgetState(WidgetState::NORMAL);
-        }
-        if (hoverableWidget(underMouse))
-        {
-            underMouse->setWidgetState(WidgetState::HOVER);
-        }
-        m_hoverWidget = underMouse;
+        m_clickWidget->leaveEvent();
     }
+    underMouse->enterEvent();
+    m_hoverWidget = underMouse;
     m_clickWidget = nullptr;
 }
 
@@ -243,42 +229,6 @@ Widget* Base::getWidgetUnderMouse(int x, int y)
     }
 
     return nullptr;
-}
-
-bool Base::hoverableWidget(Widget* widget)
-{
-    switch (widget->getWidgetType())
-    {
-    case WidgetType::LABEL:
-    case WidgetType::IMAGE:
-    case WidgetType::NONE:
-        return false;
-    }
-    return true;
-}
-
-bool Base::clickableWidget(Widget* widget)
-{
-    switch (widget->getWidgetType())
-    {
-    case WidgetType::LABEL:
-    case WidgetType::IMAGE:
-    case WidgetType::NONE:
-        return false;
-    }
-    return true;
-}
-bool Base::selectableWidget(Widget* widget)
-{
-    switch (widget->getWidgetType())
-    {
-    case WidgetType::LABEL:
-    case WidgetType::IMAGE:
-    case WidgetType::BUTTON:
-    case WidgetType::NONE:
-        return false;
-    }
-    return true;
 }
 
 HRESULT Base::createGraphicsResource()

@@ -15,8 +15,6 @@ Label::Label(Base* base, const std::string& text)
 	m_base->addWidget(this);
 	m_type = WidgetType::LABEL;
     m_text = text;
-    m_drawBackground = false;
-    m_drawBorder = false;
 }
 
 void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
@@ -48,11 +46,6 @@ void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
 
     brush->SetColor(text);
     renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, rectangle, brush);
-}
-
-void Label::grid(int row, int col, int rowSpan, int colSpan)
-{
-    show();
 }
 
 void Label::place(int x, int y)

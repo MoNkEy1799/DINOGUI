@@ -14,10 +14,10 @@ Checkbox::Checkbox(Base* base, const std::string& text)
 {
     m_base = base;
     m_base->addWidget(this);
-    m_type = WidgetType::LABEL;
+    m_type = WidgetType::CHECKBOX;
     m_text = text;
-    m_drawBackground = false;
-    m_drawBorder = false;
+    m_drawBackground = true;
+    m_drawBorder = true;
 }
 
 void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
@@ -47,13 +47,13 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         }
     }
 
+    if (m_check)
+    {
+
+    }
+
     brush->SetColor(text);
     renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, rectangle, brush);
-}
-
-void Checkbox::grid(int row, int col, int rowSpan, int colSpan)
-{
-    show();
 }
 
 void Checkbox::place(int x, int y)
@@ -62,7 +62,8 @@ void Checkbox::place(int x, int y)
     m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
 }
 
-void Checkbox::check()
+void DINOGUI::Checkbox::clicked()
 {
     m_check = !m_check;
 }
+
