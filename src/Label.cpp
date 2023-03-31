@@ -10,11 +10,13 @@
 using namespace DINOGUI;
 
 Label::Label(Base* base, const std::string& text)
-	: m_text(text)
 {
 	m_base = base;
 	m_base->addWidget(this);
 	m_type = WidgetType::LABEL;
+    m_text = text;
+    m_drawBackground = false;
+    m_drawBorder = false;
 }
 
 void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
@@ -24,8 +26,16 @@ void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
     D2D1_COLOR_F text = toD2DColorF(m_theme.txt);
     D2D1_RECT_F rectangle = currentRect();
 
-    brush->SetColor(background);
-    renderTarget->FillRectangle(rectangle, brush);
+    if (m_drawBackground)
+    {
+        brush->SetColor(background);
+        renderTarget->FillRectangle(rectangle, brush);
+    }
+    if (m_drawBorder)
+    {
+        brush->SetColor(border);
+        renderTarget->DrawRectangle(rectangle, brush);
+    }
 
     if (!m_fontFormat)
     {

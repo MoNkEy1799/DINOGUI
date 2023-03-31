@@ -94,9 +94,10 @@ public:
 	void setWidgetState(const WidgetState& state, bool redraw = true);
 	WidgetType getWidgetType();
 	bool contains(int x, int y);
-	bool createFontFormat();
 	void show();
 	void hide();
+	void drawBorder(bool draw);
+	void drawBackground(bool draw);
 
 	void DEBUGSIZE() { std::cout << "SIZE: " << m_size.width << " | " << m_size.height << std::endl; };
 	void DEBUGPOS() { std::cout << "POS: " << m_point.x << " | " << m_point.y << std::endl; };
@@ -110,8 +111,11 @@ protected:
 	Font m_font;
 	WidgetState m_state;
 	WidgetType m_type;
+	std::string m_text;
+	bool m_drawBackground, m_drawBorder;
 
 	D2D1_RECT_F currentRect();
+	bool createFontFormat();
 };
 
 class Button : public Widget
@@ -132,7 +136,6 @@ public:
 	void connect(std::function<void()> function);
 
 private:
-	std::string m_text;
 	std::function<void()> m_click;
 };
 
@@ -149,9 +152,6 @@ public:
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void grid(int row, int col, int rowSpan, int colSpan) override;
 	void place(int x, int y) override;
-
-private:
-	std::string m_text;
 };
 
 class Checkbox : public Widget
@@ -171,7 +171,6 @@ public:
 	void check();
 
 private:
-	std::string m_text;
 	D2D1_RECT_F m_box;
 	bool m_check;
 };

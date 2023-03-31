@@ -7,10 +7,11 @@
 using namespace DINOGUI;
 
 Widget::Widget()
-    : m_fontFormat(nullptr), m_base(nullptr),
+    : m_fontFormat(nullptr), m_base(nullptr), m_text(""),
       m_theme(DINOGUI_THEME_LIGHT), m_font(DINOGUI_FONT_DEFAULT),
       m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }),
-      m_state(WidgetState::NORMAL), m_type(WidgetType::NONE)
+      m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
+      m_drawBackground(true), m_drawBorder(true)
 {
 }
 
@@ -54,6 +55,33 @@ bool Widget::contains(int x, int y)
 	return ( inX && inY );
 }
 
+void DINOGUI::Widget::show()
+{
+    m_base->addDisplayWidget(this);
+    m_base->redrawScreen();
+}
+
+void DINOGUI::Widget::hide()
+{
+    m_base->removeDisplayWidget(this);
+    m_base->redrawScreen();
+}
+
+void DINOGUI::Widget::drawBorder(bool draw)
+{
+    m_drawBorder = draw;
+}
+
+void DINOGUI::Widget::drawBackground(bool draw)
+{
+    m_drawBackground = draw;
+}
+
+D2D1_RECT_F Widget::currentRect()
+{
+    return D2D1::Rect(m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height);
+}
+
 bool Widget::createFontFormat()
 {
     HRESULT hResult = m_base->getWriteFactory()->CreateTextFormat(
@@ -76,21 +104,4 @@ bool Widget::createFontFormat()
     }
 
     return true;
-}
-
-void DINOGUI::Widget::show()
-{
-    m_base->addDisplayWidget(this);
-    m_base->redrawScreen();
-}
-
-void DINOGUI::Widget::hide()
-{
-    m_base->removeDisplayWidget(this);
-    m_base->redrawScreen();
-}
-
-D2D1_RECT_F Widget::currentRect()
-{
-    return D2D1::Rect(m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height);
 }

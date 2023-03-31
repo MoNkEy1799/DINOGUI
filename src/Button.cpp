@@ -10,11 +10,12 @@
 using namespace DINOGUI;
 
 Button::Button(Base* base, const std::string& text, std::function<void()> function)
-    : m_text(text), m_click(function)
+    : m_click(function)
 {
     m_base = base;
     m_base->addWidget(this);
     m_type = WidgetType::BUTTON;
+    m_text = text;
 }
 
 void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
@@ -46,10 +47,16 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
     }
     D2D1_RECT_F rectangle = currentRect();
 
-    brush->SetColor(background);
-    renderTarget->FillRectangle(rectangle, brush);
-    brush->SetColor(border);
-    renderTarget->DrawRectangle(rectangle, brush);
+    if (m_drawBackground)
+    {
+        brush->SetColor(background);
+        renderTarget->FillRectangle(rectangle, brush);
+    }
+    if (m_drawBorder)
+    {
+        brush->SetColor(border);
+        renderTarget->DrawRectangle(rectangle, brush);
+    }
 
     if (!m_fontFormat)
     {
