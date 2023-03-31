@@ -10,7 +10,7 @@
 using namespace DINOGUI;
 
 Checkbox::Checkbox(Base* base, const std::string& text)
-    : m_check(false), m_box({0.0f, 0.0f, 0.0f, 0.0f})
+    : m_check(false)
 {
     m_base = base;
     m_base->addWidget(this);
@@ -65,4 +65,10 @@ void Checkbox::place(int x, int y)
 void Checkbox::check()
 {
     m_check = !m_check;
+}
+
+D2D1_RECT_F DINOGUI::Checkbox::currentBox()
+{
+    D2D1_SIZE_F r;
+    return D2D1_RECT_F();
 }

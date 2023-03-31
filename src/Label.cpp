@@ -48,6 +48,11 @@ void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
 
     brush->SetColor(text);
     renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, rectangle, brush);
+    
+    brush->SetColor(D2D1::ColorF(1.0f, 1.0f, 0.0f));
+    renderTarget->FillRectangle(D2D1::Rect(240.0f, 110.0f, 254.0f, 124.0f), brush);
+    brush->SetColor(text);
+    renderTarget->DrawRectangle(D2D1::Rect(240.0f, 110.0f, 254.0f, 124.0f), brush);
 }
 
 void Label::grid(int row, int col, int rowSpan, int colSpan)

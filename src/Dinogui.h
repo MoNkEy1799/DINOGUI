@@ -171,7 +171,7 @@ public:
 	void check();
 
 private:
-	D2D1_RECT_F m_box;
+	D2D1_RECT_F currentBox();
 	bool m_check;
 };
 
