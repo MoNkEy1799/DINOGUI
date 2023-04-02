@@ -10,7 +10,7 @@
 using namespace DINOGUI;
 
 Checkbox::Checkbox(Base* base, const std::string& text)
-    : m_check(false), m_box({0.0f, 0.0f, 0.0f, 0.0f})
+    : m_check(false)
 {
     m_base = base;
     m_base->addWidget(this);
@@ -26,16 +26,17 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
     D2D1_COLOR_F text = toD2DColorF(m_theme.txt);
     D2D1_RECT_F rectangle = currentRect();
+    D2D1_RECT_F box = currentBox();
 
     if (m_drawBackground)
     {
         brush->SetColor(background);
-        renderTarget->FillRectangle(rectangle, brush);
+        renderTarget->FillRectangle(box, brush);
     }
     if (m_drawBorder)
     {
         brush->SetColor(border);
-        renderTarget->DrawRectangle(rectangle, brush);
+        renderTarget->DrawRectangle(box, brush);
     }
 
     if (!m_fontFormat)
@@ -65,5 +66,10 @@ void Checkbox::place(int x, int y)
 void DINOGUI::Checkbox::clicked()
 {
     m_check = !m_check;
+}
+
+D2D1_RECT_F DINOGUI::Checkbox::currentBox()
+{
+    return { 10.0f, 10.0f, 10.0f + m_font.size, 10.0f + m_font.size };
 }
 
