@@ -95,9 +95,9 @@ int Base::createFactoryAndDPI()
 
 void Base::destroyWindow()
 {
-    for (Widget* widget : m_widgets)
+    while (!m_widgets.empty())
     {
-        delete widget;
+        delete m_widgets.back();
     }
     destroyGraphicsResources();
     safeReleaseInterface(&m_factory);
@@ -131,7 +131,7 @@ void Base::paintWidgets()
 
         for (Widget* widget : m_displayWidgets)
         {
-            widget->draw(m_renderTarget, m_colorBrush);
+            widget->draw(m_renderTarget, m_colorBrush, m_strokeStyle);
         }
 
         hResult = m_renderTarget->EndDraw();
@@ -174,6 +174,8 @@ void Base::leftClick(int posX, int posY, DWORD flags)
 {
     int x = DPIConverter::PixelsToDips(posX);
     int y = DPIConverter::PixelsToDips(posY);
+
+    std::cout << "Mouse Pos: " << x << " | " << y << std::endl;
 
     Widget* underMouse = getWidgetUnderMouse(x, y);
     if (underMouse)
@@ -249,6 +251,21 @@ HRESULT Base::createGraphicsResource()
         }
     }
 
+    if (!m_strokeStyle)
+    {
+        D2D1_STROKE_STYLE_PROPERTIES props =
+        {
+            D2D1_CAP_STYLE_FLAT,
+            D2D1_CAP_STYLE_FLAT,
+            D2D1_CAP_STYLE_FLAT,
+            D2D1_LINE_JOIN_MITER,
+            0.0f,
+            D2D1_DASH_STYLE_SOLID,
+            0.0f
+        };
+        hResult = m_factory->CreateStrokeStyle(props, nullptr, 0, &m_strokeStyle);
+    }
+
     return hResult;
 }
 
@@ -256,4 +273,5 @@ void Base::destroyGraphicsResources()
 {
     safeReleaseInterface(&m_renderTarget);
     safeReleaseInterface(&m_colorBrush);
+    safeReleaseInterface(&m_strokeStyle);
 }

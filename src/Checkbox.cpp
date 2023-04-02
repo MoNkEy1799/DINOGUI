@@ -16,15 +16,38 @@ Checkbox::Checkbox(Base* base, const std::string& text)
     m_base->addWidget(this);
     m_type = WidgetType::CHECKBOX;
     m_text = text;
-    m_drawBackground = true;
-    m_drawBorder = true;
+    m_drawBackground = 0;
+    m_drawBorder = 0;
 }
 
-void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
 {
     D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
     D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
     D2D1_COLOR_F text = toD2DColorF(m_theme.txt);
+
+    switch (m_state)
+    {
+    case WidgetState::SELECTED:
+    case WidgetState::NORMAL:
+        background = toD2DColorF(m_theme.bg);
+        border = toD2DColorF(m_theme.brd);
+        text = toD2DColorF(m_theme.txt);
+        break;
+
+    case WidgetState::HOVER:
+        background = toD2DColorF(m_theme.bg_h);
+        border = toD2DColorF(m_theme.brd_h);
+        text = toD2DColorF(m_theme.txt_h);
+        break;
+
+    case WidgetState::CLICKED:
+        background = toD2DColorF(m_theme.bg_c);
+        border = toD2DColorF(m_theme.brd_c);
+        text = toD2DColorF(m_theme.txt_c);
+        break;
+    }
+
     D2D1_RECT_F rectangle = currentRect();
     D2D1_RECT_F box = currentBox();
 

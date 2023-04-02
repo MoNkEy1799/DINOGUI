@@ -17,7 +17,7 @@ Label::Label(Base* base, const std::string& text)
     m_text = text;
 }
 
-void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
 {
     D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
     D2D1_COLOR_F border = toD2DColorF(m_theme.brd);

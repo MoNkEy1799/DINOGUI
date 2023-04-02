@@ -20,7 +20,7 @@ Button::Button(Base* base, const std::string& text, std::function<void()> functi
     m_drawBorder = true;
 }
 
-void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
 {
     D2D1_COLOR_F background;
     D2D1_COLOR_F border;
@@ -48,6 +48,12 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
         break;
     }
     D2D1_RECT_F rectangle = currentRect();
+    std::cout << rectangle.left << " , ";
+    std::cout << rectangle.top;
+    std::cout << " : upper left" << std::endl;
+    std::cout << rectangle.right << " , ";
+    std::cout << rectangle.bottom;
+    std::cout << " : lower right" << std::endl;
 
     if (m_drawBackground)
     {
@@ -76,7 +82,7 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
 void Button::place(int x, int y)
 {
     show();
-    m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
+    m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x)+0.01f, DPIConverter::PixelsToDips(y) + 0.01f);
 }
 
 void Button::clicked()
