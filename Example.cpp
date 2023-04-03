@@ -14,8 +14,8 @@ int main()
 	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(base, "Checkbox");
 	button->place(184, 59);
 	button->setSize(100, 100);
-	label->place(180, 100);
-	checkbox->place(134, 121);
+	//label->place(180, 100);
+	//checkbox->place(134, 121);
 	//label->drawBackground();
 	button->connect(&testClickFunc);
 

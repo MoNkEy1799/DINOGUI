@@ -62,6 +62,9 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
         renderTarget->DrawRectangle(rectangle, brush);
     }
 
+    brush->SetColor({ 1.0f, 0.0f, 0.0f });
+    renderTarget->DrawLine({ 50.0f, 238.0f }, { 100.0f, 100.0f }, brush);
+
     if (!m_fontFormat)
     {
         if (!createFontFormat())

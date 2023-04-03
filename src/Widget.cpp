@@ -125,7 +125,7 @@ D2D1_RECT_F Widget::currentRect()
 
 D2D1_RECT_F Widget::drawingAdjusted(D2D1_RECT_F rect)
 {
-    return { rect.left + 0.3f, rect.top + 0.3f, rect.right + 0.3f, rect.bottom + 0.3f };
+    return { rect.left + 0.3f, rect.top + 0.3f, rect.right - 0.3f, rect.bottom - 0.3f };
 }
 
 bool Widget::createFontFormat()

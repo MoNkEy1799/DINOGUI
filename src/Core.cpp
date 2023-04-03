@@ -246,7 +246,7 @@ HRESULT Base::createGraphicsResource()
 
         if (SUCCEEDED(hResult))
         {
-            hResult = m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(1.0f, 1.0f, 1.0f), &m_colorBrush);
+            hResult = m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(0.0f), &m_colorBrush);
         }
     }
 
