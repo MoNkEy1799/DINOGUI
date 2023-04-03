@@ -94,13 +94,19 @@ void Checkbox::clicked()
 D2D1_RECT_F Checkbox::currentTextRect()
 {
     D2D1_RECT_F current = currentRect();
-    return { current.left + 10.0f, current.top, current.right, current.bottom };
+    return { current.left + 10.0f,
+             current.top,
+             current.right,
+             current.bottom };
 }
 
 D2D1_RECT_F Checkbox::currentBoxRect()
 {
     D2D1_RECT_F current = currentRect();
     float midHeight = current.top + (current.bottom - current.top) / 2.0f;
-    return { current.left, midHeight - 4.0f, current.left + 10.f, midHeight + 6.0f };
+    return { current.left,
+             midHeight - 4.0f,
+             current.left + 10.f,
+             midHeight + 6.0f };
 }
 

@@ -11,8 +11,7 @@ Widget::Widget()
       m_theme(DINOGUI_THEME_LIGHT), m_font(DINOGUI_FONT_DEFAULT),
       m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }),
       m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
-      m_drawBackground(false), m_drawBorder(false),
-      m_hover(false), m_click(false)
+      m_drawBackground(false), m_drawBorder(false), m_hover(false)
 {
 }
 
@@ -33,6 +32,11 @@ void Widget::setFont(const Font& font)
     m_font = font;
     safeReleaseInterface(&m_fontFormat);
     m_base->redrawScreen();
+}
+
+void Widget::setSize(int width, int height)
+{
+    m_size = { (float)width, (float)height };
 }
 
 WidgetType Widget::getWidgetType()
@@ -116,7 +120,12 @@ void Widget::unselectEvent()
 
 D2D1_RECT_F Widget::currentRect()
 {
-    return D2D1::Rect(m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height);
+    return { m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height };
+}
+
+D2D1_RECT_F Widget::drawingAdjusted(D2D1_RECT_F rect)
+{
+    return { rect.left + 0.3f, rect.top + 0.3f, rect.right + 0.3f, rect.bottom + 0.3f };
 }
 
 bool Widget::createFontFormat()

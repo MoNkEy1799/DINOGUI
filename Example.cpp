@@ -12,7 +12,8 @@ int main()
 	DINOGUI::Button* button = new DINOGUI::Button(base, "Button");
 	DINOGUI::Label* label = new DINOGUI::Label(base, "Label");
 	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(base, "Checkbox");
-	button->place(50, 50);
+	button->place(184, 59);
+	button->setSize(100, 100);
 	label->place(180, 100);
 	checkbox->place(134, 121);
 	//label->drawBackground();

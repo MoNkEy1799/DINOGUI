@@ -10,7 +10,7 @@
 using namespace DINOGUI;
 
 Button::Button(Base* base, const std::string& text, std::function<void()> function)
-    : m_click(function)
+    : m_clickFunction(function)
 {
     m_base = base;
     m_base->addWidget(this);
@@ -25,7 +25,9 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
     D2D1_COLOR_F background;
     D2D1_COLOR_F border;
     D2D1_COLOR_F text;
-    D2D1_RECT_F rectangle = currentRect();
+    D2D1_RECT_F rectangle = drawingAdjusted(currentRect());
+    std::cout << rectangle.left << " , " << rectangle.top << std::endl;
+    std::cout << rectangle.right << " , " << rectangle.bottom << std::endl;
 
     switch (m_state)
     {
@@ -76,18 +78,18 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
 void Button::place(int x, int y)
 {
     show();
-    m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x)+0.01f, DPIConverter::PixelsToDips(y) + 0.01f);
+    m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
 }
 
 void Button::clicked()
 {
-    if (m_click)
+    if (m_clickFunction)
     {
-        m_click();
+        m_clickFunction();
     }
 }
 
 void Button::connect(std::function<void()> function)
 {
-    m_click = function;
+    m_clickFunction = function;
 }

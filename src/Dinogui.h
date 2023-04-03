@@ -92,6 +92,8 @@ public:
 	
 	void setTheme(const ColorTheme& theme);
 	void setFont(const Font& font);
+	void setSize(int width, int height);
+
 	WidgetType getWidgetType();
 	bool contains(int x, int y);
 	void show();
@@ -117,9 +119,10 @@ protected:
 	WidgetType m_type;
 	std::string m_text;
 	bool m_drawBackground, m_drawBorder;
-	bool m_hover, m_click;
+	bool m_hover;
 
 	D2D1_RECT_F currentRect();
+	D2D1_RECT_F drawingAdjusted(D2D1_RECT_F rect);
 	bool createFontFormat();
 	static bool hoverableWidget(const WidgetType& type);
 	static bool clickableWidget(const WidgetType& type);
@@ -145,7 +148,7 @@ public:
 	void connect(std::function<void()> function);
 
 private:
-	std::function<void()> m_click;
+	std::function<void()> m_clickFunction;
 };
 
 class Label : public Widget
