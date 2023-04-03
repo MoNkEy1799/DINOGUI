@@ -182,7 +182,8 @@ public:
 	void clicked() override;
 
 private:
-	D2D1_RECT_F currentBox();
+	D2D1_RECT_F currentTextRect();
+	D2D1_RECT_F currentBoxRect();
 	bool m_check;
 };
 

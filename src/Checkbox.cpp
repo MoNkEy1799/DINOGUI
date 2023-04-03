@@ -16,8 +16,9 @@ Checkbox::Checkbox(Base* base, const std::string& text)
     m_base->addWidget(this);
     m_type = WidgetType::CHECKBOX;
     m_text = text;
-    m_drawBackground = 0;
-    m_drawBorder = 0;
+    m_drawBackground = 1;
+    m_drawBorder = 1;
+    m_size = { 80.0f, 20.0f };
 }
 
 void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
@@ -25,6 +26,8 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
     D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
     D2D1_COLOR_F text = toD2DColorF(m_theme.txt);
+    D2D1_RECT_F textRect = currentTextRect();
+    D2D1_RECT_F boxRect = currentBoxRect();
 
     switch (m_state)
     {
@@ -48,18 +51,15 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         break;
     }
 
-    D2D1_RECT_F rectangle = currentRect();
-    D2D1_RECT_F box = currentBox();
-
     if (m_drawBackground)
     {
         brush->SetColor(background);
-        renderTarget->FillRectangle(box, brush);
+        renderTarget->FillRectangle(boxRect, brush);
     }
     if (m_drawBorder)
     {
         brush->SetColor(border);
-        renderTarget->DrawRectangle(box, brush);
+        renderTarget->DrawRectangle(boxRect, brush);
     }
 
     if (!m_fontFormat)
@@ -77,7 +77,7 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     }
 
     brush->SetColor(text);
-    renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, rectangle, brush);
+    renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, textRect, brush);
 }
 
 void Checkbox::place(int x, int y)
@@ -86,13 +86,21 @@ void Checkbox::place(int x, int y)
     m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
 }
 
-void DINOGUI::Checkbox::clicked()
+void Checkbox::clicked()
 {
     m_check = !m_check;
 }
 
-D2D1_RECT_F DINOGUI::Checkbox::currentBox()
+D2D1_RECT_F Checkbox::currentTextRect()
 {
-    return { 10.0f, 10.0f, 10.0f + m_font.size, 10.0f + m_font.size };
+    D2D1_RECT_F current = currentRect();
+    return { current.left + 10.0f, current.top, current.right, current.bottom };
+}
+
+D2D1_RECT_F Checkbox::currentBoxRect()
+{
+    D2D1_RECT_F current = currentRect();
+    float midHeight = current.top + (current.bottom - current.top) / 2.0f;
+    return { current.left, midHeight - 4.0f, current.left + 10.f, midHeight + 6.0f };
 }
 

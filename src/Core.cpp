@@ -118,7 +118,6 @@ void Base::paintWidgets()
 {
     DEBUG_DrawCalls += 1;
     std::cout << "total draw calls: " << DEBUG_DrawCalls << std::endl;
-    std::cout << m_widgets.size() << std::endl;
     HRESULT hResult = createGraphicsResource();
 
     if (SUCCEEDED(hResult))

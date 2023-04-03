@@ -12,9 +12,9 @@ int main()
 	DINOGUI::Button* button = new DINOGUI::Button(base, "Button");
 	DINOGUI::Label* label = new DINOGUI::Label(base, "Label");
 	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(base, "Checkbox");
-	button->place(1, 1);
+	button->place(50, 50);
 	label->place(180, 100);
-	checkbox->place(210, 150);
+	checkbox->place(134, 121);
 	//label->drawBackground();
 	button->connect(&testClickFunc);
 

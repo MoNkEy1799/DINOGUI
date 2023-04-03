@@ -25,6 +25,7 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
     D2D1_COLOR_F background;
     D2D1_COLOR_F border;
     D2D1_COLOR_F text;
+    D2D1_RECT_F rectangle = currentRect();
 
     switch (m_state)
     {
@@ -47,13 +48,6 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
         text = toD2DColorF(m_theme.txt_c);
         break;
     }
-    D2D1_RECT_F rectangle = currentRect();
-    std::cout << rectangle.left << " , ";
-    std::cout << rectangle.top;
-    std::cout << " : upper left" << std::endl;
-    std::cout << rectangle.right << " , ";
-    std::cout << rectangle.bottom;
-    std::cout << " : lower right" << std::endl;
 
     if (m_drawBackground)
     {
