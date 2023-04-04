@@ -10,7 +10,8 @@
 using namespace DINOGUI;
 
 Checkbox::Checkbox(Base* base, const std::string& text)
-    : m_check(false)
+    : m_check(false), m_boxPoint(m_point), m_textPoint(m_point),
+      m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size)
 {
     m_base = base;
     m_base->addWidget(this);
@@ -21,13 +22,19 @@ Checkbox::Checkbox(Base* base, const std::string& text)
     m_size = { 80.0f, 20.0f };
 }
 
+void DINOGUI::Checkbox::setSize(int width, int height)
+{
+    m_size = { (float)width, (float)height };
+    calculateBoxAndTextLayout();
+}
+
 void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
 {
     D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
     D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
     D2D1_COLOR_F text = toD2DColorF(m_theme.txt);
-    D2D1_RECT_F textRect = currentTextRect();
-    D2D1_RECT_F boxRect = currentBoxRect();
+    D2D1_RECT_F textRect = drawingAdjusted(currentTextRect());
+    D2D1_RECT_F boxRect = drawingAdjusted(currentBoxRect());
 
     switch (m_state)
     {
@@ -67,7 +74,10 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         if (!createFontFormat())
         {
             throw std::runtime_error("Could not create Font Format");
-            return;
+        }
+        if (!SUCCEEDED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
+        {
+            throw std::runtime_error("Could not align Font Format");
         }
     }
 
@@ -84,6 +94,7 @@ void Checkbox::place(int x, int y)
 {
     show();
     m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
+    calculateBoxAndTextLayout();
 }
 
 void Checkbox::clicked()
@@ -91,22 +102,23 @@ void Checkbox::clicked()
     m_check = !m_check;
 }
 
-D2D1_RECT_F Checkbox::currentTextRect()
+void DINOGUI::Checkbox::calculateBoxAndTextLayout()
 {
     D2D1_RECT_F current = currentRect();
-    return { current.left + 10.0f,
-             current.top,
-             current.right,
-             current.bottom };
+    float pad = m_boxSize.width / 4.0f;
+    float midHeight = m_size.height / 2.0f;
+    m_boxPoint = { m_point.x + pad, m_point.y + midHeight - m_boxSize.height / 2.0f };
+    m_textPoint = { m_point.x + 2 * pad + m_boxSize.width, m_point.y };
+    m_textSize = { m_size.width - 2 * pad + m_boxSize.width, m_size.height };
+}
+
+D2D1_RECT_F Checkbox::currentTextRect()
+{
+    return { m_textPoint.x, m_textPoint.y, m_textPoint.x + m_textSize.width, m_textPoint.y + m_textSize.height };
 }
 
 D2D1_RECT_F Checkbox::currentBoxRect()
 {
-    D2D1_RECT_F current = currentRect();
-    float midHeight = current.top + (current.bottom - current.top) / 2.0f;
-    return { current.left,
-             midHeight - 4.0f,
-             current.left + 10.f,
-             midHeight + 6.0f };
+    return { m_boxPoint.x, m_boxPoint.y, m_boxPoint.x + m_boxSize.width, m_boxPoint.y + m_boxSize.height };
 }
 

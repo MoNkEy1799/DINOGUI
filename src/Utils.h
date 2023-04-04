@@ -68,7 +68,8 @@ struct ColorTheme
 struct DPIConverter
 {
 	static void Initialize(HWND windowHandle);
-	static float PixelsToDips(float x);
+	static float PixelsToDips(float f);
+	static float DpiAdjusted(float f);
 
 private:
     static float scale;

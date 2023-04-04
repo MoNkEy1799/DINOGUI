@@ -26,8 +26,6 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
     D2D1_COLOR_F border;
     D2D1_COLOR_F text;
     D2D1_RECT_F rectangle = drawingAdjusted(currentRect());
-    std::cout << rectangle.left << " , " << rectangle.top << std::endl;
-    std::cout << rectangle.right << " , " << rectangle.bottom << std::endl;
 
     switch (m_state)
     {

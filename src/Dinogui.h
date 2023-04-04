@@ -30,6 +30,8 @@ enum class WidgetType { NONE, BUTTON, LABEL, LINEEDIT, CHECKBOX, IMAGE };
 class Base : public TemplateWindow<Base>
 {
 public:
+	void DEBUG_DRAW_RECT(D2D1_RECT_F r);
+
 	Base(const std::string& windowName = "DINOGUI", int width = 200, int height = 200, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT);
 	int run();
 
@@ -77,6 +79,8 @@ private:
 class Widget
 {
 public:
+	static void DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str = "");
+
 	Widget();
 	~Widget();
 	Widget(const Widget&) = delete;
@@ -92,7 +96,7 @@ public:
 	
 	void setTheme(const ColorTheme& theme);
 	void setFont(const Font& font);
-	void setSize(int width, int height);
+	virtual void setSize(int width, int height);
 
 	WidgetType getWidgetType();
 	bool contains(int x, int y);
@@ -122,11 +126,11 @@ protected:
 	bool m_hover;
 
 	D2D1_RECT_F currentRect();
-	D2D1_RECT_F drawingAdjusted(D2D1_RECT_F rect);
 	bool createFontFormat();
 	static bool hoverableWidget(const WidgetType& type);
 	static bool clickableWidget(const WidgetType& type);
 	static bool selectableWidget(const WidgetType& type);
+	static D2D1_RECT_F drawingAdjusted(D2D1_RECT_F rect);
 };
 
 class Button : public Widget
@@ -178,6 +182,7 @@ public:
 	Checkbox& operator=(const Checkbox&) = delete;
 	Checkbox& operator=(Checkbox&&) = delete;
 
+	void setSize(int width, int height) override;
 	void draw(ID2D1HwndRenderTarget* renderTarget,
 			  ID2D1SolidColorBrush* brush,
 			  ID2D1StrokeStyle* strokeStyle) override;
@@ -185,8 +190,11 @@ public:
 	void clicked() override;
 
 private:
+	void calculateBoxAndTextLayout();
 	D2D1_RECT_F currentTextRect();
 	D2D1_RECT_F currentBoxRect();
+	D2D1_POINT_2F m_boxPoint, m_textPoint;
+	D2D1_SIZE_F m_boxSize, m_textSize;
 	bool m_check;
 };
 

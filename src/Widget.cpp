@@ -6,6 +6,13 @@
 
 using namespace DINOGUI;
 
+void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
+{
+    std::cout << "### Coords for " << str << " ###" << std::endl;
+    std::cout << "top-left: " << rect.left << ", " << rect.top << std::endl;
+    std::cout << "bottom-right: " << rect.right << ", " << rect.bottom << std::endl;
+}
+
 Widget::Widget()
     : m_fontFormat(nullptr), m_base(nullptr), m_text(""),
       m_theme(DINOGUI_THEME_LIGHT), m_font(DINOGUI_FONT_DEFAULT),
@@ -18,6 +25,7 @@ Widget::Widget()
 Widget::~Widget()
 {
     m_base->removeWidget(this);
+    m_base->removeDisplayWidget(this);
     safeReleaseInterface(&m_fontFormat);
 }
 
@@ -125,7 +133,10 @@ D2D1_RECT_F Widget::currentRect()
 
 D2D1_RECT_F Widget::drawingAdjusted(D2D1_RECT_F rect)
 {
-    return { rect.left + 0.3f, rect.top + 0.3f, rect.right - 0.3f, rect.bottom - 0.3f };
+    return { DPIConverter::DpiAdjusted(rect.left),
+             DPIConverter::DpiAdjusted(rect.top),
+             DPIConverter::DpiAdjusted(rect.right),
+             DPIConverter::DpiAdjusted(rect.bottom) };
 }
 
 bool Widget::createFontFormat()
