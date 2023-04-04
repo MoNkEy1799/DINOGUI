@@ -139,6 +139,12 @@ D2D1_RECT_F Widget::drawingAdjusted(D2D1_RECT_F rect)
              DPIConverter::DpiAdjusted(rect.bottom) };
 }
 
+D2D1_POINT_2F Widget::drawingAdjusted(D2D1_POINT_2F point)
+{
+    return { DPIConverter::DpiAdjusted(point.x),
+             DPIConverter::DpiAdjusted(point.y) };
+}
+
 bool Widget::createFontFormat()
 {
     HRESULT hResult = m_base->getWriteFactory()->CreateTextFormat(

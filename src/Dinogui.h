@@ -43,6 +43,7 @@ public:
 	void removeDisplayWidget(Widget* widget) { m_displayWidgets.erase(std::remove(m_displayWidgets.begin(), m_displayWidgets.end(), widget), m_displayWidgets.end()); };
 	void redrawScreen() { InvalidateRect(m_windowHandle, nullptr, false); };
 
+	ID2D1Factory* getFactory() { return m_factory; };
 	IDWriteFactory* getWriteFactory() { return m_writeFactory; };
 
 private:
@@ -131,6 +132,7 @@ protected:
 	static bool clickableWidget(const WidgetType& type);
 	static bool selectableWidget(const WidgetType& type);
 	static D2D1_RECT_F drawingAdjusted(D2D1_RECT_F rect);
+	static D2D1_POINT_2F drawingAdjusted(D2D1_POINT_2F point);
 };
 
 class Button : public Widget
@@ -190,12 +192,15 @@ public:
 	void clicked() override;
 
 private:
-	void calculateBoxAndTextLayout();
-	D2D1_RECT_F currentTextRect();
-	D2D1_RECT_F currentBoxRect();
+	ID2D1PathGeometry* m_checkmark;
 	D2D1_POINT_2F m_boxPoint, m_textPoint;
 	D2D1_SIZE_F m_boxSize, m_textSize;
 	bool m_check;
+
+	bool createPathGeometry();
+	void calculateBoxAndTextLayout();
+	D2D1_RECT_F currentTextRect();
+	D2D1_RECT_F currentBoxRect();
 };
 
 }

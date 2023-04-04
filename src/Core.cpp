@@ -18,8 +18,8 @@ void Base::DEBUG_DRAW_RECT(D2D1_RECT_F r)
 
 Base::Base(const std::string& windowName, int width, int height, int x, int y)
     : m_factory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr), m_writeFactory(nullptr),
-    m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
-    m_hoverWidget(nullptr), m_clickWidget(nullptr)
+      m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
+      m_hoverWidget(nullptr), m_clickWidget(nullptr), m_strokeStyle(nullptr)
 {
 }
 
@@ -120,51 +120,11 @@ void Base::resizeWindow()
     }
 }
 
-ID2D1PathGeometry* test(ID2D1Factory* fac)
-{
-    ID2D1GeometrySink* pSink = NULL;
-    ID2D1PathGeometry* pPathGeometry = NULL;
-    HRESULT hr = S_OK;
-    if (SUCCEEDED(hr))
-    {
-        hr = fac->CreatePathGeometry(&pPathGeometry);
-
-        if (SUCCEEDED(hr))
-        {
-            // Write to the path geometry using the geometry sink.
-            hr = pPathGeometry->Open(&pSink);
-
-            if (SUCCEEDED(hr))
-            {
-                float t = 200.0f;
-                pSink->BeginFigure(
-                    D2D1::Point2F(24 + t, 8 + t),                       // Punkt 1
-                    D2D1_FIGURE_BEGIN_FILLED
-                );
-
-
-                pSink->AddLine(D2D1::Point2F(26 + t, 10 + t));           // Punkt 2
-                pSink->AddLine(D2D1::Point2F(13 + t, 23 + t));          // Punkt 3
-                pSink->AddLine(D2D1::Point2F(5 + t, 15 + t));           // Punkt 4
-                pSink->AddLine(D2D1::Point2F(7 + t, 13 + t));           // Punkt 5
-                pSink->AddLine(D2D1::Point2F(13 + t, 19 + t));          // Punkt 6
-                pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
-
-                hr = pSink->Close();
-            }
-            safeReleaseInterface(&pSink);
-        }
-    }
-    return pPathGeometry;
-}
-
 void Base::paintWidgets()
 {
     DEBUG_DrawCalls += 1;
     std::cout << "total draw calls: " << DEBUG_DrawCalls << std::endl;
     HRESULT hResult = createGraphicsResource();
-
-    ID2D1PathGeometry* geo = test(m_factory);
 
     if (SUCCEEDED(hResult))
     {
@@ -174,17 +134,9 @@ void Base::paintWidgets()
         m_renderTarget->Clear(toD2DColorF(DINOCOLOR_WINDOW_LIGHT));
         m_renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
-        m_renderTarget->SetTransform(
-            D2D1::Matrix3x2F::Scale(
-                D2D1::Size(5.0f, 5.0f),
-                D2D1::Point2F(214.0f, 214.0f))
-        );
-        m_renderTarget->FillGeometry(geo, m_colorBrush);
-        m_renderTarget->DrawRectangle({ 200, 200, 230, 230 }, m_colorBrush);
-
         for (Widget* widget : m_displayWidgets)
         {
-            //widget->draw(m_renderTarget, m_colorBrush, m_strokeStyle);
+            widget->draw(m_renderTarget, m_colorBrush, m_strokeStyle);
         }
 
         hResult = m_renderTarget->EndDraw();

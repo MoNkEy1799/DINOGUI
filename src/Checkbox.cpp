@@ -11,7 +11,8 @@ using namespace DINOGUI;
 
 Checkbox::Checkbox(Base* base, const std::string& text)
     : m_check(false), m_boxPoint(m_point), m_textPoint(m_point),
-      m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size)
+      m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size),
+      m_checkmark(nullptr)
 {
     m_base = base;
     m_base->addWidget(this);
@@ -60,7 +61,7 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (m_drawBackground)
     {
-        brush->SetColor(background);
+        brush->SetColor({ 1.0f, 1.0f, 1.0f });
         renderTarget->FillRectangle(boxRect, brush);
     }
     if (m_drawBorder)
@@ -83,7 +84,14 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (m_check)
     {
-
+        if (!m_checkmark && !createPathGeometry())
+        {
+            throw std::runtime_error("Could not create Path Geometry");
+        }
+        renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+        brush->SetColor(border);
+        renderTarget->FillGeometry(m_checkmark, brush);
+        renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
     }
 
     brush->SetColor(text);
@@ -102,7 +110,37 @@ void Checkbox::clicked()
     m_check = !m_check;
 }
 
-void DINOGUI::Checkbox::calculateBoxAndTextLayout()
+bool Checkbox::createPathGeometry()
+{
+    ID2D1GeometrySink* sink;
+    if (!SUCCEEDED(m_base->getFactory()->CreatePathGeometry(&m_checkmark)))
+    {
+        return false;
+    }
+    if (!SUCCEEDED(m_checkmark->Open(&sink)))
+    {
+        return false;
+    }
+
+    float x = m_boxPoint.x;
+    float y = m_boxPoint.y;
+    sink->BeginFigure(drawingAdjusted(D2D1::Point2F(10.5f + x, 3.5f + y)), D2D1_FIGURE_BEGIN_FILLED);
+    sink->AddLine(drawingAdjusted(D2D1::Point2F(11.5f + x, 4.5f + y)));
+    sink->AddLine(drawingAdjusted(D2D1::Point2F(5.5f + x, 10.5f + y)));
+    sink->AddLine(drawingAdjusted(D2D1::Point2F(1.5f + x, 6.5f + y)));
+    sink->AddLine(drawingAdjusted(D2D1::Point2F(2.5f + x, 5.5f + y)));
+    sink->AddLine(drawingAdjusted(D2D1::Point2F(5.5f + x, 8.5f + y)));
+    sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+
+    if (!SUCCEEDED(sink->Close()))
+    {
+        return false;
+    }
+    safeReleaseInterface(&sink);
+    return true;
+}
+
+void Checkbox::calculateBoxAndTextLayout()
 {
     D2D1_RECT_F current = currentRect();
     float pad = m_boxSize.width / 4.0f;
