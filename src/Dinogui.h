@@ -22,29 +22,30 @@ class Widget;
 class Button;
 class Label;
 class Checkbox;
-class LineEdit;
+class Textedit;
 class Image;
-enum class WidgetState { NORMAL, HOVER, CLICKED, SELECTED };
-enum class WidgetType { NONE, BUTTON, LABEL, LINEEDIT, CHECKBOX, IMAGE };
+enum class WidgetState { NORMAL, HOVER, CLICKED };
+enum class WidgetType { NONE, BUTTON, LABEL, TEXTEDIT, CHECKBOX, IMAGE };
 
-class Base : public TemplateWindow<Base>
+class Core : public TemplateWindow<Core>
 {
 public:
 	void DEBUG_DRAW_RECT(D2D1_RECT_F r);
 
-	Base(const std::string& windowName = "DINOGUI", int width = 200, int height = 200, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT);
+	Core(const std::string& windowName = "DINOGUI", int width = 200, int height = 200, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT);
 	int run();
 
 	LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam);
 
-	void addWidget(Widget* widget) { m_widgets.push_back(widget); };
-	void removeWidget(Widget* widget) { m_widgets.erase(std::remove(m_widgets.begin(), m_widgets.end(), widget), m_widgets.end()); };
-	void addDisplayWidget(Widget* widget) { m_displayWidgets.push_back(widget); };
-	void removeDisplayWidget(Widget* widget) { m_displayWidgets.erase(std::remove(m_displayWidgets.begin(), m_displayWidgets.end(), widget), m_displayWidgets.end()); };
-	void redrawScreen() { InvalidateRect(m_windowHandle, nullptr, false); };
+	void addWidget(Widget* widget);
+	void removeWidget(Widget* widget);
+	void addDisplayWidget(Widget* widget);
+	void removeDisplayWidget(Widget* widget);
+	void redrawScreen() const { InvalidateRect(m_windowHandle, nullptr, false); };
 
-	ID2D1Factory* getFactory() { return m_factory; };
-	IDWriteFactory* getWriteFactory() { return m_writeFactory; };
+	ID2D1Factory* getFactory() const { return m_factory; };
+	IDWriteFactory* getWriteFactory() const { return m_writeFactory; };
+	void setSelectedWidget(Widget* widget) { m_selectedWidget = widget; };
 
 private:
 	IDWriteFactory* m_writeFactory;
@@ -58,6 +59,7 @@ private:
 	std::vector<Widget*> m_displayWidgets;
 	Widget* m_hoverWidget;
 	Widget* m_clickWidget;
+	Widget* m_selectedWidget;
 	std::string m_windowName;
 	int m_width, m_height, m_xPos, m_yPos;
 	int DEBUG_DrawCalls = 0;
@@ -70,8 +72,8 @@ private:
 	void leftClick(int posX, int posY, DWORD flags);
 	void leftRelease(int posX, int posY, DWORD flags);
 
-	D2D1_SIZE_U getCurrentWindowSize();
-	Widget* getWidgetUnderMouse(int x, int y);
+	D2D1_SIZE_U getCurrentWindowSize () const;
+	Widget* getWidgetUnderMouse(int x, int y) const;
 
 	HRESULT	createGraphicsResource();
 	void destroyGraphicsResources();
@@ -82,8 +84,8 @@ class Widget
 public:
 	static void DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str = "");
 
-	Widget();
-	~Widget();
+	Widget(Core* core);
+	virtual ~Widget();
 	Widget(const Widget&) = delete;
 	Widget(Widget&&) = delete;
 	Widget& operator=(const Widget&) = delete;
@@ -99,8 +101,8 @@ public:
 	void setFont(const Font& font);
 	virtual void setSize(int width, int height);
 
-	WidgetType getWidgetType();
-	bool contains(int x, int y);
+	WidgetType getWidgetType() const;
+	bool contains(int x, int y) const;
 	void show();
 	void hide();
 	void drawBorder(bool draw = true);
@@ -110,14 +112,14 @@ public:
 	void leaveEvent();
 	void clickEvent();
 	void releaseEvent();
-	void selectEvent();
-	void unselectEvent();
+	static D2D1_POINT_2F drawingAdjusted(D2D1_POINT_2F point);
+	static D2D1_RECT_F drawingAdjusted(D2D1_RECT_F rect);
 
 protected:
 	IDWriteTextFormat* m_fontFormat;
 	D2D1_POINT_2F m_point;
 	D2D1_SIZE_F m_size;
-	Base* m_base;
+	Core* m_core;
 	ColorTheme m_theme;
 	Font m_font;
 	WidgetState m_state;
@@ -126,19 +128,17 @@ protected:
 	bool m_drawBackground, m_drawBorder;
 	bool m_hover;
 
-	D2D1_RECT_F currentRect();
+	D2D1_RECT_F currentRect() const;
 	bool createFontFormat();
 	static bool hoverableWidget(const WidgetType& type);
 	static bool clickableWidget(const WidgetType& type);
 	static bool selectableWidget(const WidgetType& type);
-	static D2D1_RECT_F drawingAdjusted(D2D1_RECT_F rect);
-	static D2D1_POINT_2F drawingAdjusted(D2D1_POINT_2F point);
 };
 
 class Button : public Widget
 {
 public:
-	Button(Base* base, const std::string& text = "", std::function<void()> function = nullptr);
+	Button(Core* core, const std::string& text = "", std::function<void()> function = nullptr);
 	~Button() = default;
 	Button(const Button&) = delete;
 	Button(Button&&) = delete;
@@ -160,7 +160,7 @@ private:
 class Label : public Widget
 {
 public:
-	Label(Base* base, const std::string& text = "");
+	Label(Core* core, const std::string& text = "");
 	~Label() = default;
 	Label(const Label&) = delete;
 	Label(Label&&) = delete;
@@ -177,8 +177,8 @@ public:
 class Checkbox : public Widget
 {
 public:
-	Checkbox(Base* base, const std::string& text = "");
-	~Checkbox() = default;
+	Checkbox(Core* core, const std::string& text = "");
+	~Checkbox();
 	Checkbox(const Checkbox&) = delete;
 	Checkbox(Checkbox&&) = delete;
 	Checkbox& operator=(const Checkbox&) = delete;
@@ -199,8 +199,28 @@ private:
 
 	bool createPathGeometry();
 	void calculateBoxAndTextLayout();
-	D2D1_RECT_F currentTextRect();
-	D2D1_RECT_F currentBoxRect();
+	D2D1_RECT_F currentTextRect() const;
+	D2D1_RECT_F currentBoxRect() const;
+};
+
+class Textedit : public Widget
+{
+public:
+	Textedit(Core* core);
+	~Textedit() = default;
+	Textedit(const Textedit&) = delete;
+	Textedit(Textedit&&) = delete;
+	Textedit& operator=(const Textedit&) = delete;
+	Textedit& operator=(Textedit&&) = delete;
+
+	void draw(ID2D1HwndRenderTarget* renderTarget,
+		ID2D1SolidColorBrush* brush,
+		ID2D1StrokeStyle* strokeStyle) override;
+	void place(int x, int y) override;
+	void clicked() override;
+
+private:
+	bool m_selected;
 };
 
 }

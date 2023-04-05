@@ -9,10 +9,9 @@
 
 using namespace DINOGUI;
 
-Label::Label(Base* base, const std::string& text)
+Label::Label(Core* core, const std::string& text)
+    : Widget(core)
 {
-	m_base = base;
-	m_base->addWidget(this);
 	m_type = WidgetType::LABEL;
     m_text = text;
 }

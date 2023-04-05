@@ -42,4 +42,3 @@ std::wstring DINOGUI::toWideString(const std::string& string)
 {
 	return std::wstring(string.begin(), string.end());
 }
-

@@ -8,19 +8,20 @@ void testClickFunc()
 
 int main()
 {
-	DINOGUI::Base* base = new DINOGUI::Base("Test Window", 800, 500);
-	DINOGUI::Button* button = new DINOGUI::Button(base, "Button");
-	DINOGUI::Label* label = new DINOGUI::Label(base, "Label");
-	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(base, "Checkbox");
+	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 800, 500);
+	DINOGUI::Button* button = new DINOGUI::Button(core, "Button");
+	DINOGUI::Label* label = new DINOGUI::Label(core, "Label");
+	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(core, "Checkbox");
+	DINOGUI::Textedit* textedit = new DINOGUI::Textedit(core);
 
 	button->place(50, 100);
 	button->connect(&testClickFunc);
 
 	label->place(250, 100);
-
 	checkbox->place(125, 100);
+	textedit->place(100, 140);
 
-	base->run();
+	core->run();
 
 	return 0;
 }

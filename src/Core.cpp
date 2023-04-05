@@ -10,20 +10,20 @@
 
 using namespace DINOGUI;
 
-void Base::DEBUG_DRAW_RECT(D2D1_RECT_F r)
+void Core::DEBUG_DRAW_RECT(D2D1_RECT_F r)
 {
     m_colorBrush->SetColor(D2D1::ColorF(1.0f, 0.0f, 0.0f));
     m_renderTarget->DrawRectangle(r, m_colorBrush);
 }
 
-Base::Base(const std::string& windowName, int width, int height, int x, int y)
-    : m_factory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr), m_writeFactory(nullptr),
+Core::Core(const std::string& windowName, int width, int height, int x, int y)
+    : m_factory(nullptr), m_writeFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr), m_strokeStyle(nullptr),
       m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
-      m_hoverWidget(nullptr), m_clickWidget(nullptr), m_strokeStyle(nullptr)
+      m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr)
 {
 }
 
-int Base::run()
+int Core::run()
 {
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
@@ -45,7 +45,7 @@ int Base::run()
     return 0;
 }
 
-LRESULT Base::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
+LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
 {
     switch (messageCode)
     {
@@ -83,7 +83,33 @@ LRESULT Base::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
     return 1;
 }
 
-int Base::createFactoryAndDPI()
+void Core::addWidget(Widget* widget)
+{ 
+    if (std::find(m_widgets.begin(), m_widgets.end(), widget) == m_widgets.end())
+    {
+        m_widgets.push_back(widget);
+    }
+}
+
+void Core::removeWidget(Widget* widget)
+{
+    m_widgets.erase(std::remove(m_widgets.begin(), m_widgets.end(), widget), m_widgets.end());
+}
+
+void Core::addDisplayWidget(Widget* widget)
+{
+    if (std::find(m_displayWidgets.begin(), m_displayWidgets.end(), widget) == m_displayWidgets.end())
+    {
+        m_displayWidgets.push_back(widget);
+    }
+}
+
+void Core::removeDisplayWidget(Widget* widget)
+{
+    m_displayWidgets.erase(std::remove(m_displayWidgets.begin(), m_displayWidgets.end(), widget), m_displayWidgets.end());
+}
+
+int Core::createFactoryAndDPI()
 {
     if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_factory)))
     {
@@ -99,7 +125,7 @@ int Base::createFactoryAndDPI()
     return 0;
 }
 
-void Base::destroyWindow()
+void Core::destroyWindow()
 {
     while (!m_widgets.empty())
     {
@@ -111,7 +137,7 @@ void Base::destroyWindow()
     PostQuitMessage(0);
 }
 
-void Base::resizeWindow()
+void Core::resizeWindow()
 {
     if (m_renderTarget)
     {
@@ -120,7 +146,7 @@ void Base::resizeWindow()
     }
 }
 
-void Base::paintWidgets()
+void Core::paintWidgets()
 {
     DEBUG_DrawCalls += 1;
     std::cout << "total draw calls: " << DEBUG_DrawCalls << std::endl;
@@ -150,7 +176,7 @@ void Base::paintWidgets()
     }
 }
 
-void Base::mouseMove(int posX, int posY, DWORD flags)
+void Core::mouseMove(int posX, int posY, DWORD flags)
 {
     int x = DPIConverter::PixelsToDips(posX);
     int y = DPIConverter::PixelsToDips(posY);
@@ -175,7 +201,7 @@ void Base::mouseMove(int posX, int posY, DWORD flags)
     }
 }
 
-void Base::leftClick(int posX, int posY, DWORD flags)
+void Core::leftClick(int posX, int posY, DWORD flags)
 {
     int x = DPIConverter::PixelsToDips(posX);
     int y = DPIConverter::PixelsToDips(posY);
@@ -183,14 +209,31 @@ void Base::leftClick(int posX, int posY, DWORD flags)
     //std::cout << "Mouse Pos: " << x << " | " << y << std::endl;
 
     Widget* underMouse = getWidgetUnderMouse(x, y);
-    if (underMouse)
+    if (!underMouse)
     {
-        underMouse->clickEvent();
+        if (m_selectedWidget)
+        {
+            m_selectedWidget->clickEvent();
+        }
+        m_clickWidget = nullptr;
+        m_selectedWidget = nullptr;
+        return;
     }
+
+    if (underMouse == m_selectedWidget)
+    {
+        return;
+    }
+    else if (m_selectedWidget)
+    {
+        m_selectedWidget->clickEvent();
+    }
+    m_selectedWidget = nullptr;
+    underMouse->clickEvent();
     m_clickWidget = underMouse;
 }
 
-void Base::leftRelease(int posX, int posY, DWORD flags)
+void Core::leftRelease(int posX, int posY, DWORD flags)
 {
     int x = DPIConverter::PixelsToDips(posX);
     int y = DPIConverter::PixelsToDips(posY);
@@ -206,6 +249,7 @@ void Base::leftRelease(int posX, int posY, DWORD flags)
         m_clickWidget = nullptr;
         return;
     }
+
     if (underMouse == m_clickWidget)
     {
         underMouse->releaseEvent();
@@ -219,14 +263,14 @@ void Base::leftRelease(int posX, int posY, DWORD flags)
     m_clickWidget = nullptr;
 }
 
-D2D1_SIZE_U Base::getCurrentWindowSize()
+D2D1_SIZE_U Core::getCurrentWindowSize() const
 {
     RECT rect;
     GetClientRect(m_windowHandle, &rect);
     return D2D1::SizeU(rect.right, rect.bottom);
 }
 
-Widget* Base::getWidgetUnderMouse(int x, int y)
+Widget* Core::getWidgetUnderMouse(int x, int y) const
 {
     for (Widget* widget : m_displayWidgets)
     {
@@ -239,7 +283,7 @@ Widget* Base::getWidgetUnderMouse(int x, int y)
     return nullptr;
 }
 
-HRESULT Base::createGraphicsResource()
+HRESULT Core::createGraphicsResource()
 {
     HRESULT hResult = S_OK;
 
@@ -260,9 +304,9 @@ HRESULT Base::createGraphicsResource()
     {
         D2D1_STROKE_STYLE_PROPERTIES props =
         {
-            D2D1_CAP_STYLE_FLAT,
-            D2D1_CAP_STYLE_FLAT,
-            D2D1_CAP_STYLE_FLAT,
+            D2D1_CAP_STYLE_SQUARE,
+            D2D1_CAP_STYLE_SQUARE,
+            D2D1_CAP_STYLE_SQUARE,
             D2D1_LINE_JOIN_MITER,
             0.0f,
             D2D1_DASH_STYLE_SOLID,
@@ -274,7 +318,7 @@ HRESULT Base::createGraphicsResource()
     return hResult;
 }
 
-void Base::destroyGraphicsResources()
+void Core::destroyGraphicsResources()
 {
     safeReleaseInterface(&m_renderTarget);
     safeReleaseInterface(&m_colorBrush);
