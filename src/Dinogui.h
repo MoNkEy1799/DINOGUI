@@ -45,6 +45,9 @@ public:
 
 	ID2D1Factory* getFactory() const { return m_factory; };
 	IDWriteFactory* getWriteFactory() const { return m_writeFactory; };
+
+	void setHoverWidget(Widget* widget) { m_hoverWidget = widget; };
+	void setClickWidget(Widget* widget) { m_clickWidget = widget; };
 	void setSelectedWidget(Widget* widget) { m_selectedWidget = widget; };
 
 private:
@@ -112,8 +115,12 @@ public:
 	void leaveEvent();
 	void clickEvent();
 	void releaseEvent();
+	void unselectEvent();
 	static D2D1_POINT_2F drawingAdjusted(D2D1_POINT_2F point);
 	static D2D1_RECT_F drawingAdjusted(D2D1_RECT_F rect);
+	static bool hoverableWidget(const WidgetType& type);
+	static bool clickableWidget(const WidgetType& type);
+	static bool selectableWidget(const WidgetType& type);
 
 protected:
 	IDWriteTextFormat* m_fontFormat;
@@ -130,9 +137,6 @@ protected:
 
 	D2D1_RECT_F currentRect() const;
 	bool createFontFormat();
-	static bool hoverableWidget(const WidgetType& type);
-	static bool clickableWidget(const WidgetType& type);
-	static bool selectableWidget(const WidgetType& type);
 };
 
 class Button : public Widget

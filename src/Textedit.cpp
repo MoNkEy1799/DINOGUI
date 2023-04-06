@@ -45,7 +45,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (m_selected)
     {
-        background = toD2DColorF(Color(1.0f, 1.0f, 1.0f));
+        background = toD2DColorF(Color(1.0f, 0.0f, 0.0f));
         border = toD2DColorF(m_theme.brd_c);
         text = toD2DColorF(m_theme.txt);
     }

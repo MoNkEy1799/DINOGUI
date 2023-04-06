@@ -64,6 +64,17 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
         resizeWindow();
         return 0;
 
+    case WM_SETCURSOR:
+        if (m_hoverWidget && Widget::selectableWidget(m_hoverWidget->getWidgetType()))
+        {
+            SetCursor(LoadCursor(NULL, IDC_IBEAM));
+        }
+        else
+        {
+            SetCursor(LoadCursor(NULL, IDC_ARROW));
+        }
+        return 0;
+
     case WM_MOUSEMOVE:
         mouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
@@ -189,15 +200,14 @@ void Core::mouseMove(int posX, int posY, DWORD flags)
     Widget* underMouse = getWidgetUnderMouse(x, y);
     if (m_hoverWidget != underMouse)
     {
-        if (underMouse)
-        {
-            underMouse->enterEvent();
-        }
         if (m_hoverWidget)
         {
             m_hoverWidget->leaveEvent();
         }
-        m_hoverWidget = underMouse;
+        if (underMouse)
+        {
+            underMouse->enterEvent();
+        }
     }
 }
 
@@ -213,24 +223,19 @@ void Core::leftClick(int posX, int posY, DWORD flags)
     {
         if (m_selectedWidget)
         {
-            m_selectedWidget->clickEvent();
+            m_selectedWidget->unselectEvent();
         }
-        m_clickWidget = nullptr;
-        m_selectedWidget = nullptr;
         return;
     }
-
     if (underMouse == m_selectedWidget)
     {
         return;
     }
-    else if (m_selectedWidget)
+    if (m_selectedWidget)
     {
-        m_selectedWidget->clickEvent();
+        m_selectedWidget->unselectEvent();
     }
-    m_selectedWidget = nullptr;
     underMouse->clickEvent();
-    m_clickWidget = underMouse;
 }
 
 void Core::leftRelease(int posX, int posY, DWORD flags)
@@ -245,8 +250,10 @@ void Core::leftRelease(int posX, int posY, DWORD flags)
         {
             m_clickWidget->leaveEvent();
         }
-        m_hoverWidget = nullptr;
-        m_clickWidget = nullptr;
+        return;
+    }
+    if (underMouse == m_selectedWidget)
+    {
         return;
     }
 
@@ -259,8 +266,6 @@ void Core::leftRelease(int posX, int posY, DWORD flags)
         m_clickWidget->leaveEvent();
     }
     underMouse->enterEvent();
-    m_hoverWidget = underMouse;
-    m_clickWidget = nullptr;
 }
 
 D2D1_SIZE_U Core::getCurrentWindowSize() const

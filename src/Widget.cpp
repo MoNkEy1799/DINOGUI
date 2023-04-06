@@ -87,17 +87,17 @@ void Widget::enterEvent()
     if (hoverableWidget(m_type))
     {
         m_state = WidgetState::HOVER;
+        m_core->setHoverWidget(this);
         m_core->redrawScreen();
     }
 }
 
 void Widget::leaveEvent()
 {
-    if (hoverableWidget(m_type))
-    {
-        m_state = WidgetState::NORMAL;
-        m_core->redrawScreen();
-    }
+    m_state = WidgetState::NORMAL;
+    m_core->setHoverWidget(nullptr);
+    m_core->setClickWidget(nullptr);
+    m_core->redrawScreen();
 }
 
 void Widget::clickEvent()
@@ -105,6 +105,7 @@ void Widget::clickEvent()
     if (clickableWidget(m_type))
     {
         m_state = WidgetState::CLICKED;
+        m_core->setClickWidget(this);
         m_core->redrawScreen();
     }
     else if (selectableWidget(m_type))
@@ -119,13 +120,20 @@ void Widget::releaseEvent()
 {
     if (hoverableWidget(m_type))
     {
-        if (!selectableWidget(m_type))
-        {
-            clicked();
-        }
         m_state = WidgetState::HOVER;
+        m_core->setHoverWidget(this);
         m_core->redrawScreen();
     }
+    clicked();
+    m_core->setClickWidget(nullptr);
+}
+
+void DINOGUI::Widget::unselectEvent()
+{
+    clicked();
+    m_state = WidgetState::NORMAL;
+    m_core->setSelectedWidget(nullptr);
+    m_core->redrawScreen();
 }
 
 D2D1_RECT_F Widget::currentRect() const
