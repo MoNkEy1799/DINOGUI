@@ -49,7 +49,12 @@ uint32_t Timer::getId() const
 
 void Timer::start()
 {
-	SetTimer(m_windowHandle, m_id, timeoutDelay, (TIMERPROC)&callback);
+	if (!callback)
+	{
+		return;
+	}
+	void (**timerproc)() = callback.target<void(*)()>();
+	SetTimer(m_windowHandle, m_id, timeoutDelay, (TIMERPROC)(*timerproc));
 	m_active = true;
 }
 

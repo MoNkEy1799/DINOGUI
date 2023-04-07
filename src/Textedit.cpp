@@ -8,7 +8,8 @@
 using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
-    : Widget(core), m_selected(false)
+    : Widget(core), m_selected(false), m_drawCursor(false),
+      m_timer(m_core->getWindowHandle())
 {
     m_type = WidgetType::TEXTEDIT;
     m_drawBackground = true;
@@ -45,7 +46,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (m_selected)
     {
-        background = toD2DColorF(Color(1.0f, 0.0f, 0.0f));
+        background = toD2DColorF(Color(1.0f, 1.0f, 1.0f));
         border = toD2DColorF(m_theme.brd_c);
         text = toD2DColorF(m_theme.txt);
     }
@@ -83,4 +84,15 @@ void Textedit::place(int x, int y)
 void Textedit::clicked()
 {
     m_selected = !m_selected;
+    if (m_selected)
+    {
+        m_timer.timeoutDelay = 500;
+        //m_timer.callback = std::bind(&Textedit::switchCursor);
+    }
+}
+
+void Textedit::switchCursor()
+{
+    m_drawCursor = !m_drawCursor;
+    m_core->redrawScreen();
 }

@@ -86,12 +86,13 @@ struct Timer
 
 	uint32_t timeoutDelay;
 	std::function<void()> callback;
-	uint32_t m_id;
-	bool m_active;
-	HWND m_windowHandle;
+
 private:
 	static uint32_t m_totalTimers;
 	
+	uint32_t m_id;
+	bool m_active;
+	HWND m_windowHandle;
 };
 
 D2D1_COLOR_F toD2DColorF(const DINOGUI::Color& color);

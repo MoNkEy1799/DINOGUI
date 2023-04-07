@@ -51,7 +51,6 @@ public:
 	void setSelectedWidget(Widget* widget) { m_selectedWidget = widget; };
 
 private:
-	Timer timer;
 	IDWriteFactory* m_writeFactory;
 	ID2D1Factory* m_factory;
 	ID2D1HwndRenderTarget* m_renderTarget;
@@ -226,6 +225,10 @@ public:
 
 private:
 	bool m_selected;
+	bool m_drawCursor;
+	Timer m_timer;
+
+	void switchCursor();
 };
 
 }
