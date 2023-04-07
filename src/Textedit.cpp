@@ -8,8 +8,7 @@
 using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
-    : Widget(core), m_selected(false), m_drawCursor(false),
-      m_timer(m_core->getWindowHandle())
+    : Widget(core), m_selected(false), m_drawCursor(false)
 {
     m_type = WidgetType::TEXTEDIT;
     m_drawBackground = true;
@@ -61,6 +60,12 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         brush->SetColor(border);
         renderTarget->DrawRectangle(rectangle, brush);
     }
+    if (m_drawCursor)
+    {
+        brush->SetColor(toD2DColorF(m_theme.txt));
+        D2D1_RECT_F rec = drawingAdjusted(currentCursorLine());
+        renderTarget->DrawLine({ rec.left, rec.top }, { rec.right, rec.bottom }, brush);
+    }
 
     if (!m_fontFormat)
     {
@@ -86,13 +91,28 @@ void Textedit::clicked()
     m_selected = !m_selected;
     if (m_selected)
     {
-        m_timer.timeoutDelay = 500;
-        //m_timer.callback = std::bind(&Textedit::switchCursor);
+        SetTimer(m_core->getWindowHandle(), (uint64_t)this, 500, (TIMERPROC)Textedit::switchCursor);
+    }
+    else
+    {
+        m_drawCursor = false;
+        KillTimer(m_core->getWindowHandle(), (uint64_t)this);
     }
 }
 
-void Textedit::switchCursor()
+D2D1_RECT_F Textedit::currentCursorLine() const
 {
-    m_drawCursor = !m_drawCursor;
-    m_core->redrawScreen();
+    return { m_point.x + 3.0f, m_point.y + 4.0f, m_point.x + 3.0f, m_point.y + 16.0f };
+}
+
+D2D1_RECT_F Textedit::currentTextRect() const
+{
+    return {};
+}
+
+void Textedit::switchCursor(HWND, uint32_t, uint64_t classPtr, DWORD)
+{
+    Textedit* self = (Textedit*)classPtr;
+    self->m_drawCursor = !(self->m_drawCursor);
+    self->m_core->redrawScreen();
 }
