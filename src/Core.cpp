@@ -19,7 +19,7 @@ void Core::DEBUG_DRAW_RECT(D2D1_RECT_F r)
 Core::Core(const std::string& windowName, int width, int height, int x, int y)
     : m_factory(nullptr), m_writeFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr), m_strokeStyle(nullptr),
       m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
-      m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr)
+      m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr), timer(nullptr)
 {
 }
 
@@ -32,7 +32,7 @@ int Core::run()
     {
         throw std::runtime_error("Could not create Window");
     }
-
+    timer = Timer(m_windowHandle);
     ShowWindow(m_windowHandle, SW_SHOW);
 
     MSG message;
@@ -211,8 +211,20 @@ void Core::mouseMove(int posX, int posY, DWORD flags)
     }
 }
 
+void test()
+{
+    std::cout << "test timer" << std::endl;
+}
+
 void Core::leftClick(int posX, int posY, DWORD flags)
 {
+    if (!timer.isActive())
+    {
+        SetTimer(timer.m_windowHandle, timer.m_id, timer.timeoutDelay, (TIMERPROC)test);
+        //timer.callback = test;
+        //timer.start();
+    }
+
     int x = DPIConverter::PixelsToDips(posX);
     int y = DPIConverter::PixelsToDips(posY);
 
