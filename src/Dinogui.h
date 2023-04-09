@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <functional>
 
+#define DEBUG_PRINT(x) std::cout << x << std::endl
+
 namespace DINOGUI
 {
 
@@ -80,6 +82,8 @@ private:
 
 	HRESULT	createGraphicsResource();
 	void destroyGraphicsResources();
+
+	bool test = true;
 };
 
 class Widget

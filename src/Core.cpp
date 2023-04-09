@@ -65,13 +65,18 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_SETCURSOR:
+        DEBUG_PRINT("set");
         if (m_hoverWidget && Widget::selectableWidget(m_hoverWidget->getWidgetType()))
         {
+            DEBUG_PRINT("ibeam");
             SetCursor(LoadCursor(NULL, IDC_IBEAM));
+            test = true;
         }
-        else
+        else if (test)
         {
+            DEBUG_PRINT("normal");
             SetCursor(LoadCursor(NULL, IDC_ARROW));
+            test = false;
         }
         return 0;
 
