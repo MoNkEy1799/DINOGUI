@@ -229,6 +229,12 @@ public:
 
 private:
 	bool m_selected;
+	bool m_drawCursor;
+
+	D2D1_RECT_F currentCursorLine() const;
+	D2D1_RECT_F currentTextRect() const;
+
+	static void switchCursor(HWND, uint32_t, uint64_t classPtr, DWORD);
 };
 
 }

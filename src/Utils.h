@@ -6,6 +6,7 @@
 #include <array>
 #include <string>
 #include <iostream>
+#include <functional>
 
 #define DINOCOLOR_WINDOW_DARK DINOGUI::Color(0.1412f, 0.1451f, 0.1804f)
 #define DINOCOLOR_WINDOW_LIGHT DINOGUI::Color(0.9412f, 0.9412f, 0.9412f)
@@ -72,7 +73,26 @@ struct DPIConverter
 	static float DpiAdjusted(float f);
 
 private:
-    static float scale;
+    static float m_scale;
+};
+
+struct Timer
+{
+	Timer(HWND windowHandle, uint32_t timeout = 1000, std::function<void()> callback = nullptr);
+	uint32_t getId() const;
+	void start();
+	void stop();
+	bool isActive();
+
+	uint32_t timeoutDelay;
+	std::function<void()> callback;
+
+private:
+	static uint32_t m_totalTimers;
+	
+	uint32_t m_id;
+	bool m_active;
+	HWND m_windowHandle;
 };
 
 D2D1_COLOR_F toD2DColorF(const DINOGUI::Color& color);

@@ -21,10 +21,6 @@ Core::Core(const std::string& windowName, int width, int height, int x, int y)
       m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
       m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr)
 {
-}
-
-int Core::run()
-{
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
 
@@ -32,7 +28,10 @@ int Core::run()
     {
         throw std::runtime_error("Could not create Window");
     }
+}
 
+int Core::run()
+{
     ShowWindow(m_windowHandle, SW_SHOW);
 
     MSG message;
