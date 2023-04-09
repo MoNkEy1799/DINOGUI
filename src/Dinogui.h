@@ -16,6 +16,7 @@
 #include <functional>
 
 #define DEBUG_PRINT(x) std::cout << x << std::endl
+#define DEBUG_PRINTW(x) std::wcout << x << std::endl
 
 namespace DINOGUI
 {
@@ -67,23 +68,24 @@ private:
 	Widget* m_selectedWidget;
 	std::string m_windowName;
 	int m_width, m_height, m_xPos, m_yPos;
+	bool m_changeCursor;
 	int DEBUG_DrawCalls = 0;
 
 	int createFactoryAndDPI();
 	void destroyWindow();
 	void resizeWindow();
 	void paintWidgets();
+	void setCursor();
 	void mouseMove(int posX, int posY, DWORD flags);
 	void leftClick(int posX, int posY, DWORD flags);
 	void leftRelease(int posX, int posY, DWORD flags);
+	void processKeys(char key);
 
 	D2D1_SIZE_U getCurrentWindowSize () const;
 	Widget* getWidgetUnderMouse(int x, int y) const;
 
 	HRESULT	createGraphicsResource();
 	void destroyGraphicsResources();
-
-	bool test = true;
 };
 
 class Widget
@@ -104,16 +106,16 @@ public:
 	virtual void place(int x, int y) = 0;
 	virtual void clicked() = 0;
 	
+	void show();
+	void hide();
+	void drawBorder(bool draw = true);
+	void drawBackground(bool draw = true);
 	void setTheme(const ColorTheme& theme);
 	void setFont(const Font& font);
 	virtual void setSize(int width, int height);
 
 	WidgetType getWidgetType() const;
 	bool contains(int x, int y) const;
-	void show();
-	void hide();
-	void drawBorder(bool draw = true);
-	void drawBackground(bool draw = true);
 
 	void enterEvent();
 	void leaveEvent();
@@ -227,7 +229,11 @@ public:
 	void place(int x, int y) override;
 	void clicked() override;
 
+	void keyInput(char key);
+
 private:
+	D2D1_POINT_2F m_cursorPoint;
+	D2D1_SIZE_F m_cursorSize;
 	bool m_selected;
 	bool m_drawCursor;
 

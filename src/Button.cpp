@@ -67,13 +67,13 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
     }
 
     brush->SetColor(text);
-    renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, rectangle, brush);
+    renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, rectangle, brush);
 }
 
 void Button::place(int x, int y)
 {
     show();
-    m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
+    m_point = D2D1::Point2F(DPIConverter::PixelsToDips((float)x), DPIConverter::PixelsToDips((float)y));
 }
 
 void Button::clicked()

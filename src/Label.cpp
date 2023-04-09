@@ -44,11 +44,11 @@ void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
     }
 
     brush->SetColor(text);
-    renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, rectangle, brush);
+    renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, rectangle, brush);
 }
 
 void Label::place(int x, int y)
 {
     show();
-    m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
+    m_point = D2D1::Point2F(DPIConverter::PixelsToDips((float)x), DPIConverter::PixelsToDips((float)y));
 }

@@ -18,8 +18,8 @@ void Core::DEBUG_DRAW_RECT(D2D1_RECT_F r)
 
 Core::Core(const std::string& windowName, int width, int height, int x, int y)
     : m_factory(nullptr), m_writeFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr), m_strokeStyle(nullptr),
-      m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
-      m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr)
+    m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
+    m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr), m_changeCursor(true)
 {
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
@@ -64,19 +64,7 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_SETCURSOR:
-        DEBUG_PRINT("set");
-        if (m_hoverWidget && Widget::selectableWidget(m_hoverWidget->getWidgetType()))
-        {
-            DEBUG_PRINT("ibeam");
-            SetCursor(LoadCursor(NULL, IDC_IBEAM));
-            test = true;
-        }
-        else if (test)
-        {
-            DEBUG_PRINT("normal");
-            SetCursor(LoadCursor(NULL, IDC_ARROW));
-            test = false;
-        }
+        setCursor();
         return 0;
 
     case WM_MOUSEMOVE:
@@ -89,6 +77,10 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
 
     case WM_LBUTTONUP:
         leftRelease(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
+
+    case WM_CHAR:
+        processKeys((char)wParam);
         return 0;
 
     default:
@@ -191,6 +183,25 @@ void Core::paintWidgets()
     }
 }
 
+void Core::setCursor()
+{
+    if (!m_changeCursor)
+    {
+        return;
+    }
+
+    if (m_hoverWidget && Widget::selectableWidget(m_hoverWidget->getWidgetType()))
+    {
+        SetCursor(LoadCursor(NULL, IDC_IBEAM));
+        m_changeCursor = false;
+    }
+    else
+    {
+        SetCursor(LoadCursor(NULL, IDC_ARROW));
+        m_changeCursor = false;
+    }
+}
+
 void Core::mouseMove(int posX, int posY, DWORD flags)
 {
     int x = DPIConverter::PixelsToDips(posX);
@@ -204,6 +215,7 @@ void Core::mouseMove(int posX, int posY, DWORD flags)
     Widget* underMouse = getWidgetUnderMouse(x, y);
     if (m_hoverWidget != underMouse)
     {
+        m_changeCursor = true;
         if (m_hoverWidget)
         {
             m_hoverWidget->leaveEvent();
@@ -270,6 +282,14 @@ void Core::leftRelease(int posX, int posY, DWORD flags)
         m_clickWidget->leaveEvent();
     }
     underMouse->enterEvent();
+}
+
+void Core::processKeys(char key)
+{
+    if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::TEXTEDIT)
+    {
+        dynamic_cast<Textedit*>(m_selectedWidget)->keyInput(key);
+    }
 }
 
 D2D1_SIZE_U Core::getCurrentWindowSize() const

@@ -8,7 +8,8 @@
 using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
-    : Widget(core), m_selected(false), m_drawCursor(false)
+    : Widget(core), m_selected(false), m_drawCursor(false),
+      m_cursorPoint({ 0.0f, 0.0f }), m_cursorSize({ 0.0f, 0.0f })
 {
     m_type = WidgetType::TEXTEDIT;
     m_drawBackground = true;
@@ -21,6 +22,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     D2D1_COLOR_F border;
     D2D1_COLOR_F text;
     D2D1_RECT_F rectangle = drawingAdjusted(currentRect());
+    D2D1_RECT_F textRect = drawingAdjusted(currentTextRect());
 
     switch (m_state)
     {
@@ -74,16 +76,22 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
             throw std::runtime_error("Could not create Font Format");
             return;
         }
+        if (FAILED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
+        {
+            throw std::runtime_error("Could not align Font Format");
+        }
     }
 
     brush->SetColor(text);
-    renderTarget->DrawText(toWideString(m_text).c_str(), m_text.size(), m_fontFormat, rectangle, brush);
+    renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, textRect, brush);
 }
 
 void Textedit::place(int x, int y)
 {
     show();
-    m_point = D2D1::Point2F(DPIConverter::PixelsToDips(x), DPIConverter::PixelsToDips(y));
+    m_point = D2D1::Point2F(DPIConverter::PixelsToDips((float)x), DPIConverter::PixelsToDips((float)y));
+    m_cursorPoint = { m_point.x + 2.0f, m_point.y + 4.0f };
+    m_cursorSize = { 0.0f, 12.0f };
 }
 
 void Textedit::clicked()
@@ -100,14 +108,34 @@ void Textedit::clicked()
     }
 }
 
+void Textedit::keyInput(char key)
+{
+    if (key == VK_BACK)
+    {
+        if (m_text.empty())
+        {
+            return;
+        }
+        m_text.pop_back();
+        m_cursorPoint.x -= 5.0f;
+    }
+    else
+    {
+        m_text.push_back(key);
+        m_cursorPoint.x += 5.0f;
+    }
+    m_core->redrawScreen();
+}
+
 D2D1_RECT_F Textedit::currentCursorLine() const
 {
-    return { m_point.x + 3.0f, m_point.y + 4.0f, m_point.x + 3.0f, m_point.y + 16.0f };
+    return { m_cursorPoint.x, m_cursorPoint.y, m_cursorPoint.x + m_cursorSize.width, m_cursorPoint.y + m_cursorSize.height };
 }
 
 D2D1_RECT_F Textedit::currentTextRect() const
 {
-    return {};
+    D2D1_RECT_F current = currentRect();
+    return { current.left + 2.0f, current.top, current.right, current.bottom };
 }
 
 void Textedit::switchCursor(HWND, uint32_t, uint64_t classPtr, DWORD)
