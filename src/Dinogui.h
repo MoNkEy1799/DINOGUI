@@ -54,6 +54,7 @@ public:
 	void setSelectedWidget(Widget* widget) { m_selectedWidget = widget; };
 
 private:
+	IDWriteTextLayout* m_layout;
 	IDWriteFactory* m_writeFactory;
 	ID2D1Factory* m_factory;
 	ID2D1HwndRenderTarget* m_renderTarget;
@@ -82,7 +83,7 @@ private:
 	void processKeys(char key);
 
 	D2D1_SIZE_U getCurrentWindowSize () const;
-	Widget* getWidgetUnderMouse(int x, int y) const;
+	Widget* getWidgetUnderMouse(float x, float y) const;
 
 	HRESULT	createGraphicsResource();
 	void destroyGraphicsResources();
@@ -111,11 +112,12 @@ public:
 	void drawBorder(bool draw = true);
 	void drawBackground(bool draw = true);
 	void setTheme(const ColorTheme& theme);
+	void setText(const std::string& text);
 	void setFont(const Font& font);
 	virtual void setSize(int width, int height);
 
 	WidgetType getWidgetType() const;
-	bool contains(int x, int y) const;
+	bool contains(float x, float y) const;
 
 	void enterEvent();
 	void leaveEvent();

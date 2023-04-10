@@ -172,6 +172,8 @@ void Core::paintWidgets()
             widget->draw(m_renderTarget, m_colorBrush, m_strokeStyle);
         }
 
+        m_renderTarget->DrawTextLayout({ 10.0f, 10.0f }, m_layout, m_colorBrush);
+
         hResult = m_renderTarget->EndDraw();
 
         if (FAILED(hResult) || hResult == D2DERR_RECREATE_TARGET)
@@ -204,8 +206,8 @@ void Core::setCursor()
 
 void Core::mouseMove(int posX, int posY, DWORD flags)
 {
-    int x = DPIConverter::PixelsToDips(posX);
-    int y = DPIConverter::PixelsToDips(posY);
+    float x = DPIConverter::PixelsToDips((float)posX);
+    float y = DPIConverter::PixelsToDips((float)posY);
 
     if (flags & DINOGUI_ALL_MOUSE_BUTTONS)
     {
@@ -229,8 +231,8 @@ void Core::mouseMove(int posX, int posY, DWORD flags)
 
 void Core::leftClick(int posX, int posY, DWORD flags)
 {
-    int x = DPIConverter::PixelsToDips(posX);
-    int y = DPIConverter::PixelsToDips(posY);
+    float x = DPIConverter::PixelsToDips((float)posX);
+    float y = DPIConverter::PixelsToDips((float)posY);
 
     //std::cout << "Mouse Pos: " << x << " | " << y << std::endl;
 
@@ -256,8 +258,8 @@ void Core::leftClick(int posX, int posY, DWORD flags)
 
 void Core::leftRelease(int posX, int posY, DWORD flags)
 {
-    int x = DPIConverter::PixelsToDips(posX);
-    int y = DPIConverter::PixelsToDips(posY);
+    float x = DPIConverter::PixelsToDips((float)posX);
+    float y = DPIConverter::PixelsToDips((float)posY);
 
     Widget* underMouse = getWidgetUnderMouse(x, y);
     if (!underMouse)
@@ -299,7 +301,7 @@ D2D1_SIZE_U Core::getCurrentWindowSize() const
     return D2D1::SizeU(rect.right, rect.bottom);
 }
 
-Widget* Core::getWidgetUnderMouse(int x, int y) const
+Widget* Core::getWidgetUnderMouse(float x, float y) const
 {
     for (Widget* widget : m_displayWidgets)
     {
@@ -342,6 +344,24 @@ HRESULT Core::createGraphicsResource()
             0.0f
         };
         hResult = m_factory->CreateStrokeStyle(props, nullptr, 0, &m_strokeStyle);
+    }
+
+    if (!m_layout)
+    {
+        const wchar_t* test = L"abcdef";
+        IDWriteTextFormat* format;
+        m_writeFactory->CreateTextFormat(
+            L"Consolas", NULL, (DWRITE_FONT_WEIGHT)400,
+            DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, L"en-us", &format);
+
+        hResult = m_writeFactory->CreateTextLayout(
+            test,      // The string to be laid out and formatted.
+            5,  // The length of the string.
+            format,  // The text format to apply to the string (contains font information, etc).
+            50,         // The width of the layout box.
+            30,        // The height of the layout box.
+            &m_layout  // The IDWriteTextLayout interface pointer.
+        );
     }
 
     return hResult;

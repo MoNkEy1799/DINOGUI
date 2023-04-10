@@ -33,14 +33,17 @@ Widget::~Widget()
 void Widget::setTheme(const ColorTheme& theme)
 {
 	m_theme = theme;
-    m_core->redrawScreen();
+}
+
+void Widget::setText(const std::string& text)
+{
+    m_text = text;
 }
 
 void Widget::setFont(const Font& font)
 {
     m_font = font;
     safeReleaseInterface(&m_fontFormat);
-    m_core->redrawScreen();
 }
 
 void Widget::setSize(int width, int height)
@@ -53,7 +56,7 @@ WidgetType Widget::getWidgetType() const
     return m_type;
 }
 
-bool Widget::contains(int x, int y) const
+bool Widget::contains(float x, float y) const
 {
 	bool inX = (x > m_point.x && x < m_point.x + m_size.width);
 	bool inY = (y > m_point.y && y < m_point.y + m_size.height);
