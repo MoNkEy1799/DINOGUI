@@ -172,8 +172,6 @@ void Core::paintWidgets()
             widget->draw(m_renderTarget, m_colorBrush, m_strokeStyle);
         }
 
-        m_renderTarget->DrawTextLayout({ 10.0f, 10.0f }, m_layout, m_colorBrush);
-
         hResult = m_renderTarget->EndDraw();
 
         if (FAILED(hResult) || hResult == D2DERR_RECREATE_TARGET)
@@ -362,6 +360,11 @@ HRESULT Core::createGraphicsResource()
             30,        // The height of the layout box.
             &m_layout  // The IDWriteTextLayout interface pointer.
         );
+
+        DWRITE_TEXT_METRICS metrics;
+        m_layout->GetMetrics(&metrics);
+
+        std::cout << metrics.
     }
 
     return hResult;
