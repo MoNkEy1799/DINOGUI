@@ -344,29 +344,6 @@ HRESULT Core::createGraphicsResource()
         hResult = m_factory->CreateStrokeStyle(props, nullptr, 0, &m_strokeStyle);
     }
 
-    if (!m_layout)
-    {
-        const wchar_t* test = L"abcdef";
-        IDWriteTextFormat* format;
-        m_writeFactory->CreateTextFormat(
-            L"Consolas", NULL, (DWRITE_FONT_WEIGHT)400,
-            DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, L"en-us", &format);
-
-        hResult = m_writeFactory->CreateTextLayout(
-            test,      // The string to be laid out and formatted.
-            5,  // The length of the string.
-            format,  // The text format to apply to the string (contains font information, etc).
-            50,         // The width of the layout box.
-            30,        // The height of the layout box.
-            &m_layout  // The IDWriteTextLayout interface pointer.
-        );
-
-        DWRITE_TEXT_METRICS metrics;
-        m_layout->GetMetrics(&metrics);
-
-        std::cout << metrics.
-    }
-
     return hResult;
 }
 

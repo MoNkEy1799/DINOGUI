@@ -54,7 +54,6 @@ public:
 	void setSelectedWidget(Widget* widget) { m_selectedWidget = widget; };
 
 private:
-	IDWriteTextLayout* m_layout;
 	IDWriteFactory* m_writeFactory;
 	ID2D1Factory* m_factory;
 	ID2D1HwndRenderTarget* m_renderTarget;
@@ -234,10 +233,12 @@ public:
 	void keyInput(char key);
 
 private:
-	D2D1_POINT_2F m_cursorPoint;
-	D2D1_SIZE_F m_cursorSize;
+	IDWriteTextLayout* m_cursorLayout;
 	bool m_selected;
 	bool m_drawCursor;
+	std::string m_cursorText;
+
+	bool createCursorLayout();
 
 	D2D1_RECT_F currentCursorLine() const;
 	D2D1_RECT_F currentTextRect() const;
