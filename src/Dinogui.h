@@ -218,7 +218,7 @@ class Textedit : public Widget
 {
 public:
 	Textedit(Core* core);
-	~Textedit() = default;
+	~Textedit();
 	Textedit(const Textedit&) = delete;
 	Textedit(Textedit&&) = delete;
 	Textedit& operator=(const Textedit&) = delete;

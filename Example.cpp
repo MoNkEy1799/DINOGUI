@@ -18,8 +18,8 @@ int main()
 	button->connect(&testClickFunc);
 
 	label->place(250, 100);
-	checkbox->place(125, 100);
-	textedit->place(100, 140);
+	checkbox->place(150, 100);
+	textedit->place(50, 140);
 
 	core->run();
 

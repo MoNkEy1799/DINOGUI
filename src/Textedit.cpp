@@ -9,12 +9,17 @@
 using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
-    : Widget(core), m_selected(false), m_drawCursor(false), m_cursorText("test "), m_cursorLayout(nullptr)
+    : Widget(core), m_selected(false), m_drawCursor(false), m_cursorText(""), m_cursorLayout(nullptr)
 {
     m_type = WidgetType::TEXTEDIT;
     m_drawBackground = true;
     m_drawBorder = true;
-    m_text = "test";
+    m_size = { 120.0f, 20.0f };
+}
+
+Textedit::~Textedit()
+{
+    safeReleaseInterface(&m_cursorLayout);
 }
 
 void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
@@ -71,26 +76,29 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
             throw std::runtime_error("Could not create Font Format");
             return;
         }
-        createCursorLayout();
 
         if (FAILED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
         {
             throw std::runtime_error("Could not align Font Format");
         }
     }
-
+    /*
     DWRITE_TEXT_METRICS m;
     m_cursorLayout->GetMetrics(&m);
     brush->SetColor(D2D1::ColorF(1.0f, 0.0f, 1.0f));
     renderTarget->FillRectangle(drawingAdjusted({ textRect.left, textRect.top + m.top, textRect.left + m.widthIncludingTrailingWhitespace, textRect.top + m.top + m.height }), brush);
-
+    */
     brush->SetColor(text);
     renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, textRect, brush);
+    
+    /*
     brush->SetColor(D2D1::ColorF(0.0f, 1.0f, 1.0f));
     renderTarget->DrawTextLayout({ textRect.left, textRect.top }, m_cursorLayout, brush);
+    */
 
     if (m_drawCursor)
     {
+        createCursorLayout();
         brush->SetColor(toD2DColorF(m_theme.txt));
         D2D1_RECT_F rec = drawingAdjusted(currentCursorLine());
         renderTarget->DrawLine({ rec.left, rec.top }, { rec.right, rec.bottom }, brush);
@@ -126,16 +134,22 @@ void Textedit::keyInput(char key)
             return;
         }
         m_text.pop_back();
+        m_cursorText.pop_back();
     }
     else
     {
         m_text.push_back(key);
+        m_cursorText.push_back(key);
     }
     m_core->redrawScreen();
 }
 
 bool Textedit::createCursorLayout()
 {
+    if (m_cursorLayout)
+    {
+        safeReleaseInterface(&m_cursorLayout);
+    }
     std::wstring cursor = toWideString(m_cursorText);
     D2D1_RECT_F current = currentTextRect();
     float width = current.right - current.left;
