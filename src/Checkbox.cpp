@@ -12,7 +12,7 @@ using namespace DINOGUI;
 Checkbox::Checkbox(Core* core, const std::string& text)
     : Widget(core), m_check(false), m_checkmark(nullptr),
       m_boxPoint(m_point), m_textPoint(m_point),
-      m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size)
+      m_boxSize({ 13.0f, 13.0f }), m_textSize(m_size)
 {
     m_type = WidgetType::CHECKBOX;
     m_text = text;

@@ -9,7 +9,8 @@
 using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
-    : Widget(core), m_selected(false), m_drawCursor(false), m_cursorText(""), m_cursorLayout(nullptr)
+    : Widget(core), m_selected(false), m_drawCursor(false), m_cursorLayout(nullptr),
+      m_cursorText(""), m_cursorPosition(0)
 {
     m_type = WidgetType::TEXTEDIT;
     m_drawBackground = true;
@@ -129,17 +130,30 @@ void Textedit::keyInput(char key)
 {
     if (key == VK_BACK)
     {
-        if (m_text.empty())
+        if (m_text.empty() || m_cursorPosition == 0)
         {
             return;
         }
-        m_text.pop_back();
-        m_cursorText.pop_back();
+        m_text.erase(m_cursorPosition - 1, 1);
+        updateCursorPosition(false);
     }
     else
     {
-        m_text.push_back(key);
-        m_cursorText.push_back(key);
+        m_text.insert(m_cursorPosition, 1, key);
+        updateCursorPosition(true);
+    }
+    m_core->redrawScreen();
+}
+
+void Textedit::arrowKey(uint32_t key)
+{
+    if (key == VK_LEFT)
+    {
+        updateCursorPosition(false);
+    }
+    else if (key == VK_RIGHT)
+    {
+        updateCursorPosition(true);
     }
     m_core->redrawScreen();
 }
@@ -150,7 +164,7 @@ bool Textedit::createCursorLayout()
     {
         safeReleaseInterface(&m_cursorLayout);
     }
-    std::wstring cursor = toWideString(m_cursorText);
+    std::wstring cursor = toWideString(m_text).substr(0, m_cursorPosition);
     D2D1_RECT_F current = currentTextRect();
     float width = current.right - current.left;
     float height = current.bottom - current.top;
@@ -167,14 +181,27 @@ bool Textedit::createCursorLayout()
     return true;
 }
 
+void Textedit::updateCursorPosition(bool increase)
+{
+    if (increase && m_cursorPosition < (uint32_t)m_text.length())
+    {
+        m_cursorPosition++;
+    }
+    else if (!increase && m_cursorPosition > 0)
+    {
+        m_cursorPosition--;
+    }
+}
+
 D2D1_RECT_F Textedit::currentCursorLine() const
 {
     DWRITE_TEXT_METRICS metrics;
     m_cursorLayout->GetMetrics(&metrics);
+    float width = metrics.widthIncludingTrailingWhitespace;
 
     D2D1_RECT_F textRect = currentTextRect();
 
-    return { textRect.left + metrics.width, textRect.top + metrics.top , textRect.left + metrics.width, textRect.top + metrics.top + metrics.height };
+    return { textRect.left + width, textRect.top + metrics.top , textRect.left + width, textRect.top + metrics.top + metrics.height };
 }
 
 D2D1_RECT_F Textedit::currentTextRect() const

@@ -83,6 +83,10 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
         processKeys((char)wParam);
         return 0;
 
+    case WM_KEYDOWN:
+        processOtherKeys((uint32_t)wParam);
+        return 0;
+
     default:
         return DefWindowProc(m_windowHandle, messageCode, wParam, lParam);
     }
@@ -292,6 +296,22 @@ void Core::processKeys(char key)
     }
 }
 
+void Core::processOtherKeys(uint32_t key)
+{
+    switch (key)
+    {
+    case VK_LEFT:
+    case VK_UP:
+    case VK_RIGHT:
+    case VK_DOWN:
+        if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::TEXTEDIT)
+        {
+            dynamic_cast<Textedit*>(m_selectedWidget)->arrowKey(key);
+        }
+        return;
+    }
+}
+
 D2D1_SIZE_U Core::getCurrentWindowSize() const
 {
     RECT rect;
@@ -325,7 +345,7 @@ HRESULT Core::createGraphicsResource()
 
         if (SUCCEEDED(hResult))
         {
-            hResult = m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(0.0f), &m_colorBrush);
+            hResult = m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(0), &m_colorBrush);
         }
     }
 

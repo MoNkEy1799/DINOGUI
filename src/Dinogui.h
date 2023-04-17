@@ -80,6 +80,7 @@ private:
 	void leftClick(int posX, int posY, DWORD flags);
 	void leftRelease(int posX, int posY, DWORD flags);
 	void processKeys(char key);
+	void processOtherKeys(uint32_t key);
 
 	D2D1_SIZE_U getCurrentWindowSize () const;
 	Widget* getWidgetUnderMouse(float x, float y) const;
@@ -231,14 +232,17 @@ public:
 	void clicked() override;
 
 	void keyInput(char key);
+	void arrowKey(uint32_t key);
 
 private:
 	IDWriteTextLayout* m_cursorLayout;
 	bool m_selected;
 	bool m_drawCursor;
 	std::string m_cursorText;
+	uint32_t m_cursorPosition;
 
 	bool createCursorLayout();
+	void updateCursorPosition(bool increase);
 
 	D2D1_RECT_F currentCursorLine() const;
 	D2D1_RECT_F currentTextRect() const;
