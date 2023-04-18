@@ -232,10 +232,11 @@ public:
 	void clicked() override;
 
 	void keyInput(char key);
-	void arrowKey(uint32_t key);
+	void otherKeys(uint32_t key);
 
 private:
 	IDWriteTextLayout* m_cursorLayout;
+	Timer* m_cursorTimer;
 	bool m_selected;
 	bool m_drawCursor;
 	std::string m_cursorText;
@@ -247,7 +248,8 @@ private:
 	D2D1_RECT_F currentCursorLine() const;
 	D2D1_RECT_F currentTextRect() const;
 
-	static void switchCursor(HWND, uint32_t, uint64_t classPtr, DWORD);
+	void switchCursor();
+	void restartCursorTimer();
 };
 
 }

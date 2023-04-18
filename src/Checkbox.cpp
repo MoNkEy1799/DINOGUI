@@ -70,6 +70,7 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     {
         brush->SetColor(border);
         renderTarget->DrawRectangle(boxRect, brush);
+
     }
 
     if (!m_fontFormat)

@@ -298,17 +298,9 @@ void Core::processKeys(char key)
 
 void Core::processOtherKeys(uint32_t key)
 {
-    switch (key)
+    if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::TEXTEDIT)
     {
-    case VK_LEFT:
-    case VK_UP:
-    case VK_RIGHT:
-    case VK_DOWN:
-        if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::TEXTEDIT)
-        {
-            dynamic_cast<Textedit*>(m_selectedWidget)->arrowKey(key);
-        }
-        return;
+        dynamic_cast<Textedit*>(m_selectedWidget)->otherKeys(key);
     }
 }
 

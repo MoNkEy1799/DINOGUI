@@ -10,17 +10,19 @@ using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
     : Widget(core), m_selected(false), m_drawCursor(false), m_cursorLayout(nullptr),
-      m_cursorText(""), m_cursorPosition(0)
+      m_cursorText(""), m_cursorPosition(0), m_cursorTimer(nullptr)
 {
     m_type = WidgetType::TEXTEDIT;
     m_drawBackground = true;
     m_drawBorder = true;
     m_size = { 120.0f, 20.0f };
+    m_cursorTimer = new Timer(m_core->getWindowHandle(), 500, [this] { switchCursor(); });
 }
 
 Textedit::~Textedit()
 {
     safeReleaseInterface(&m_cursorLayout);
+    delete m_cursorTimer;
 }
 
 void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
@@ -83,20 +85,10 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
             throw std::runtime_error("Could not align Font Format");
         }
     }
-    /*
-    DWRITE_TEXT_METRICS m;
-    m_cursorLayout->GetMetrics(&m);
-    brush->SetColor(D2D1::ColorF(1.0f, 0.0f, 1.0f));
-    renderTarget->FillRectangle(drawingAdjusted({ textRect.left, textRect.top + m.top, textRect.left + m.widthIncludingTrailingWhitespace, textRect.top + m.top + m.height }), brush);
-    */
+
     brush->SetColor(text);
     renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, textRect, brush);
     
-    /*
-    brush->SetColor(D2D1::ColorF(0.0f, 1.0f, 1.0f));
-    renderTarget->DrawTextLayout({ textRect.left, textRect.top }, m_cursorLayout, brush);
-    */
-
     if (m_drawCursor)
     {
         createCursorLayout();
@@ -117,12 +109,12 @@ void Textedit::clicked()
     m_selected = !m_selected;
     if (m_selected)
     {
-        SetTimer(m_core->getWindowHandle(), (uint64_t)this, 500, (TIMERPROC)Textedit::switchCursor);
+        m_cursorTimer->start();
     }
     else
     {
         m_drawCursor = false;
-        KillTimer(m_core->getWindowHandle(), (uint64_t)this);
+        m_cursorTimer->stop();
     }
 }
 
@@ -145,7 +137,7 @@ void Textedit::keyInput(char key)
     m_core->redrawScreen();
 }
 
-void Textedit::arrowKey(uint32_t key)
+void Textedit::otherKeys(uint32_t key)
 {
     if (key == VK_LEFT)
     {
@@ -155,7 +147,15 @@ void Textedit::arrowKey(uint32_t key)
     {
         updateCursorPosition(true);
     }
-    m_core->redrawScreen();
+    else if (key == VK_DELETE)
+    {
+        if (m_text.empty() || m_cursorPosition == (uint32_t)m_text.size())
+        {
+            return;
+        }
+        m_text.erase(m_cursorPosition, 1);
+        restartCursorTimer();
+    }
 }
 
 bool Textedit::createCursorLayout()
@@ -186,10 +186,12 @@ void Textedit::updateCursorPosition(bool increase)
     if (increase && m_cursorPosition < (uint32_t)m_text.length())
     {
         m_cursorPosition++;
+        restartCursorTimer();
     }
     else if (!increase && m_cursorPosition > 0)
     {
         m_cursorPosition--;
+        restartCursorTimer();
     }
 }
 
@@ -210,9 +212,15 @@ D2D1_RECT_F Textedit::currentTextRect() const
     return { current.left + 2.0f, current.top, current.right, current.bottom };
 }
 
-void Textedit::switchCursor(HWND, uint32_t, uint64_t classPtr, DWORD)
+void Textedit::switchCursor()
 {
-    Textedit* self = (Textedit*)classPtr;
-    self->m_drawCursor = !(self->m_drawCursor);
-    self->m_core->redrawScreen();
+    m_drawCursor = !(m_drawCursor);
+    m_core->redrawScreen();
+}
+
+void Textedit::restartCursorTimer()
+{
+    m_drawCursor = true;
+    m_cursorTimer->restart();
+    m_core->redrawScreen();
 }

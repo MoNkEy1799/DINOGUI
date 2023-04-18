@@ -79,18 +79,17 @@ private:
 struct Timer
 {
 	Timer(HWND windowHandle, uint32_t timeout = 1000, std::function<void()> callback = nullptr);
-	uint32_t getId() const;
 	void start();
 	void stop();
+	void restart();
 	bool isActive();
 
 	uint32_t timeoutDelay;
 	std::function<void()> callback;
 
 private:
-	static uint32_t m_totalTimers;
+	static void timerFunction(HWND, uint32_t, uint64_t classPtr, DWORD);
 	
-	uint32_t m_id;
 	bool m_active;
 	HWND m_windowHandle;
 };

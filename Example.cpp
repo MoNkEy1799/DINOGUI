@@ -17,8 +17,8 @@ int main()
 	button->place(50, 100);
 	button->connect(&testClickFunc);
 
-	label->place(250, 200);
-	checkbox->place(200, 100);
+	label->place(250, 300);
+	checkbox->place(200, 240);
 	textedit->place(50, 140);
 
 	core->run();
