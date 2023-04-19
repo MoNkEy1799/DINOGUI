@@ -5,12 +5,13 @@
 #include <d2d1.h>
 #include <dwrite.h>
 #include <string>
+#include <vector>
 
 using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
-    : Widget(core), m_selected(false), m_drawCursor(false), m_cursorLayout(nullptr),
-      m_cursorText(""), m_cursorPosition(0), m_cursorTimer(nullptr)
+    : Widget(core), m_selected(false), m_drawCursor(false), m_cursorTimer(nullptr),
+      m_cursorPosition(0)
 {
     m_type = WidgetType::TEXTEDIT;
     m_drawBackground = true;
@@ -21,7 +22,6 @@ Textedit::Textedit(Core* core)
 
 Textedit::~Textedit()
 {
-    safeReleaseInterface(&m_cursorLayout);
     delete m_cursorTimer;
 }
 
@@ -30,8 +30,8 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     D2D1_COLOR_F background;
     D2D1_COLOR_F border;
     D2D1_COLOR_F text;
-    D2D1_RECT_F rectangle = drawingAdjusted(currentRect());
-    D2D1_RECT_F textRect = drawingAdjusted(currentTextRect());
+    D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
+    D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
 
     switch (m_state)
     {
@@ -80,6 +80,9 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
             return;
         }
 
+        std::array<float, 2> a = calculateCharDimension(L" ");
+        std::cout << a[0] << "  " << a[1] << std::endl;
+
         if (FAILED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
         {
             throw std::runtime_error("Could not align Font Format");
@@ -91,9 +94,8 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     
     if (m_drawCursor)
     {
-        createCursorLayout();
         brush->SetColor(toD2DColorF(m_theme.txt));
-        D2D1_RECT_F rec = drawingAdjusted(currentCursorLine());
+        D2D1_RECT_F rec = DPIHandler::adjusted(currentCursorLine());
         renderTarget->DrawLine({ rec.left, rec.top }, { rec.right, rec.bottom }, brush);
     }
 }
@@ -101,7 +103,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 void Textedit::place(int x, int y)
 {
     show();
-    m_point = D2D1::Point2F(DPIConverter::PixelsToDips((float)x), DPIConverter::PixelsToDips((float)y));
+    m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
 }
 
 void Textedit::clicked()
@@ -158,27 +160,14 @@ void Textedit::otherKeys(uint32_t key)
     }
 }
 
-bool Textedit::createCursorLayout()
+std::array<float, 2> Textedit::calculateCharDimension(const wchar_t* character)
 {
-    if (m_cursorLayout)
-    {
-        safeReleaseInterface(&m_cursorLayout);
-    }
-    std::wstring cursor = toWideString(m_text).substr(0, m_cursorPosition);
-    D2D1_RECT_F current = currentTextRect();
-    float width = current.right - current.left;
-    float height = current.bottom - current.top;
-
-    HRESULT hResult = m_core->getWriteFactory()->CreateTextLayout(
-        cursor.c_str(), (uint32_t)cursor.length(), m_fontFormat, width, height, &m_cursorLayout);
-    m_cursorLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
-
-    if (FAILED(hResult))
-    {
-        return false;
-    }
-
-    return true;
+    IDWriteTextLayout* layout;
+    m_core->getWriteFactory()->CreateTextLayout(character, 1, m_fontFormat, 1.0f, 1.0f, &layout);
+    DWRITE_TEXT_METRICS metrics;
+    layout->GetMetrics(&metrics);
+    safeReleaseInterface(&layout);
+    return { metrics.widthIncludingTrailingWhitespace, metrics.height };
 }
 
 void Textedit::updateCursorPosition(bool increase)
@@ -197,13 +186,12 @@ void Textedit::updateCursorPosition(bool increase)
 
 D2D1_RECT_F Textedit::currentCursorLine() const
 {
-    DWRITE_TEXT_METRICS metrics;
-    m_cursorLayout->GetMetrics(&metrics);
-    float width = metrics.widthIncludingTrailingWhitespace;
-
     D2D1_RECT_F textRect = currentTextRect();
-
-    return { textRect.left + width, textRect.top + metrics.top , textRect.left + width, textRect.top + metrics.top + metrics.height };
+    /*float top = (textRect.bottom - textRect.top - m_charHeight) / 2.0f;
+    return { textRect.left + (m_charWidth * m_cursorPosition), textRect.top + top,
+             textRect.left + (m_charWidth * m_cursorPosition), textRect.top + top + m_charHeight };
+             */
+    return { 0 };
 }
 
 D2D1_RECT_F Textedit::currentTextRect() const

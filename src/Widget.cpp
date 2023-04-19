@@ -13,8 +13,8 @@ void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
     std::cout << "bottom-right: " << rect.right << ", " << rect.bottom << std::endl;
     std::cout << std::endl;
     std::cout << "### Act. Coords for " << str << " ###" << std::endl;
-    std::cout << "top-left: " << rect.left * 1.0f / DPIConverter::PixelsToDips(1.0f) << ", " << rect.top * 1.0f / DPIConverter::PixelsToDips(1.0f) << std::endl;
-    std::cout << "bottom-right: " << rect.right * 1.0f / DPIConverter::PixelsToDips(1.0f) << ", " << rect.bottom * 1.0f / DPIConverter::PixelsToDips(1.0f) << std::endl;
+    std::cout << "top-left: " << rect.left * 1.0f / DPIHandler::PixelsToDips(1.0f) << ", " << rect.top * 1.0f / DPIHandler::PixelsToDips(1.0f) << std::endl;
+    std::cout << "bottom-right: " << rect.right * 1.0f / DPIHandler::PixelsToDips(1.0f) << ", " << rect.bottom * 1.0f / DPIHandler::PixelsToDips(1.0f) << std::endl;
 }
 
 Widget::Widget(Core* core)
@@ -146,20 +146,6 @@ void DINOGUI::Widget::unselectEvent()
 D2D1_RECT_F Widget::currentRect() const
 {
     return { m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height };
-}
-
-D2D1_RECT_F Widget::drawingAdjusted(D2D1_RECT_F rect)
-{
-    return { DPIConverter::DpiAdjusted(rect.left),
-             DPIConverter::DpiAdjusted(rect.top),
-             DPIConverter::DpiAdjusted(rect.right),
-             DPIConverter::DpiAdjusted(rect.bottom) };
-}
-
-D2D1_POINT_2F Widget::drawingAdjusted(D2D1_POINT_2F point)
-{
-    return { DPIConverter::DpiAdjusted(point.x),
-             DPIConverter::DpiAdjusted(point.y) };
 }
 
 bool Widget::createFontFormat()

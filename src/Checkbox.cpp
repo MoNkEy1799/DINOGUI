@@ -37,8 +37,8 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
     D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
     D2D1_COLOR_F text = toD2DColorF(m_theme.txt);
-    D2D1_RECT_F textRect = drawingAdjusted(currentTextRect());
-    D2D1_RECT_F boxRect = drawingAdjusted(currentBoxRect());
+    D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
+    D2D1_RECT_F boxRect = DPIHandler::adjusted(currentBoxRect());
 
     switch (m_state)
     {
@@ -104,7 +104,7 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 void Checkbox::place(int x, int y)
 {
     show();
-    m_point = D2D1::Point2F(DPIConverter::PixelsToDips((float)x), DPIConverter::PixelsToDips((float)y));
+    m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
     calculateBoxAndTextLayout();
 }
 
@@ -127,12 +127,12 @@ bool Checkbox::createPathGeometry()
 
     float x = m_boxPoint.x;
     float y = m_boxPoint.y;
-    sink->BeginFigure(drawingAdjusted(D2D1::Point2F(10.0f + x, 3.0f + y)), D2D1_FIGURE_BEGIN_FILLED);
-    sink->AddLine(drawingAdjusted(D2D1::Point2F(11.0f + x, 4.0f + y)));
-    sink->AddLine(drawingAdjusted(D2D1::Point2F(5.0f + x, 10.0f + y)));
-    sink->AddLine(drawingAdjusted(D2D1::Point2F(2.0f + x, 7.0f + y)));
-    sink->AddLine(drawingAdjusted(D2D1::Point2F(3.0f + x, 6.0f + y)));
-    sink->AddLine(drawingAdjusted(D2D1::Point2F(5.0f + x, 8.0f + y)));
+    sink->BeginFigure(DPIHandler::adjusted(D2D1::Point2F(10.0f + x, 3.0f + y)), D2D1_FIGURE_BEGIN_FILLED);
+    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(11.0f + x, 4.0f + y)));
+    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(5.0f + x, 10.0f + y)));
+    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(2.0f + x, 7.0f + y)));
+    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(3.0f + x, 6.0f + y)));
+    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(5.0f + x, 8.0f + y)));
     sink->EndFigure(D2D1_FIGURE_END_CLOSED);
 
     if (FAILED(sink->Close()))

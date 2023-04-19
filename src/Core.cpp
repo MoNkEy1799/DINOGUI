@@ -132,7 +132,7 @@ int Core::createFactoryAndDPI()
         return -1;
     }
 
-    DPIConverter::Initialize(m_windowHandle);
+    DPIHandler::Initialize(m_windowHandle);
     return 0;
 }
 
@@ -208,8 +208,8 @@ void Core::setCursor()
 
 void Core::mouseMove(int posX, int posY, DWORD flags)
 {
-    float x = DPIConverter::PixelsToDips((float)posX);
-    float y = DPIConverter::PixelsToDips((float)posY);
+    float x = DPIHandler::PixelsToDips((float)posX);
+    float y = DPIHandler::PixelsToDips((float)posY);
 
     if (flags & DINOGUI_ALL_MOUSE_BUTTONS)
     {
@@ -233,8 +233,8 @@ void Core::mouseMove(int posX, int posY, DWORD flags)
 
 void Core::leftClick(int posX, int posY, DWORD flags)
 {
-    float x = DPIConverter::PixelsToDips((float)posX);
-    float y = DPIConverter::PixelsToDips((float)posY);
+    float x = DPIHandler::PixelsToDips((float)posX);
+    float y = DPIHandler::PixelsToDips((float)posY);
 
     //std::cout << "Mouse Pos: " << x << " | " << y << std::endl;
 
@@ -260,8 +260,8 @@ void Core::leftClick(int posX, int posY, DWORD flags)
 
 void Core::leftRelease(int posX, int posY, DWORD flags)
 {
-    float x = DPIConverter::PixelsToDips((float)posX);
-    float y = DPIConverter::PixelsToDips((float)posY);
+    float x = DPIHandler::PixelsToDips((float)posX);
+    float y = DPIHandler::PixelsToDips((float)posY);
 
     Widget* underMouse = getWidgetUnderMouse(x, y);
     if (!underMouse)

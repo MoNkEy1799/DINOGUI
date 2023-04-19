@@ -66,14 +66,16 @@ struct ColorTheme
 	Color txt_c, bg_c, brd_c;
 };
 
-struct DPIConverter
+struct DPIHandler
 {
 	static void Initialize(HWND windowHandle);
 	static float PixelsToDips(float f);
-	static float DpiAdjusted(float f);
+	static D2D1_POINT_2F adjusted(D2D1_POINT_2F point);
+	static D2D1_RECT_F adjusted(D2D1_RECT_F rect);
 
 private:
     static float m_scale;
+	static float DpiAdjusted(float f);
 };
 
 struct Timer

@@ -23,7 +23,7 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
     D2D1_COLOR_F background;
     D2D1_COLOR_F border;
     D2D1_COLOR_F text;
-    D2D1_RECT_F rectangle = drawingAdjusted(currentRect());
+    D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
 
     switch (m_state)
     {
@@ -73,7 +73,7 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
 void Button::place(int x, int y)
 {
     show();
-    m_point = D2D1::Point2F(DPIConverter::PixelsToDips((float)x), DPIConverter::PixelsToDips((float)y));
+    m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
 }
 
 void Button::clicked()

@@ -10,21 +10,32 @@
 
 using namespace DINOGUI;
 
-float DPIConverter::m_scale = 1.0f;
+float DPIHandler::m_scale = 1.0f;
 
-void DPIConverter::Initialize(HWND windowHandle)
+void DPIHandler::Initialize(HWND windowHandle)
 {
     uint32_t dpi = GetDpiForWindow(windowHandle);
     m_scale = dpi / 96.0f;
 	//std::cout << "DPI Scale : " << m_scale << "\n" << std::endl;
 }
 
-float DPIConverter::PixelsToDips(float f)
+float DPIHandler::PixelsToDips(float f)
 {
 	return f / m_scale;
 }
 
-float DPIConverter::DpiAdjusted(float f)
+D2D1_POINT_2F DPIHandler::adjusted(D2D1_POINT_2F point)
+{
+	return { DpiAdjusted(point.x), DpiAdjusted(point.y) };
+}
+
+D2D1_RECT_F DPIHandler::adjusted(D2D1_RECT_F rect)
+{
+	return { DpiAdjusted(rect.left), DpiAdjusted(rect.top),
+			 DpiAdjusted(rect.right), DpiAdjusted(rect.bottom) };
+}
+
+float DPIHandler::DpiAdjusted(float f)
 {
 	return (std::floor(f * m_scale) + 0.5f) / m_scale;
 }
@@ -50,7 +61,7 @@ void Timer::stop()
 	m_active = false;
 }
 
-void DINOGUI::Timer::restart()
+void Timer::restart()
 {
 	if (!m_active)
 	{

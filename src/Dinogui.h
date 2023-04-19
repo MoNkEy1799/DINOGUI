@@ -124,8 +124,7 @@ public:
 	void clickEvent();
 	void releaseEvent();
 	void unselectEvent();
-	static D2D1_POINT_2F drawingAdjusted(D2D1_POINT_2F point);
-	static D2D1_RECT_F drawingAdjusted(D2D1_RECT_F rect);
+	
 	static bool hoverableWidget(const WidgetType& type);
 	static bool clickableWidget(const WidgetType& type);
 	static bool selectableWidget(const WidgetType& type);
@@ -235,14 +234,14 @@ public:
 	void otherKeys(uint32_t key);
 
 private:
-	IDWriteTextLayout* m_cursorLayout;
+	std::vector<float> m_charWidths;
+	float m_lineHeight;
 	Timer* m_cursorTimer;
 	bool m_selected;
 	bool m_drawCursor;
-	std::string m_cursorText;
 	uint32_t m_cursorPosition;
 
-	bool createCursorLayout();
+	std::array<float, 2> calculateCharDimension(const wchar_t* character);
 	void updateCursorPosition(bool increase);
 
 	D2D1_RECT_F currentCursorLine() const;
