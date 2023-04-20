@@ -91,3 +91,19 @@ std::wstring DINOGUI::toWideString(const std::string& string)
 {
 	return std::wstring(string.begin(), string.end());
 }
+
+void DINOGUI::throwIfFailed(HRESULT result, const std::string& message)
+{
+	if (FAILED(result))
+	{
+		throw std::runtime_error(message);
+	}
+}
+
+void DINOGUI::throwIfFailed(bool result, const std::string& message)
+{
+	if (!result)
+	{
+		throw std::runtime_error(message);
+	}
+}

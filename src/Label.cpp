@@ -16,7 +16,7 @@ Label::Label(Core* core, const std::string& text)
     m_text = text;
 }
 
-void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
+void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
     D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
     D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
@@ -36,11 +36,7 @@ void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
 
     if (!m_fontFormat)
     {
-        if (!createFontFormat())
-        {
-            throw std::runtime_error("Could not create Font Format");
-            return;
-        }
+        throwIfFailed(createFontFormat(), "Failed to create text format");
     }
 
     brush->SetColor(text);

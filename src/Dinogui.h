@@ -58,7 +58,6 @@ private:
 	ID2D1Factory* m_factory;
 	ID2D1HwndRenderTarget* m_renderTarget;
 	ID2D1SolidColorBrush* m_colorBrush;
-	ID2D1StrokeStyle* m_strokeStyle;
 	D2D1_POINT_2F m_mousePosition;
 
 	std::vector<Widget*> m_widgets;
@@ -101,9 +100,7 @@ public:
 	Widget& operator=(const Widget&) = delete;
 	Widget& operator=(Widget&&) = delete;
 
-	virtual void draw(ID2D1HwndRenderTarget* renderTarget,
-					  ID2D1SolidColorBrush* brush,
-					  ID2D1StrokeStyle* strokeStyle) = 0;
+	virtual void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) = 0;
 	virtual void place(int x, int y) = 0;
 	virtual void clicked() = 0;
 	
@@ -156,9 +153,7 @@ public:
 	Button& operator=(const Button&) = delete;
 	Button& operator=(Button&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget,
-			  ID2D1SolidColorBrush* brush,
-			  ID2D1StrokeStyle* strokeStyle) override;
+	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked() override;
 
@@ -178,9 +173,7 @@ public:
 	Label& operator=(const Label&) = delete;
 	Label& operator=(Label&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget,
-		      ID2D1SolidColorBrush* brush,
-		      ID2D1StrokeStyle* strokeStyle) override;
+	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked() override {};
 };
@@ -196,9 +189,7 @@ public:
 	Checkbox& operator=(Checkbox&&) = delete;
 
 	void setSize(int width, int height) override;
-	void draw(ID2D1HwndRenderTarget* renderTarget,
-			  ID2D1SolidColorBrush* brush,
-			  ID2D1StrokeStyle* strokeStyle) override;
+	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked() override;
 
@@ -224,9 +215,7 @@ public:
 	Textedit& operator=(const Textedit&) = delete;
 	Textedit& operator=(Textedit&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget,
-		ID2D1SolidColorBrush* brush,
-		ID2D1StrokeStyle* strokeStyle) override;
+	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked() override;
 

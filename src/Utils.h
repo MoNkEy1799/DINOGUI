@@ -98,6 +98,8 @@ private:
 
 D2D1_COLOR_F toD2DColorF(const DINOGUI::Color& color);
 std::wstring toWideString(const std::string& string);
+void throwIfFailed(HRESULT result, const std::string& message);
+void throwIfFailed(bool result, const std::string& message);
 
 template<class C>
 void safeReleaseInterface(C** pointerToInterface)

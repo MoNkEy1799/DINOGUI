@@ -25,7 +25,7 @@ Textedit::~Textedit()
     delete m_cursorTimer;
 }
 
-void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
+void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
     D2D1_COLOR_F background;
     D2D1_COLOR_F border;
@@ -74,19 +74,11 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (!m_fontFormat)
     {
-        if (!createFontFormat())
-        {
-            throw std::runtime_error("Could not create Font Format");
-            return;
-        }
+        throwIfFailed(createFontFormat(), "Failed to create text format");
+        throwIfFailed(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING), "Failed to align text format");
 
         std::array<float, 2> a = calculateCharDimension(L" ");
         std::cout << a[0] << "  " << a[1] << std::endl;
-
-        if (FAILED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
-        {
-            throw std::runtime_error("Could not align Font Format");
-        }
     }
 
     brush->SetColor(text);

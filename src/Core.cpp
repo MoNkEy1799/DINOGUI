@@ -17,17 +17,14 @@ void Core::DEBUG_DRAW_RECT(D2D1_RECT_F r)
 }
 
 Core::Core(const std::string& windowName, int width, int height, int x, int y)
-    : m_factory(nullptr), m_writeFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr), m_strokeStyle(nullptr),
+    : m_factory(nullptr), m_writeFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr),
     m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
     m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr), m_changeCursor(true)
 {
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
 
-    if (!createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, m_width, m_height, m_xPos, m_yPos))
-    {
-        throw std::runtime_error("Could not create Window");
-    }
+    throwIfFailed(createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, m_width, m_height, m_xPos, m_yPos), "Failed to create window");
 }
 
 int Core::run()
@@ -161,30 +158,27 @@ void Core::paintWidgets()
 {
     DEBUG_DrawCalls += 1;
     std::cout << "total draw calls: " << DEBUG_DrawCalls << std::endl;
-    HRESULT hResult = createGraphicsResource();
+    throwIfFailed(createGraphicsResource(), "Failed to create graphics resources");
+    
+    PAINTSTRUCT painStruct;
+    BeginPaint(m_windowHandle, &painStruct);
+    m_renderTarget->BeginDraw();
+    m_renderTarget->Clear(toD2DColorF(DINOCOLOR_WINDOW_LIGHT));
+    m_renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
-    if (SUCCEEDED(hResult))
+    for (Widget* widget : m_displayWidgets)
     {
-        PAINTSTRUCT painStruct;
-        BeginPaint(m_windowHandle, &painStruct);
-        m_renderTarget->BeginDraw();
-        m_renderTarget->Clear(toD2DColorF(DINOCOLOR_WINDOW_LIGHT));
-        m_renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
-
-        for (Widget* widget : m_displayWidgets)
-        {
-            widget->draw(m_renderTarget, m_colorBrush, m_strokeStyle);
-        }
-
-        hResult = m_renderTarget->EndDraw();
-
-        if (FAILED(hResult) || hResult == D2DERR_RECREATE_TARGET)
-        {
-            destroyGraphicsResources();
-        }
-
-        EndPaint(m_windowHandle, &painStruct);
+        widget->draw(m_renderTarget, m_colorBrush);
     }
+
+    HRESULT hResult = m_renderTarget->EndDraw();
+
+    if (FAILED(hResult) || hResult == D2DERR_RECREATE_TARGET)
+    {
+        destroyGraphicsResources();
+    }
+
+    EndPaint(m_windowHandle, &painStruct);
 }
 
 void Core::setCursor()
@@ -340,22 +334,6 @@ HRESULT Core::createGraphicsResource()
             hResult = m_renderTarget->CreateSolidColorBrush(D2D1::ColorF(0), &m_colorBrush);
         }
     }
-
-    if (!m_strokeStyle)
-    {
-        D2D1_STROKE_STYLE_PROPERTIES props =
-        {
-            D2D1_CAP_STYLE_SQUARE,
-            D2D1_CAP_STYLE_SQUARE,
-            D2D1_CAP_STYLE_SQUARE,
-            D2D1_LINE_JOIN_MITER,
-            0.0f,
-            D2D1_DASH_STYLE_SOLID,
-            0.0f
-        };
-        hResult = m_factory->CreateStrokeStyle(props, nullptr, 0, &m_strokeStyle);
-    }
-
     return hResult;
 }
 
@@ -363,5 +341,4 @@ void Core::destroyGraphicsResources()
 {
     safeReleaseInterface(&m_renderTarget);
     safeReleaseInterface(&m_colorBrush);
-    safeReleaseInterface(&m_strokeStyle);
 }

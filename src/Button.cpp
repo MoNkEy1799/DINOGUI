@@ -18,7 +18,7 @@ Button::Button(Core* core, const std::string& text, std::function<void()> functi
     m_drawBorder = true;
 }
 
-void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
+void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
     D2D1_COLOR_F background;
     D2D1_COLOR_F border;
@@ -59,11 +59,7 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
 
     if (!m_fontFormat)
     {
-        if (!createFontFormat())
-        {
-            throw std::runtime_error("Could not create Font Format");
-            return;
-        }
+        throwIfFailed(createFontFormat(), "Failed to create text format");
     }
 
     brush->SetColor(text);

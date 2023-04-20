@@ -32,7 +32,7 @@ void DINOGUI::Checkbox::setSize(int width, int height)
     calculateBoxAndTextLayout();
 }
 
-void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush, ID2D1StrokeStyle* strokeStyle)
+void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
     D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
     D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
@@ -75,21 +75,14 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (!m_fontFormat)
     {
-        if (!createFontFormat())
-        {
-            throw std::runtime_error("Could not create Font Format");
-        }
-        if (FAILED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
-        {
-            throw std::runtime_error("Could not align Font Format");
-        }
+        throwIfFailed(createFontFormat(), "Failed to create text format");
     }
 
     if (m_check)
     {
-        if (!m_checkmark && !createPathGeometry())
+        if (!m_checkmark)
         {
-            throw std::runtime_error("Could not create Path Geometry");
+            throwIfFailed(createPathGeometry(), "Failed to create path geometry");
         }
         renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
         brush->SetColor(border);
