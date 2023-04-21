@@ -6,12 +6,13 @@
 #include <dwrite.h>
 #include <string>
 #include <vector>
+#include <numeric>
 
 using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
     : Widget(core), m_selected(false), m_drawCursor(false), m_cursorTimer(nullptr),
-      m_cursorPosition(0)
+      m_cursorPosition(0), m_lineHeight(0.0f)
 {
     m_type = WidgetType::TEXTEDIT;
     m_drawBackground = true;
@@ -76,9 +77,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     {
         throwIfFailed(createFontFormat(), "Failed to create text format");
         throwIfFailed(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING), "Failed to align text format");
-
-        std::array<float, 2> a = calculateCharDimension(L" ");
-        std::cout << a[0] << "  " << a[1] << std::endl;
+        calculateCharDimension('A');
     }
 
     brush->SetColor(text);
@@ -121,11 +120,13 @@ void Textedit::keyInput(char key)
             return;
         }
         m_text.erase(m_cursorPosition - 1, 1);
+        m_charWidths.erase(m_charWidths.begin() + m_cursorPosition - 1);
         updateCursorPosition(false);
     }
     else
     {
         m_text.insert(m_cursorPosition, 1, key);
+        m_charWidths.insert(m_charWidths.begin() + m_cursorPosition, calculateCharDimension(key));
         updateCursorPosition(true);
     }
     m_core->redrawScreen();
@@ -148,18 +149,25 @@ void Textedit::otherKeys(uint32_t key)
             return;
         }
         m_text.erase(m_cursorPosition, 1);
+        m_charWidths.erase(m_charWidths.begin() + m_cursorPosition);
         restartCursorTimer();
     }
 }
 
-std::array<float, 2> Textedit::calculateCharDimension(const wchar_t* character)
+float Textedit::calculateCharDimension(char character)
 {
     IDWriteTextLayout* layout;
-    m_core->getWriteFactory()->CreateTextLayout(character, 1, m_fontFormat, 1.0f, 1.0f, &layout);
+    const wchar_t c = (wchar_t)character;
+    m_core->getWriteFactory()->CreateTextLayout(&c, 1, m_fontFormat, 1.0f, 1.0f, &layout);
     DWRITE_TEXT_METRICS metrics;
     layout->GetMetrics(&metrics);
     safeReleaseInterface(&layout);
-    return { metrics.widthIncludingTrailingWhitespace, metrics.height };
+
+    if (m_lineHeight < metrics.height)
+    {
+        m_lineHeight = metrics.height;
+    }
+    return metrics.widthIncludingTrailingWhitespace;
 }
 
 void Textedit::updateCursorPosition(bool increase)
@@ -179,11 +187,10 @@ void Textedit::updateCursorPosition(bool increase)
 D2D1_RECT_F Textedit::currentCursorLine() const
 {
     D2D1_RECT_F textRect = currentTextRect();
-    /*float top = (textRect.bottom - textRect.top - m_charHeight) / 2.0f;
-    return { textRect.left + (m_charWidth * m_cursorPosition), textRect.top + top,
-             textRect.left + (m_charWidth * m_cursorPosition), textRect.top + top + m_charHeight };
-             */
-    return { 0 };
+    float yGap = (textRect.bottom - textRect.top - m_lineHeight) / 2.0f;
+    float xGap = std::accumulate(m_charWidths.begin(), m_charWidths.begin() + m_cursorPosition, 0.0f);
+    return { textRect.left + xGap, textRect.top + yGap,
+             textRect.left + xGap, textRect.top + yGap + m_lineHeight };
 }
 
 D2D1_RECT_F Textedit::currentTextRect() const

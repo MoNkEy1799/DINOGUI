@@ -10,9 +10,8 @@
 using namespace DINOGUI;
 
 Checkbox::Checkbox(Core* core, const std::string& text)
-    : Widget(core), m_check(false), m_checkmark(nullptr),
-      m_boxPoint(m_point), m_textPoint(m_point),
-      m_boxSize({ 13.0f, 13.0f }), m_textSize(m_size)
+    : Widget(core), m_check(false), m_boxPoint(m_point), m_textPoint(m_point),
+      m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size)
 {
     m_type = WidgetType::CHECKBOX;
     m_text = text;
@@ -21,12 +20,7 @@ Checkbox::Checkbox(Core* core, const std::string& text)
     m_size = { 80.0f, 20.0f };
 }
 
-DINOGUI::Checkbox::~Checkbox()
-{
-    safeReleaseInterface(&m_checkmark);
-}
-
-void DINOGUI::Checkbox::setSize(int width, int height)
+void Checkbox::setSize(int width, int height)
 {
     m_size = { (float)width, (float)height };
     calculateBoxAndTextLayout();
@@ -76,17 +70,16 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     if (!m_fontFormat)
     {
         throwIfFailed(createFontFormat(), "Failed to create text format");
+        throwIfFailed(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING), "Failed to align text format");
     }
 
     if (m_check)
     {
-        if (!m_checkmark)
-        {
-            throwIfFailed(createPathGeometry(), "Failed to create path geometry");
-        }
         renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
         brush->SetColor(border);
-        renderTarget->FillGeometry(m_checkmark, brush);
+        std::array<D2D1_POINT_2F, 3> box = currentCheckbox();
+        renderTarget->DrawLine(box[0], box[1], brush);
+        renderTarget->DrawLine(box[1], box[2], brush);
         renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
     }
 
@@ -106,34 +99,10 @@ void Checkbox::clicked()
     m_check = !m_check;
 }
 
-bool Checkbox::createPathGeometry()
+std::array<D2D1_POINT_2F, 3> Checkbox::currentCheckbox()
 {
-    ID2D1GeometrySink* sink;
-    if (FAILED(m_core->getFactory()->CreatePathGeometry(&m_checkmark)))
-    {
-        return false;
-    }
-    if (FAILED(m_checkmark->Open(&sink)))
-    {
-        return false;
-    }
-
-    float x = m_boxPoint.x;
-    float y = m_boxPoint.y;
-    sink->BeginFigure(DPIHandler::adjusted(D2D1::Point2F(10.0f + x, 3.0f + y)), D2D1_FIGURE_BEGIN_FILLED);
-    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(11.0f + x, 4.0f + y)));
-    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(5.0f + x, 10.0f + y)));
-    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(2.0f + x, 7.0f + y)));
-    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(3.0f + x, 6.0f + y)));
-    sink->AddLine(DPIHandler::adjusted(D2D1::Point2F(5.0f + x, 8.0f + y)));
-    sink->EndFigure(D2D1_FIGURE_END_CLOSED);
-
-    if (FAILED(sink->Close()))
-    {
-        return false;
-    }
-    safeReleaseInterface(&sink);
-    return true;
+    D2D1_RECT_F box = currentBoxRect();
+    return { { {box.left + 10.5f, box.top + 3.5f}, { box.left + 5.0f, box.top + 10.0f }, { box.left + 2.0f, box.top + 7.0f } } };
 }
 
 void Checkbox::calculateBoxAndTextLayout()

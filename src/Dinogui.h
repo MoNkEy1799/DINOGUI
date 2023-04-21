@@ -182,7 +182,7 @@ class Checkbox : public Widget
 {
 public:
 	Checkbox(Core* core, const std::string& text = "");
-	~Checkbox();
+	~Checkbox() = default;
 	Checkbox(const Checkbox&) = delete;
 	Checkbox(Checkbox&&) = delete;
 	Checkbox& operator=(const Checkbox&) = delete;
@@ -194,12 +194,11 @@ public:
 	void clicked() override;
 
 private:
-	ID2D1PathGeometry* m_checkmark;
 	D2D1_POINT_2F m_boxPoint, m_textPoint;
 	D2D1_SIZE_F m_boxSize, m_textSize;
 	bool m_check;
 
-	bool createPathGeometry();
+	std::array<D2D1_POINT_2F, 3> currentCheckbox();
 	void calculateBoxAndTextLayout();
 	D2D1_RECT_F currentTextRect() const;
 	D2D1_RECT_F currentBoxRect() const;
@@ -230,7 +229,7 @@ private:
 	bool m_drawCursor;
 	uint32_t m_cursorPosition;
 
-	std::array<float, 2> calculateCharDimension(const wchar_t* character);
+	float calculateCharDimension(char character);
 	void updateCursorPosition(bool increase);
 
 	D2D1_RECT_F currentCursorLine() const;

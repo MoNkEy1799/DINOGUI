@@ -60,6 +60,12 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
         resizeWindow();
         return 0;
 
+    /*case WM_DPICHANGED:
+        DPIHandler::Initialize(m_windowHandle);
+        std::cout << "DPI " << GetDpiForWindow(m_windowHandle) << std::endl;
+        redrawScreen();
+        return 0;*/
+
     case WM_SETCURSOR:
         setCursor();
         return 0;
