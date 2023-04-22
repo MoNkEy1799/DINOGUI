@@ -28,7 +28,7 @@ class Checkbox;
 class Textedit;
 class Image;
 enum class WidgetState { NORMAL, HOVER, CLICKED };
-enum class WidgetType { NONE, BUTTON, LABEL, TEXTEDIT, CHECKBOX, IMAGE };
+enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE };
 
 class Core : public TemplateWindow<Core>
 {
@@ -102,7 +102,7 @@ public:
 
 	virtual void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) = 0;
 	virtual void place(int x, int y) = 0;
-	virtual void clicked() = 0;
+	virtual void clicked(float mouseX, float mouseY) = 0;
 	
 	void show();
 	void hide();
@@ -116,10 +116,11 @@ public:
 	WidgetType getWidgetType() const;
 	bool contains(float x, float y) const;
 
+	void receiveEvent(Event* event);
 	void enterEvent();
 	void leaveEvent();
-	void clickEvent();
-	void releaseEvent();
+	void clickEvent(float mouseX, float mouseY);
+	void releaseEvent(float mouseX, float mouseY);
 	void unselectEvent();
 	
 	static bool hoverableWidget(const WidgetType& type);
@@ -137,10 +138,17 @@ protected:
 	WidgetType m_type;
 	std::string m_text;
 	bool m_drawBackground, m_drawBorder;
-	bool m_hover;
+
+	D2D1_RECT_F mapToLocal(D2D1_RECT_F rect);
+	D2D1_POINT_2F mapToLocal(D2D1_POINT_2F point);
+	D2D1_RECT_F mapToGlobal(D2D1_RECT_F rect);
+	D2D1_POINT_2F mapToGlobal(D2D1_POINT_2F point);
 
 	D2D1_RECT_F currentRect() const;
 	bool createFontFormat();
+
+	void drawBasicShape(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+	void basicPlace(int x, int y);
 };
 
 class Button : public Widget
@@ -155,7 +163,7 @@ public:
 
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
-	void clicked() override;
+	void clicked(float mouseX, float mouseY) override;
 
 	void connect(std::function<void()> function);
 
@@ -175,7 +183,7 @@ public:
 
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
-	void clicked() override {};
+	void clicked(float mouseX, float mouseY) override {};
 };
 
 class Checkbox : public Widget
@@ -191,7 +199,7 @@ public:
 	void setSize(int width, int height) override;
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
-	void clicked() override;
+	void clicked(float mouseX, float mouseY) override;
 
 private:
 	D2D1_POINT_2F m_boxPoint, m_textPoint;
@@ -216,7 +224,8 @@ public:
 
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
-	void clicked() override;
+	void clicked(float mouseX, float mouseY) override;
+	void unselect();
 
 	void keyInput(char key);
 	void otherKeys(uint32_t key);
@@ -230,6 +239,7 @@ private:
 	uint32_t m_cursorPosition;
 
 	float calculateCharDimension(char character);
+	uint32_t getCursorPosition(float x);
 	void updateCursorPosition(bool increase);
 
 	D2D1_RECT_F currentCursorLine() const;
@@ -237,6 +247,21 @@ private:
 
 	void switchCursor();
 	void restartCursorTimer();
+};
+
+class Image : public Widget
+{
+public:
+	Image(Core* core);
+	~Image();
+	Image(const Image&) = delete;
+	Image(Image&&) = delete;
+	Image& operator=(const Image&) = delete;
+	Image& operator=(Image&&) = delete;
+
+	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void place(int x, int y) override;
+	void clicked(float mouseX, float mouseY) override {};
 };
 
 }

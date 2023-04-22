@@ -222,11 +222,11 @@ void Core::mouseMove(int posX, int posY, DWORD flags)
         m_changeCursor = true;
         if (m_hoverWidget)
         {
-            m_hoverWidget->leaveEvent();
+            m_hoverWidget->receiveEvent(new Event(EventType::LEAVE_EVENT, x, y));
         }
         if (underMouse)
         {
-            underMouse->enterEvent();
+            underMouse->receiveEvent(new Event(EventType::ENTER_EVENT, x, y));
         }
     }
 }
@@ -243,19 +243,20 @@ void Core::leftClick(int posX, int posY, DWORD flags)
     {
         if (m_selectedWidget)
         {
-            m_selectedWidget->unselectEvent();
+            m_selectedWidget->receiveEvent(new Event(EventType::UNSELECT_EVENT, x, y));
         }
         return;
     }
     if (underMouse == m_selectedWidget)
     {
+        m_selectedWidget->receiveEvent(new Event(EventType::CLICK_EVENT, x, y));
         return;
     }
     if (m_selectedWidget)
     {
-        m_selectedWidget->unselectEvent();
+        m_selectedWidget->receiveEvent(new Event(EventType::UNSELECT_EVENT, x, y));
     }
-    underMouse->clickEvent();
+    underMouse->receiveEvent(new Event(EventType::CLICK_EVENT, x, y));
 }
 
 void Core::leftRelease(int posX, int posY, DWORD flags)
@@ -268,7 +269,7 @@ void Core::leftRelease(int posX, int posY, DWORD flags)
     {
         if (m_clickWidget)
         {
-            m_clickWidget->leaveEvent();
+            m_clickWidget->receiveEvent(new Event(EventType::LEAVE_EVENT, x, y));
         }
         return;
     }
@@ -279,13 +280,13 @@ void Core::leftRelease(int posX, int posY, DWORD flags)
 
     if (underMouse == m_clickWidget)
     {
-        underMouse->releaseEvent();
+        underMouse->receiveEvent(new Event(EventType::REALEASE_EVENT, x, y));
     }
     else if (m_clickWidget)
     {
-        m_clickWidget->leaveEvent();
+        m_clickWidget->receiveEvent(new Event(EventType::LEAVE_EVENT, x, y));
     }
-    underMouse->enterEvent();
+    underMouse->receiveEvent(new Event(EventType::ENTER_EVENT, x, y));
 }
 
 void Core::processKeys(char key)

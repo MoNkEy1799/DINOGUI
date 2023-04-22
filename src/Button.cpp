@@ -20,59 +20,25 @@ Button::Button(Core* core, const std::string& text, std::function<void()> functi
 
 void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    D2D1_COLOR_F background;
-    D2D1_COLOR_F border;
-    D2D1_COLOR_F text;
+    drawBasicShape(renderTarget, brush);
+    D2D1_COLOR_F colText = m_theme.txt.d2d1();
     D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
-
-    switch (m_state)
-    {
-    case WidgetState::NORMAL:
-        background = toD2DColorF(m_theme.bg);
-        border = toD2DColorF(m_theme.brd);
-        text = toD2DColorF(m_theme.txt);
-        break;
-
-    case WidgetState::HOVER:
-        background = toD2DColorF(m_theme.bg_h);
-        border = toD2DColorF(m_theme.brd_h);
-        text = toD2DColorF(m_theme.txt_h);
-        break;
-
-    case WidgetState::CLICKED:
-        background = toD2DColorF(m_theme.bg_c);
-        border = toD2DColorF(m_theme.brd_c);
-        text = toD2DColorF(m_theme.txt_c);
-        break;
-    }
-
-    if (m_drawBackground)
-    {
-        brush->SetColor(background);
-        renderTarget->FillRectangle(rectangle, brush);
-    }
-    if (m_drawBorder)
-    {
-        brush->SetColor(border);
-        renderTarget->DrawRectangle(rectangle, brush);
-    }
 
     if (!m_fontFormat)
     {
         throwIfFailed(createFontFormat(), "Failed to create text format");
     }
 
-    brush->SetColor(text);
+    brush->SetColor(colText);
     renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, rectangle, brush);
 }
 
 void Button::place(int x, int y)
 {
-    show();
-    m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
+    basicPlace(x, y);
 }
 
-void Button::clicked()
+void Button::clicked(float mouseX, float mouseY)
 {
     if (m_clickFunction)
     {

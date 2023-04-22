@@ -18,33 +18,20 @@ Label::Label(Core* core, const std::string& text)
 
 void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
-    D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
-    D2D1_COLOR_F text = toD2DColorF(m_theme.txt);
+    drawBasicShape(renderTarget, brush);
+    D2D1_COLOR_F colText = m_theme.txt.d2d1();
     D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
-
-    if (m_drawBackground)
-    {
-        brush->SetColor(background);
-        renderTarget->FillRectangle(rectangle, brush);
-    }
-    if (m_drawBorder)
-    {
-        brush->SetColor(border);
-        renderTarget->DrawRectangle(rectangle, brush);
-    }
 
     if (!m_fontFormat)
     {
         throwIfFailed(createFontFormat(), "Failed to create text format");
     }
 
-    brush->SetColor(text);
+    brush->SetColor(colText);
     renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, rectangle, brush);
 }
 
 void Label::place(int x, int y)
 {
-    show();
-    m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
+    basicPlace(x, y);
 }

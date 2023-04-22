@@ -15,8 +15,8 @@ Checkbox::Checkbox(Core* core, const std::string& text)
 {
     m_type = WidgetType::CHECKBOX;
     m_text = text;
-    m_drawBackground = true;
-    m_drawBorder = true;
+    m_drawBackground = false;
+    m_drawBorder = false;
     m_size = { 80.0f, 20.0f };
 }
 
@@ -28,6 +28,7 @@ void Checkbox::setSize(int width, int height)
 
 void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
+    drawBasicShape(renderTarget, brush);
     D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
     D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
     D2D1_COLOR_F text = toD2DColorF(m_theme.txt);
@@ -55,17 +56,10 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         break;
     }
 
-    if (m_drawBackground)
-    {
-        brush->SetColor(background);
-        renderTarget->FillRectangle(boxRect, brush);
-    }
-    if (m_drawBorder)
-    {
-        brush->SetColor(border);
-        renderTarget->DrawRectangle(boxRect, brush);
-
-    }
+    brush->SetColor(background);
+    renderTarget->FillRectangle(boxRect, brush);
+    brush->SetColor(border);
+    renderTarget->DrawRectangle(boxRect, brush);
 
     if (!m_fontFormat)
     {
@@ -89,12 +83,11 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
 void Checkbox::place(int x, int y)
 {
-    show();
-    m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
+    basicPlace(x, y);
     calculateBoxAndTextLayout();
 }
 
-void Checkbox::clicked()
+void Checkbox::clicked(float mouseX, float mouseY)
 {
     m_check = !m_check;
 }

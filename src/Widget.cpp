@@ -22,7 +22,7 @@ Widget::Widget(Core* core)
       m_theme(DINOGUI_THEME_LIGHT), m_font(DINOGUI_FONT_DEFAULT),
       m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }),
       m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
-      m_drawBackground(false), m_drawBorder(false), m_hover(false)
+      m_drawBackground(false), m_drawBorder(false)
 {
     m_core->addWidget(this);
 }
@@ -89,6 +89,34 @@ void Widget::drawBackground(bool draw)
     m_drawBackground = draw;
 }
 
+void Widget::receiveEvent(Event* event)
+{
+    switch (event->type)
+    {
+    case EventType::ENTER_EVENT:
+        enterEvent();
+        break;
+
+    case EventType::LEAVE_EVENT:
+        leaveEvent();
+        break;
+    
+    case EventType::CLICK_EVENT:
+        clickEvent(event->mouseX, event->mouseY);
+        break;
+
+    case EventType::REALEASE_EVENT:
+        releaseEvent(event->mouseX, event->mouseY);
+        break;
+
+    case EventType::UNSELECT_EVENT:
+        unselectEvent();
+        break;
+    }
+
+    delete event;
+}
+
 void Widget::enterEvent()
 {
     if (hoverableWidget(m_type))
@@ -107,7 +135,7 @@ void Widget::leaveEvent()
     m_core->redrawScreen();
 }
 
-void Widget::clickEvent()
+void Widget::clickEvent(float mouseX, float mouseY)
 {
     if (clickableWidget(m_type))
     {
@@ -117,13 +145,13 @@ void Widget::clickEvent()
     }
     else if (selectableWidget(m_type))
     {
-        clicked();
+        clicked(mouseX, mouseY);
         m_core->setSelectedWidget(this);
         m_core->redrawScreen();
     }
 }
 
-void Widget::releaseEvent()
+void Widget::releaseEvent(float mouseX, float mouseY)
 {
     if (hoverableWidget(m_type))
     {
@@ -131,16 +159,39 @@ void Widget::releaseEvent()
         m_core->setHoverWidget(this);
         m_core->redrawScreen();
     }
-    clicked();
+    clicked(mouseX, mouseY);
     m_core->setClickWidget(nullptr);
 }
 
-void DINOGUI::Widget::unselectEvent()
+void Widget::unselectEvent()
 {
-    clicked();
+    if (m_type == WidgetType::TEXTEDIT)
+    {
+        dynamic_cast<Textedit*>(this)->unselect();
+    }
     m_state = WidgetState::NORMAL;
     m_core->setSelectedWidget(nullptr);
     m_core->redrawScreen();
+}
+
+D2D1_RECT_F Widget::mapToLocal(D2D1_RECT_F rect)
+{
+    return { rect.left - m_point.x, rect.top - m_point.y, rect.right - m_point.x - m_size.width, rect.bottom - m_point.y - m_size.height };
+}
+
+D2D1_POINT_2F Widget::mapToLocal(D2D1_POINT_2F point)
+{
+    return {point.x - m_point.x, point.y - m_point.y};
+}
+
+D2D1_RECT_F Widget::mapToGlobal(D2D1_RECT_F rect)
+{
+    return { rect.left + m_point.x, rect.top + m_point.y, rect.right + m_point.x + m_size.width, rect.bottom + m_point.y + m_size.height };
+}
+
+D2D1_POINT_2F Widget::mapToGlobal(D2D1_POINT_2F point)
+{
+    return { point.x + m_point.x, point.y + m_point.y };
 }
 
 D2D1_RECT_F Widget::currentRect() const
@@ -208,4 +259,46 @@ bool Widget::selectableWidget(const WidgetType& type)
         return false;
     }
     return true;
+}
+
+void Widget::drawBasicShape(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+{
+    D2D1_COLOR_F colBackground;
+    D2D1_COLOR_F colBorder;
+    D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
+
+    switch (m_state)
+    {
+    case WidgetState::NORMAL:
+        colBackground = m_theme.bg.d2d1();
+        colBorder = m_theme.brd.d2d1();
+        break;
+
+    case WidgetState::HOVER:
+        colBackground = m_theme.bg_h.d2d1();
+        colBorder = m_theme.brd_h.d2d1();
+        break;
+
+    case WidgetState::CLICKED:
+        colBackground = m_theme.bg_c.d2d1();
+        colBorder = m_theme.brd_c.d2d1();
+        break;
+    }
+
+    if (m_drawBackground)
+    {
+        brush->SetColor(colBackground);
+        renderTarget->FillRectangle(rectangle, brush);
+    }
+    if (m_drawBorder)
+    {
+        brush->SetColor(colBorder);
+        renderTarget->DrawRectangle(rectangle, brush);
+    }
+}
+
+void Widget::basicPlace(int x, int y)
+{
+    show();
+    m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
 }

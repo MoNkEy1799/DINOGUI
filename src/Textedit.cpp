@@ -78,6 +78,15 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         throwIfFailed(createFontFormat(), "Failed to create text format");
         throwIfFailed(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING), "Failed to align text format");
         calculateCharDimension('A');
+
+        if (!m_text.empty())
+        {
+            m_charWidths.clear();
+            for (char c : m_text)
+            {
+                m_charWidths.push_back(calculateCharDimension(c));
+            }
+        }
     }
 
     brush->SetColor(text);
@@ -93,22 +102,33 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
 void Textedit::place(int x, int y)
 {
-    show();
-    m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
+    basicPlace(x, y);
 }
 
-void Textedit::clicked()
+void Textedit::clicked(float mouseX, float mouseY)
 {
-    m_selected = !m_selected;
-    if (m_selected)
+    if (!m_selected)
     {
+        m_selected = true;
         m_cursorTimer->start();
     }
-    else
+
+    uint32_t newCursorPos = getCursorPosition(mouseX);
+    if (newCursorPos != m_cursorPosition)
     {
-        m_drawCursor = false;
-        m_cursorTimer->stop();
+        restartCursorTimer();
     }
+    m_cursorPosition = newCursorPos;
+}
+
+void Textedit::unselect()
+{
+    m_selected = false;
+    m_drawCursor = false;
+    m_cursorTimer->stop();
+    m_state = WidgetState::NORMAL;
+    m_core->setSelectedWidget(nullptr);
+    m_core->redrawScreen();
 }
 
 void Textedit::keyInput(char key)
@@ -168,6 +188,28 @@ float Textedit::calculateCharDimension(char character)
         m_lineHeight = metrics.height;
     }
     return metrics.widthIncludingTrailingWhitespace;
+}
+
+uint32_t Textedit::getCursorPosition(float x)
+{
+    if (m_text.empty())
+    {
+        return 0;
+    }
+
+    float width = currentTextRect().left;
+    size_t pos = 0;
+    do
+    {
+        if (x <= width)
+        {
+            return (uint32_t)pos;
+        }
+        width += m_charWidths[pos];
+        pos++;
+    } while (pos < m_text.length());
+
+    return (uint32_t)m_text.length();
 }
 
 void Textedit::updateCursorPosition(bool increase)

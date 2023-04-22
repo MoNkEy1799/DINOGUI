@@ -28,7 +28,7 @@
 	DINOGUI::Color(0.0000f, 0.0000f, 0.0000f), DINOGUI::Color(0.8000f, 0.8941f, 0.9686f), DINOGUI::Color(0.0039f, 0.3373f, 0.6078f), \
 }
 
-#define DINOGUI_FONT_DEFAULT DINOGUI::Font{ 12.0f, "Segeo UI", DINOGUI::FontWeight::NORMAL }
+#define DINOGUI_FONT_DEFAULT DINOGUI::Font{ 12.0f, "Segoe UI", DINOGUI::FontWeight::NORMAL }
 
 #define DINOGUI_ALL_MOUSE_BUTTONS MK_LBUTTON + MK_MBUTTON + MK_RBUTTON + MK_XBUTTON1 + MK_XBUTTON2
 
@@ -56,6 +56,7 @@ struct Color
 {
 	Color(float red, float green, float blue) : r(red), g(green), b(blue), a(1.0f) {};
 	Color(float red, float green, float blue, float alpha) : r(red), g(green), b(blue), a(alpha) {};
+	D2D1_COLOR_F d2d1();
 	float r, g, b, a;
 };
 
@@ -94,6 +95,15 @@ private:
 	
 	bool m_active;
 	HWND m_windowHandle;
+};
+
+enum class EventType { ENTER_EVENT, LEAVE_EVENT, CLICK_EVENT, REALEASE_EVENT, UNSELECT_EVENT };
+
+struct Event
+{
+	Event(EventType type, float mouseX, float mouseY) : type(type), mouseX(mouseX), mouseY(mouseY) {};
+	EventType type;
+	float mouseX, mouseY;
 };
 
 D2D1_COLOR_F toD2DColorF(const DINOGUI::Color& color);
