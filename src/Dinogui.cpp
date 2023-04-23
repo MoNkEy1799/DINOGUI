@@ -101,6 +101,7 @@ void DINOGUI::throwIfFailed(HRESULT result, const std::string& message)
 {
 	if (FAILED(result))
 	{
+		std::cout << message << std::endl;
 		throw std::runtime_error(message);
 	}
 }
@@ -109,6 +110,7 @@ void DINOGUI::throwIfFailed(bool result, const std::string& message)
 {
 	if (!result)
 	{
+		std::cout << message << std::endl;
 		throw std::runtime_error(message);
 	}
 }

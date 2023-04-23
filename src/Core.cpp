@@ -17,7 +17,7 @@ void Core::DEBUG_DRAW_RECT(D2D1_RECT_F r)
 }
 
 Core::Core(const std::string& windowName, int width, int height, int x, int y)
-    : m_factory(nullptr), m_writeFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr),
+    : m_factory(nullptr), m_writeFactory(nullptr), m_imageFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr),
     m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
     m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr), m_changeCursor(true)
 {
@@ -32,7 +32,7 @@ int Core::run()
     ShowWindow(m_windowHandle, SW_SHOW);
 
     MSG message;
-    while (GetMessage(&message, NULL, 0, 0))
+    while (GetMessage(&message, nullptr, 0, 0))
     {
         TranslateMessage(&message);
         DispatchMessage(&message);
@@ -135,6 +135,16 @@ int Core::createFactoryAndDPI()
         return -1;
     }
 
+    if (FAILED(CoInitialize(nullptr)))
+    {
+        return -1;
+    }
+
+    if (FAILED(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_imageFactory))))
+    {
+        return -1;
+    }
+
     DPIHandler::Initialize(m_windowHandle);
     return 0;
 }
@@ -196,12 +206,12 @@ void Core::setCursor()
 
     if (m_hoverWidget && Widget::selectableWidget(m_hoverWidget->getWidgetType()))
     {
-        SetCursor(LoadCursor(NULL, IDC_IBEAM));
+        SetCursor(LoadCursor(nullptr, IDC_IBEAM));
         m_changeCursor = false;
     }
     else
     {
-        SetCursor(LoadCursor(NULL, IDC_ARROW));
+        SetCursor(LoadCursor(nullptr, IDC_ARROW));
         m_changeCursor = false;
     }
 }

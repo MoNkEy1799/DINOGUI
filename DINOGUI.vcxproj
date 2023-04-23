@@ -146,6 +146,9 @@
     <ClInclude Include="src\Dinogui.h" />
     <ClInclude Include="src\Utils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Dino.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

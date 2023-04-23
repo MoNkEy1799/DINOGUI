@@ -1,9 +1,10 @@
 #include "src/Dinogui.h"
 #include <Windows.h>
 
-void testClickFunc()
+void testClickFunc(DINOGUI::Image* image)
 {
 	std::cout << "Button clicked" << std::endl;
+	image->show();
 }
 
 int main()
@@ -21,7 +22,7 @@ int main()
 	textedit->place(50, 140);
 	image->place(400, 400);
 
-	button->connect(testClickFunc);
+	button->connect([image] {testClickFunc(image); });
 
 	core->run();
 

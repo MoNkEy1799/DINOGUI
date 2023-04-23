@@ -7,6 +7,7 @@
 #include "Utils.h"
 
 #include <Windows.h>
+#include <wincodec.h>
 #include <d2d1.h>
 #include <dwrite.h>
 #include <string>
@@ -48,14 +49,16 @@ public:
 
 	ID2D1Factory* getFactory() const { return m_factory; };
 	IDWriteFactory* getWriteFactory() const { return m_writeFactory; };
+	IWICImagingFactory* getImageFactory() const { return m_imageFactory; };
 
 	void setHoverWidget(Widget* widget) { m_hoverWidget = widget; };
 	void setClickWidget(Widget* widget) { m_clickWidget = widget; };
 	void setSelectedWidget(Widget* widget) { m_selectedWidget = widget; };
 
 private:
-	IDWriteFactory* m_writeFactory;
 	ID2D1Factory* m_factory;
+	IDWriteFactory* m_writeFactory;
+	IWICImagingFactory* m_imageFactory;
 	ID2D1HwndRenderTarget* m_renderTarget;
 	ID2D1SolidColorBrush* m_colorBrush;
 	D2D1_POINT_2F m_mousePosition;
@@ -262,6 +265,9 @@ public:
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
+
+private:
+	IWICBitmapDecoder* m_decoder;
 };
 
 }
