@@ -72,7 +72,10 @@ void Image::loadImageFromFile(const std::string& filename)
 void Image::loadPixelData()
 {
     byte buffer[400];
+    buffer[0] = 255;
+    buffer[3] = 255;
 
+    /*
     for (int row = 0; row < 10; row++)
     {
         for (int col = 0; col < 10; col++)
@@ -85,7 +88,7 @@ void Image::loadPixelData()
             buffer[pixel + 2] = c;
             buffer[pixel + 3] = 255;
         }
-    }
+    }*/
 
     if (FAILED(m_core->getImageFactory()->CreateBitmapFromMemory(
         10,
