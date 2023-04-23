@@ -255,7 +255,7 @@ private:
 class Image : public Widget
 {
 public:
-	Image(Core* core);
+	Image(Core* core, const std::string& filename = "");
 	~Image();
 	Image(const Image&) = delete;
 	Image(Image&&) = delete;
@@ -266,8 +266,12 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
 
+	void loadImageFromFile(const std::string& filename);
+	void loadPixelData();
+
 private:
-	IWICBitmapDecoder* m_decoder;
+	ID2D1Bitmap* m_drawingBitmap;
+	IWICBitmap* m_wicBitmap;
 };
 
 }

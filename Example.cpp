@@ -9,18 +9,20 @@ void testClickFunc(DINOGUI::Image* image)
 
 int main()
 {
-	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 1000, 1000);
+	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 600, 600);
 	DINOGUI::Button* button = new DINOGUI::Button(core, "Button");
 	DINOGUI::Label* label = new DINOGUI::Label(core, "Label");
 	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(core, "Checkbox");
 	DINOGUI::Textedit* textedit = new DINOGUI::Textedit(core);
-	DINOGUI::Image* image = new DINOGUI::Image(core);
+	DINOGUI::Image* image = new DINOGUI::Image(core);// , "Dino.png");
 
-	button->place(50, 100);
-	label->place(250, 300);
-	checkbox->place(200, 240);
-	textedit->place(50, 140);
-	image->place(400, 400);
+	button->place(50, 50);
+	label->place(120, 50);
+	checkbox->place(190, 50);
+	textedit->place(300, 50);
+	image->place(100, 100);
+	image->loadPixelData();
+	image->setSize(100, 100);
 
 	button->connect([image] {testClickFunc(image); });
 
