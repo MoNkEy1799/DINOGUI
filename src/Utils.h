@@ -106,6 +106,29 @@ struct Event
 	float mouseX, mouseY;
 };
 
+template<typename T, size_t S>
+struct PixelBuffer
+{
+	PixelBuffer(uint32_t width, uint32_t height) : m_width(width), m_height(height) {};
+	void fillBuffer(T value)
+	{
+
+	}
+	void insertPixel(T value, size_t position)
+	{
+
+	}
+
+private:
+	uint32_t m_width, m_height;
+	std::array<T, S> m_buffer;
+
+	static T invertOrder(T value)
+	{
+
+	}
+};
+
 D2D1_COLOR_F toD2DColorF(const DINOGUI::Color& color);
 std::wstring toWideString(const std::string& string);
 void throwIfFailed(HRESULT result, const std::string& message = "");

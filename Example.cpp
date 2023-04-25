@@ -22,7 +22,7 @@ int main()
 	textedit->place(300, 50);
 	image->place(100, 100);
 	image->loadPixelData();
-	image->setSize(100, 100);
+	image->setSize(128, 12);
 
 	button->connect([image] {testClickFunc(image); });
 

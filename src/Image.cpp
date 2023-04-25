@@ -6,6 +6,8 @@
 #include <dwrite.h>
 #include <string>
 #include <stdexcept>
+#include <iostream>
+#include <iomanip>
 
 using namespace DINOGUI;
 
@@ -71,32 +73,23 @@ void Image::loadImageFromFile(const std::string& filename)
 
 void Image::loadPixelData()
 {
-    byte buffer[400];
-    buffer[0] = 255;
-    buffer[3] = 255;
+    uint32_t buffer[1536 * 4] = { 0 };
 
-    /*
-    for (int row = 0; row < 10; row++)
+    for (size_t i = 0; i < 1536; i++)
     {
-        for (int col = 0; col < 10; col++)
-        {
-            int pixel = row * 40 + col * 4;
-            float scale = 255.0f / 400.0f;
-            int c = pixel * scale;
-            buffer[pixel] = c;
-            buffer[pixel + 1] = 0;
-            buffer[pixel + 2] = c;
-            buffer[pixel + 3] = 255;
-        }
-    }*/
+        buffer[i * 4] = 0x0f0000ff;
+        buffer[i * 4 + 1] = 0x0f0000ff;
+        buffer[i * 4 + 2] = 0x0f0000ff;
+        buffer[i * 4 + 3] = 0x0f0000ff;
+    }
 
     if (FAILED(m_core->getImageFactory()->CreateBitmapFromMemory(
-        10,
-        10,
+        128,
+        12,
         GUID_WICPixelFormat32bppPRGBA,
-        40,
-        400,
-        buffer,
+        128*4,
+        1536*4,
+        (byte*)&buffer,
         &m_wicBitmap
     )))
     {
