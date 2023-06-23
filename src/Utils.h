@@ -123,7 +123,7 @@ private:
 	uint32_t m_width, m_height;
 	std::array<T, S> m_buffer;
 
-	static T invertOrder(T value)
+	static T invertByteOrder(T value)
 	{
 
 	}
