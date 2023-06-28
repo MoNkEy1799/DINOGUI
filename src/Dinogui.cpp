@@ -10,9 +10,9 @@
 
 using namespace DINOGUI;
 
-D2D1_COLOR_F Color::d2d1()
+D2D1_COLOR_F Color::d2d1(Color c)
 {
-	return D2D1::ColorF(r, g, b, a);
+	return D2D1::ColorF(c.r, c.g, c.b, c.a);
 }
 
 float DPIHandler::m_scale = 1.0f;

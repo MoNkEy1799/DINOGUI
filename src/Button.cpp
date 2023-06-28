@@ -21,7 +21,7 @@ Button::Button(Core* core, const std::string& text, std::function<void()> functi
 void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
     drawBasicShape(renderTarget, brush);
-    D2D1_COLOR_F colText = m_theme.txt.d2d1();
+    D2D1_COLOR_F colText = Color::d2d1(m_theme.txt);
     D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
 
     if (!m_fontFormat)

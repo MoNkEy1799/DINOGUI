@@ -77,10 +77,10 @@ void Image::loadPixelData()
 
     for (size_t i = 0; i < 1536; i++)
     {
-        buffer[i * 4] = 0x0f0000ff;
-        buffer[i * 4 + 1] = 0x0f0000ff;
-        buffer[i * 4 + 2] = 0x0f0000ff;
-        buffer[i * 4 + 3] = 0x0f0000ff;
+        buffer[i * 4] = 0xff0000ff;
+        buffer[i * 4 + 1] = 0xff00ff00;
+        buffer[i * 4 + 2] = 0xffff0000;
+        buffer[i * 4 + 3] = 0xff000000;
     }
 
     if (FAILED(m_core->getImageFactory()->CreateBitmapFromMemory(

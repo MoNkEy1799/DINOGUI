@@ -24,7 +24,7 @@ int main()
 	image->loadPixelData();
 	image->setSize(128, 12);
 
-	button->connect([image] {testClickFunc(image); });
+	button->connect([image] { testClickFunc(image); });
 
 	core->run();
 

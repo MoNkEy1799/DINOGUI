@@ -270,18 +270,18 @@ void Widget::drawBasicShape(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColor
     switch (m_state)
     {
     case WidgetState::NORMAL:
-        colBackground = m_theme.bg.d2d1();
-        colBorder = m_theme.brd.d2d1();
+        colBackground = Color::d2d1(m_theme.bg);
+        colBorder = Color::d2d1(m_theme.brd);
         break;
 
     case WidgetState::HOVER:
-        colBackground = m_theme.bg_h.d2d1();
-        colBorder = m_theme.brd_h.d2d1();
+        colBackground = Color::d2d1(m_theme.bg_h);
+        colBorder = Color::d2d1(m_theme.brd_h);
         break;
 
     case WidgetState::CLICKED:
-        colBackground = m_theme.bg_c.d2d1();
-        colBorder = m_theme.brd_c.d2d1();
+        colBackground = Color::d2d1(m_theme.bg_c);
+        colBorder = Color::d2d1(m_theme.brd_c);
         break;
     }
 
@@ -299,6 +299,6 @@ void Widget::drawBasicShape(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColor
 
 void Widget::basicPlace(int x, int y)
 {
-    show();
     m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
+    show();
 }

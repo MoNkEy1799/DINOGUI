@@ -8,24 +8,17 @@
 #include <iostream>
 #include <functional>
 
-#define DINOCOLOR_WINDOW_DARK DINOGUI::Color(0.1412f, 0.1451f, 0.1804f)
-#define DINOCOLOR_WINDOW_LIGHT DINOGUI::Color(0.9412f, 0.9412f, 0.9412f)
+#define DINOCOLOR_WINDOW_DARK DINOGUI::Color{ 0.1412f, 0.1451f, 0.1804f }
+#define DINOCOLOR_WINDOW_LIGHT DINOGUI::Color{ 0.9412f, 0.9412f, 0.9412f }
 
-#define DINOCOLOR_LIGHTGRAY DINOGUI::Color(0.7f, 0.7f, 0.7f, 1.0f)
+#define DINOCOLOR_LIGHTGRAY DINOGUI::Color{ 0.7f, 0.7f, 0.7f, 1.0f }
 
 
 #define DINOGUI_THEME_DARK \
 { \
-	DINOCOLOR_LIGHTGRAY, DINOGUI::Color(0.3f, 0.3f, 0.3f), DINOGUI::Color(0.1f, 0.1f, 0.1f), \
-	DINOCOLOR_LIGHTGRAY, DINOGUI::Color(0.99f, 0.4f, 0.4f), DINOGUI::Color(0.1f, 0.1f, 0.1f), \
-	DINOCOLOR_LIGHTGRAY, DINOGUI::Color(0.3f, 0.3f, 0.3f), DINOGUI::Color(0.1f, 0.1f, 0.1f), \
-}
-
-#define DINOGUI_THEME_LIGHT \
-{ \
-	DINOGUI::Color(0.0000f, 0.0000f, 0.0000f), DINOGUI::Color(0.8824f, 0.8824f, 0.8824f), DINOGUI::Color(0.6784f, 0.6784f, 0.6784f), \
-	DINOGUI::Color(0.0000f, 0.0000f, 0.0000f), DINOGUI::Color(0.8980f, 0.9451f, 0.9843f), DINOGUI::Color(0.0000f, 0.4706f, 0.8431f), \
-	DINOGUI::Color(0.0000f, 0.0000f, 0.0000f), DINOGUI::Color(0.8000f, 0.8941f, 0.9686f), DINOGUI::Color(0.0039f, 0.3373f, 0.6078f), \
+	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 0.3f, 0.3f, 0.3f }, DINOGUI::Color{ 0.1f, 0.1f, 0.1f }, \
+	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 0.99f, 0.4f, 0.4f }, DINOGUI::Color{ 0.1f, 0.1f, 0.1f }, \
+	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 0.3f, 0.3f, 0.3f }, DINOGUI::Color{ 0.1f, 0.1f, 0.1f }, \
 }
 
 #define DINOGUI_FONT_DEFAULT DINOGUI::Font{ 12.0f, "Segoe UI", DINOGUI::FontWeight::NORMAL }
@@ -54,10 +47,8 @@ struct Font
 
 struct Color
 {
-	Color(float red, float green, float blue) : r(red), g(green), b(blue), a(1.0f) {};
-	Color(float red, float green, float blue, float alpha) : r(red), g(green), b(blue), a(alpha) {};
-	D2D1_COLOR_F d2d1();
 	float r, g, b, a;
+	static D2D1_COLOR_F d2d1(Color c);
 };
 
 struct ColorTheme
@@ -66,6 +57,13 @@ struct ColorTheme
 	Color txt_h, bg_h, brd_h;
 	Color txt_c, bg_c, brd_c;
 };
+
+#define DINOGUI_THEME_LIGHT ColorTheme \
+{ \
+	Color{ 0.0000f, 0.0000f, 0.0000f }, Color{ 0.8824f, 0.8824f, 0.8824f }, Color{ 0.6784f, 0.6784f, 0.6784f }, \
+	Color{ 0.0000f, 0.0000f, 0.0000f }, Color{ 0.8980f, 0.9451f, 0.9843f }, Color{ 0.0000f, 0.4706f, 0.8431f }, \
+	Color{ 0.0000f, 0.0000f, 0.0000f }, Color{ 0.8000f, 0.8941f, 0.9686f }, Color{ 0.0039f, 0.3373f, 0.6078f } \
+}
 
 struct DPIHandler
 {
@@ -106,6 +104,8 @@ struct Event
 	float mouseX, mouseY;
 };
 
+// TODO: maybe create enum for possible color depths
+// template<enum class T, size_t S>
 template<typename T, size_t S>
 struct PixelBuffer
 {

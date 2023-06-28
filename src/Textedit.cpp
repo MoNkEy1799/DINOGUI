@@ -37,19 +37,19 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     switch (m_state)
     {
     case WidgetState::NORMAL:
-        background = toD2DColorF(Color(1.0f, 1.0f, 1.0f));
-        border = toD2DColorF(Color(0.2f, 0.2f, 0.2f));
+        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
+        border = toD2DColorF(Color{ 0.2f, 0.2f, 0.2f });
         text = toD2DColorF(m_theme.txt);
         break;
 
     case WidgetState::HOVER:
-        background = toD2DColorF(Color(1.0f, 1.0f, 1.0f));
+        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
         border = toD2DColorF(m_theme.brd_h);
         text = toD2DColorF(m_theme.txt_h);
         break;
 
     case WidgetState::CLICKED:
-        background = toD2DColorF(Color(1.0f, 1.0f, 1.0f));
+        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
         border = toD2DColorF(m_theme.brd_c);
         text = toD2DColorF(m_theme.txt_c);
         break;
@@ -57,7 +57,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (m_selected)
     {
-        background = toD2DColorF(Color(1.0f, 1.0f, 1.0f));
+        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
         border = toD2DColorF(m_theme.brd_c);
         text = toD2DColorF(m_theme.txt);
     }

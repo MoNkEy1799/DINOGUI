@@ -38,14 +38,14 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     switch (m_state)
     {
     case WidgetState::NORMAL:
-        background = toD2DColorF(Color(1.0f, 1.0f, 1.0f));
-        border = toD2DColorF(Color(0.2f, 0.2f, 0.2f));
+        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
+        border = toD2DColorF(Color{ 0.2f, 0.2f, 0.2f });
         text = toD2DColorF(m_theme.txt);
         break;
 
     case WidgetState::HOVER:
         background = toD2DColorF(m_theme.bg_h);
-        border = toD2DColorF(Color(0.0f, 0.4706f, 0.8431f));
+        border = toD2DColorF(Color{ 0.0f, 0.4706f, 0.8431f });
         text = toD2DColorF(m_theme.txt_h);
         break;
 
