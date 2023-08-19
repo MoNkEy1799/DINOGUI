@@ -12,7 +12,7 @@ using namespace DINOGUI;
 
 D2D1_COLOR_F Color::d2d1(Color c)
 {
-	return D2D1::ColorF(c.r, c.g, c.b, c.a);
+	return D2D1::ColorF(c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, c.a / 255.0f);
 }
 
 float DPIHandler::m_scale = 1.0f;
@@ -85,11 +85,6 @@ void Timer::timerFunction(HWND, uint32_t, uint64_t classPtr, DWORD)
 {
 	Timer* self = (Timer*)classPtr;
 	self->callback();
-}
-
-D2D1_COLOR_F DINOGUI::toD2DColorF(const Color& color)
-{
-	return D2D1::ColorF(color.r, color.g, color.b, color.a);
 }
 
 std::wstring DINOGUI::toWideString(const std::string& string)

@@ -1,10 +1,10 @@
 #include "src/Dinogui.h"
 #include <Windows.h>
 
-void testClickFunc(DINOGUI::Image* image)
+void testClickFunc(DINOGUI::Widget* wid)
 {
 	std::cout << "Button clicked" << std::endl;
-	image->show();
+	std::cout << ((DINOGUI::Textedit*)wid)->getText() << std::endl;
 }
 
 int main()
@@ -21,10 +21,12 @@ int main()
 	checkbox->place(190, 50);
 	textedit->place(300, 50);
 	image->place(100, 100);
-	image->loadPixelData();
-	image->setSize(128, 12);
+	image->createPixelBuffer(300, 212);
+	image->unlockBuffer();
+	image->fillBuffer({ 255, 255, 0 });
+	image->lockBuffer();
 
-	button->connect([image] { testClickFunc(image); });
+	button->connect([textedit] { testClickFunc(textedit); });
 
 	core->run();
 

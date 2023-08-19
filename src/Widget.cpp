@@ -209,17 +209,18 @@ bool Widget::createFontFormat()
     {
         return false;
     }
-
     if (!SUCCEEDED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER)))
     {
         return false;
     }
-
     if (!SUCCEEDED(m_fontFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER)))
     {
         return false;
     }
-
+    if (!SUCCEEDED(m_fontFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP)))
+    {
+        return false;
+    }
     return true;
 }
 

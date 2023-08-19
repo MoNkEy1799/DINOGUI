@@ -15,8 +15,6 @@ Checkbox::Checkbox(Core* core, const std::string& text)
 {
     m_type = WidgetType::CHECKBOX;
     m_text = text;
-    m_drawBackground = false;
-    m_drawBorder = false;
     m_size = { 80.0f, 20.0f };
 }
 
@@ -28,31 +26,31 @@ void Checkbox::setSize(int width, int height)
 
 void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    drawBasicShape(renderTarget, brush);
-    D2D1_COLOR_F background = toD2DColorF(m_theme.bg);
-    D2D1_COLOR_F border = toD2DColorF(m_theme.brd);
-    D2D1_COLOR_F text = toD2DColorF(m_theme.txt);
+    //drawBasicShape(renderTarget, brush);
+    D2D1_COLOR_F background = Color::d2d1(m_theme.bg);
+    D2D1_COLOR_F border = Color::d2d1(m_theme.brd);
+    D2D1_COLOR_F text = Color::d2d1(m_theme.txt);
     D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
     D2D1_RECT_F boxRect = DPIHandler::adjusted(currentBoxRect());
 
     switch (m_state)
     {
     case WidgetState::NORMAL:
-        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
-        border = toD2DColorF(Color{ 0.2f, 0.2f, 0.2f });
-        text = toD2DColorF(m_theme.txt);
+        background = Color::d2d1(Color{ 255, 255, 255 });
+        border = Color::d2d1(Color{ 51, 51, 51 });
+        text = Color::d2d1(m_theme.txt);
         break;
 
     case WidgetState::HOVER:
-        background = toD2DColorF(m_theme.bg_h);
-        border = toD2DColorF(Color{ 0.0f, 0.4706f, 0.8431f });
-        text = toD2DColorF(m_theme.txt_h);
+        background = Color::d2d1(m_theme.bg_h);
+        border = Color::d2d1(Color{ 0, 120, 215 });
+        text = Color::d2d1(m_theme.txt_h);
         break;
 
     case WidgetState::CLICKED:
-        background = toD2DColorF(m_theme.bg_c);
-        border = toD2DColorF(m_theme.brd_c);
-        text = toD2DColorF(m_theme.txt_c);
+        background = Color::d2d1(m_theme.bg_c);
+        border = Color::d2d1(m_theme.brd_c);
+        text = Color::d2d1(m_theme.txt_c);
         break;
     }
 
@@ -90,6 +88,11 @@ void Checkbox::place(int x, int y)
 void Checkbox::clicked(float mouseX, float mouseY)
 {
     m_check = !m_check;
+}
+
+bool DINOGUI::Checkbox::isChecked()
+{
+    return m_check;
 }
 
 std::array<D2D1_POINT_2F, 3> Checkbox::currentCheckbox()

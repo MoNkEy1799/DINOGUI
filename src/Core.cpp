@@ -179,7 +179,7 @@ void Core::paintWidgets()
     PAINTSTRUCT painStruct;
     BeginPaint(m_windowHandle, &painStruct);
     m_renderTarget->BeginDraw();
-    m_renderTarget->Clear(toD2DColorF(DINOCOLOR_WINDOW_LIGHT));
+    m_renderTarget->Clear(Color::d2d1(DINOCOLOR_WINDOW_LIGHT));
     m_renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
     for (Widget* widget : m_displayWidgets)

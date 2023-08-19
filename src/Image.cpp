@@ -12,7 +12,8 @@
 using namespace DINOGUI;
 
 Image::Image(Core* core, const std::string& filename)
-    : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr)
+    : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr), m_wicLock(nullptr),
+      m_buffer(nullptr), m_bufferWidth(0), m_bufferHeight(0)
 {
     m_type = WidgetType::IMAGE;
     m_drawBorder = true;
@@ -27,6 +28,7 @@ Image::~Image()
 {
     safeReleaseInterface(&m_drawingBitmap);
     safeReleaseInterface(&m_wicBitmap);
+    safeReleaseInterface(&m_wicLock);
 }
 
 void Image::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
@@ -71,30 +73,56 @@ void Image::loadImageFromFile(const std::string& filename)
     safeReleaseInterface(&converter);
 }
 
-void Image::loadPixelData()
+void DINOGUI::Image::createPixelBuffer(int width, int height)
 {
-    uint32_t buffer[1536 * 4] = { 0 };
+    m_bufferWidth = width;
+    m_bufferHeight = height;
+    uint32_t* buffer = new uint32_t[width * height] { 0 };
+    throwIfFailed(m_core->getImageFactory()->CreateBitmapFromMemory(width, height, GUID_WICPixelFormat32bppPRGBA,
+        width * 4, width * height * 4, (byte*)buffer, &m_wicBitmap));
+    setSize(width, height);
+    delete[] buffer;
+}
 
-    for (size_t i = 0; i < 1536; i++)
+void DINOGUI::Image::fillBuffer(Color color)
+{
+    if (!m_buffer)
     {
-        buffer[i * 4] = 0xff0000ff;
-        buffer[i * 4 + 1] = 0xff00ff00;
-        buffer[i * 4 + 2] = 0xffff0000;
-        buffer[i * 4 + 3] = 0xff000000;
-    }
-
-    if (FAILED(m_core->getImageFactory()->CreateBitmapFromMemory(
-        128,
-        12,
-        GUID_WICPixelFormat32bppPRGBA,
-        128*4,
-        1536*4,
-        (byte*)&buffer,
-        &m_wicBitmap
-    )))
-    {
-        DEBUG_PRINT("nope");
         return;
     }
-    DEBUG_PRINT("YES!");
+    
+    for (int pos = 0; pos < m_bufferWidth * m_bufferHeight; pos++)
+    {
+        m_buffer[pos * 4 + 0] = (byte)color.r;
+        m_buffer[pos * 4 + 1] = (byte)color.g;
+        m_buffer[pos * 4 + 2] = (byte)color.b;
+        m_buffer[pos * 4 + 3] = (byte)color.a;
+    }
+}
+
+void DINOGUI::Image::setPixel(Color color, size_t pos)
+{
+    if (!m_buffer)
+    {
+        return;
+    }
+
+    m_buffer[pos * 4 + 0] = (byte)color.r;
+    m_buffer[pos * 4 + 1] = (byte)color.g;
+    m_buffer[pos * 4 + 2] = (byte)color.b;
+    m_buffer[pos * 4 + 3] = (byte)color.a;
+}
+
+void DINOGUI::Image::lockBuffer()
+{
+    m_buffer = nullptr;
+    safeReleaseInterface(&m_wicLock);
+}
+
+void DINOGUI::Image::unlockBuffer()
+{
+    WICRect wicRect = { 0, 0, m_bufferWidth, m_bufferHeight };
+    uint32_t bufferSize;
+    m_wicBitmap->Lock(&wicRect, WICBitmapLockWrite, &m_wicLock);
+    m_wicLock->GetDataPointer(&bufferSize, &m_buffer);
 }

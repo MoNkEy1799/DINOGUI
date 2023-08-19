@@ -204,6 +204,8 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override;
 
+	bool isChecked();
+
 private:
 	D2D1_POINT_2F m_boxPoint, m_textPoint;
 	D2D1_SIZE_F m_boxSize, m_textSize;
@@ -229,6 +231,8 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override;
 	void unselect();
+
+	std::string getText();
 
 	void keyInput(char key);
 	void otherKeys(uint32_t key);
@@ -267,11 +271,18 @@ public:
 	void clicked(float mouseX, float mouseY) override {};
 
 	void loadImageFromFile(const std::string& filename);
-	void loadPixelData();
+	void createPixelBuffer(int width, int height);
+	void fillBuffer(Color color);
+	void setPixel(Color color, size_t pos);
+	void lockBuffer();
+	void unlockBuffer();
 
 private:
 	ID2D1Bitmap* m_drawingBitmap;
 	IWICBitmap* m_wicBitmap;
+	IWICBitmapLock* m_wicLock;
+	byte* m_buffer;
+	int m_bufferWidth, m_bufferHeight;
 };
 
 }

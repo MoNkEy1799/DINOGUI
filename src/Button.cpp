@@ -16,6 +16,8 @@ Button::Button(Core* core, const std::string& text, std::function<void()> functi
     m_text = text;
     m_drawBackground = true;
     m_drawBorder = true;
+
+    std::cout << m_theme.bg.b << std::endl;
 }
 
 void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)

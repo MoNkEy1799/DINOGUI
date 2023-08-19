@@ -37,29 +37,29 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     switch (m_state)
     {
     case WidgetState::NORMAL:
-        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
-        border = toD2DColorF(Color{ 0.2f, 0.2f, 0.2f });
-        text = toD2DColorF(m_theme.txt);
+        background = Color::d2d1(Color{ 255, 255, 255 });
+        border = Color::d2d1(Color{ 51, 51, 51 });
+        text = Color::d2d1(m_theme.txt);
         break;
 
     case WidgetState::HOVER:
-        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
-        border = toD2DColorF(m_theme.brd_h);
-        text = toD2DColorF(m_theme.txt_h);
+        background = Color::d2d1(Color{ 255, 255, 255 });
+        border = Color::d2d1(m_theme.brd_h);
+        text = Color::d2d1(m_theme.txt_h);
         break;
 
     case WidgetState::CLICKED:
-        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
-        border = toD2DColorF(m_theme.brd_c);
-        text = toD2DColorF(m_theme.txt_c);
+        background = Color::d2d1(Color{ 255, 255, 255 });
+        border = Color::d2d1(m_theme.brd_c);
+        text = Color::d2d1(m_theme.txt_c);
         break;
     }
 
     if (m_selected)
     {
-        background = toD2DColorF(Color{ 1.0f, 1.0f, 1.0f });
-        border = toD2DColorF(m_theme.brd_c);
-        text = toD2DColorF(m_theme.txt);
+        background = Color::d2d1(Color{ 255, 255, 255 });
+        border = Color::d2d1(m_theme.brd_c);
+        text = Color::d2d1(m_theme.txt);
     }
 
     if (m_drawBackground)
@@ -90,11 +90,11 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     }
 
     brush->SetColor(text);
-    renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, textRect, brush);
+    renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, textRect, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
     
     if (m_drawCursor)
     {
-        brush->SetColor(toD2DColorF(m_theme.txt));
+        brush->SetColor(Color::d2d1(m_theme.txt));
         D2D1_RECT_F rec = DPIHandler::adjusted(currentCursorLine());
         renderTarget->DrawLine({ rec.left, rec.top }, { rec.right, rec.bottom }, brush);
     }
@@ -129,6 +129,11 @@ void Textedit::unselect()
     m_state = WidgetState::NORMAL;
     m_core->setSelectedWidget(nullptr);
     m_core->redrawScreen();
+}
+
+std::string DINOGUI::Textedit::getText()
+{
+    return m_text;
 }
 
 void Textedit::keyInput(char key)
@@ -199,6 +204,8 @@ uint32_t Textedit::getCursorPosition(float x)
 
     float width = currentTextRect().left;
     size_t pos = 0;
+    // this will always set the cursor behind the next char and not to the closest "gap"
+    // prob fix by checking if x is <= width + charWidth / 2
     do
     {
         if (x <= width)

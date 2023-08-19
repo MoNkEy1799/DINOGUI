@@ -8,17 +8,17 @@
 #include <iostream>
 #include <functional>
 
-#define DINOCOLOR_WINDOW_DARK DINOGUI::Color{ 0.1412f, 0.1451f, 0.1804f }
-#define DINOCOLOR_WINDOW_LIGHT DINOGUI::Color{ 0.9412f, 0.9412f, 0.9412f }
+#define DINOCOLOR_WINDOW_DARK DINOGUI::Color{ 36, 37, 46 }
+#define DINOCOLOR_WINDOW_LIGHT DINOGUI::Color{ 240, 240, 240 }
 
-#define DINOCOLOR_LIGHTGRAY DINOGUI::Color{ 0.7f, 0.7f, 0.7f, 1.0f }
+#define DINOCOLOR_LIGHTGRAY DINOGUI::Color{ 178, 178, 178 }
 
 
 #define DINOGUI_THEME_DARK \
 { \
-	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 0.3f, 0.3f, 0.3f }, DINOGUI::Color{ 0.1f, 0.1f, 0.1f }, \
-	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 0.99f, 0.4f, 0.4f }, DINOGUI::Color{ 0.1f, 0.1f, 0.1f }, \
-	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 0.3f, 0.3f, 0.3f }, DINOGUI::Color{ 0.1f, 0.1f, 0.1f }, \
+	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 76, 76, 76 }, DINOGUI::Color{ 25, 25, 25 }, \
+	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 253, 102, 102 }, DINOGUI::Color{ 25, 25, 25 }, \
+	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 76, 76, 76 }, DINOGUI::Color{ 25, 25, 25 }, \
 }
 
 #define DINOGUI_FONT_DEFAULT DINOGUI::Font{ 12.0f, "Segoe UI", DINOGUI::FontWeight::NORMAL }
@@ -47,7 +47,7 @@ struct Font
 
 struct Color
 {
-	float r, g, b, a;
+	int r, g, b, a = 255;
 	static D2D1_COLOR_F d2d1(Color c);
 };
 
@@ -60,9 +60,9 @@ struct ColorTheme
 
 #define DINOGUI_THEME_LIGHT ColorTheme \
 { \
-	Color{ 0.0000f, 0.0000f, 0.0000f }, Color{ 0.8824f, 0.8824f, 0.8824f }, Color{ 0.6784f, 0.6784f, 0.6784f }, \
-	Color{ 0.0000f, 0.0000f, 0.0000f }, Color{ 0.8980f, 0.9451f, 0.9843f }, Color{ 0.0000f, 0.4706f, 0.8431f }, \
-	Color{ 0.0000f, 0.0000f, 0.0000f }, Color{ 0.8000f, 0.8941f, 0.9686f }, Color{ 0.0039f, 0.3373f, 0.6078f } \
+	Color{ 0, 0, 0 }, Color{ 225, 225, 225 }, Color{ 173, 173, 173 }, \
+	Color{ 0, 0, 0 }, Color{ 229, 241, 251 }, Color{ 0, 120, 215 }, \
+	Color{ 0, 0, 0 }, Color{ 204, 228, 247 }, Color{ 1, 86, 155 } \
 }
 
 struct DPIHandler
@@ -104,32 +104,6 @@ struct Event
 	float mouseX, mouseY;
 };
 
-// TODO: maybe create enum for possible color depths
-// template<enum class T, size_t S>
-template<typename T, size_t S>
-struct PixelBuffer
-{
-	PixelBuffer(uint32_t width, uint32_t height) : m_width(width), m_height(height) {};
-	void fillBuffer(T value)
-	{
-
-	}
-	void insertPixel(T value, size_t position)
-	{
-
-	}
-
-private:
-	uint32_t m_width, m_height;
-	std::array<T, S> m_buffer;
-
-	static T invertByteOrder(T value)
-	{
-
-	}
-};
-
-D2D1_COLOR_F toD2DColorF(const DINOGUI::Color& color);
 std::wstring toWideString(const std::string& string);
 void throwIfFailed(HRESULT result, const std::string& message = "");
 void throwIfFailed(bool result, const std::string& message = "");
