@@ -231,6 +231,7 @@ bool Widget::hoverableWidget(const WidgetType& type)
     case WidgetType::NONE:
     case WidgetType::LABEL:
     case WidgetType::IMAGE:
+    case WidgetType::CANVAS:
         return false;
     }
     return true;
@@ -257,6 +258,7 @@ bool Widget::selectableWidget(const WidgetType& type)
     case WidgetType::LABEL:
     case WidgetType::CHECKBOX:
     case WidgetType::IMAGE:
+    case WidgetType::CANVAS:
         return false;
     }
     return true;

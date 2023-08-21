@@ -29,7 +29,7 @@ class Checkbox;
 class Textedit;
 class Image;
 enum class WidgetState { NORMAL, HOVER, CLICKED };
-enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE };
+enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS };
 
 class Core : public TemplateWindow<Core>
 {
@@ -271,11 +271,36 @@ public:
 	void clicked(float mouseX, float mouseY) override {};
 
 	void loadImageFromFile(const std::string& filename);
-	void createPixelBuffer(int width, int height);
-	void fillBuffer(Color color);
-	void setPixel(Color color, size_t pos);
-	void lockBuffer();
-	void unlockBuffer();
+
+private:
+	ID2D1Bitmap* m_drawingBitmap;
+	IWICBitmap* m_wicBitmap;
+	uint32_t m_imageWidth, m_imageHeight;
+};
+
+class Canvas : public Widget
+{
+public:
+	Canvas(Core* core, int width = 100, int height = 100, Color fillColor = { 255, 255, 255 });
+	~Canvas();
+	Canvas(const Canvas&) = delete;
+	Canvas(Canvas&&) = delete;
+	Canvas& operator=(const Canvas&) = delete;
+	Canvas& operator=(Canvas&&) = delete;
+
+	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void place(int x, int y) override;
+	void clicked(float mouseX, float mouseY) override {};
+
+	void fill(Color color, bool autoLock = true);
+	void setPixel(Color color, size_t pos, bool autoLock = true);
+	void drawLine(int xa, int ya, int xb, int yb, Color color, bool autoLock = true);
+	void drawRectangle(int xa, int ya, int xb, int yb, Color color, bool autoLock = true);
+	void drawTriangle();
+	void drawCircle(int x, int y, int r, Color color, bool autoLock = true);
+	void drawEllipse(int x, int y, int ra, int rb, Color color, bool autoLock = true);
+	void lock();
+	void unlock();
 
 private:
 	ID2D1Bitmap* m_drawingBitmap;
@@ -283,6 +308,8 @@ private:
 	IWICBitmapLock* m_wicLock;
 	byte* m_buffer;
 	int m_bufferWidth, m_bufferHeight;
+
+	void createPixelBuffer();
 };
 
 }
