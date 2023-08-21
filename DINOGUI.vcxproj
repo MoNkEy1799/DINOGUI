@@ -132,7 +132,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Example.cpp" />
+    <ClCompile Include="examples\Mandelbrot.cpp" />
+    <ClCompile Include="Test.cpp" />
     <ClCompile Include="src\Button.cpp" />
     <ClCompile Include="src\Canvas.cpp" />
     <ClCompile Include="src\Checkbox.cpp" />

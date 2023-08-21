@@ -310,6 +310,7 @@ private:
 	int m_bufferWidth, m_bufferHeight;
 
 	void createPixelBuffer();
+	void checkBounds(int& n);
 };
 
 }

@@ -245,6 +245,7 @@ bool Widget::clickableWidget(const WidgetType& type)
     case WidgetType::LABEL:
     case WidgetType::TEXTEDIT:
     case WidgetType::IMAGE:
+    case WidgetType::CANVAS:
         return false;
     }
     return true;

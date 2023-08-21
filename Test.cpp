@@ -7,7 +7,7 @@ void testClickFunc(DINOGUI::Widget* wid)
 	std::cout << ((DINOGUI::Textedit*)wid)->getText() << std::endl;
 }
 
-int main()
+int m()
 {
 	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 600, 600);
 	DINOGUI::Button* button = new DINOGUI::Button(core, "Button");
@@ -15,7 +15,7 @@ int main()
 	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(core, "Checkbox");
 	DINOGUI::Textedit* textedit = new DINOGUI::Textedit(core);
 	DINOGUI::Image* image = new DINOGUI::Image(core, "Dino.png");
-	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core);
+	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, 300, 300);
 
 	button->place(50, 50);
 	label->place(120, 50);
@@ -23,11 +23,10 @@ int main()
 	textedit->place(300, 50);
 	image->place(50, 100);
 	canvas->place(180, 100);
-	Random r;
-	for (int i = 0; i < 100*100; i++)
-	{
-		canvas->setPixel({ r.randInt(50, 255), r.randInt(50, 255) , r.randInt(50, 255) }, i);
-	}
+	canvas->fill({ 0, 255, 255 });
+	canvas->drawRectangle(-10, -10, 40, 40, { 0, 255, 0 });
+	canvas->drawEllipse(-20, 100, 90, 40, { 0, 0, 255 });
+	canvas->drawCircle(240, 240, 24, { 255, 0, 0 });
 
 	button->connect([textedit] { testClickFunc(textedit); });
 
