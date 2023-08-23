@@ -2,39 +2,47 @@
 
 #include <complex>
 
-int iteration(std::complex<double> c)
+int mandelbrot(double real, double imag, int maxIter = 150)
 {
-	std::complex<double> start(0.0, 0.0);
-	for (int i = 10; i > 0; i--)
+	double zReal = real;
+	double zImag = imag;
+	for (int i = maxIter; i > 0; i--)
 	{
-		start += std::pow(start, 2) + c;
-		if (std::abs(start) > 2)
+		double realSq = zReal * zReal;
+		double imagSq = zImag * zImag;
+		if (realSq + imagSq > 4.0)
 		{
 			return i;
 		}
+		zImag = 2.0 * zReal * zImag + imag;
+		zReal = realSq - imagSq + real;
 	}
 	return 0;
 }
 
-int main()
+int runMandelbrot()
 {
-	int scale = 400;
-	DINOGUI::Core* core = new DINOGUI::Core("Mandelbrot", scale * 3, scale * 2);
+	int scale = 300;
+	DINOGUI::Core* core = new DINOGUI::Core("Mandelbrot", 900, 600);
 	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, scale * 3, scale * 2);
 	canvas->place(0, 0);
 	canvas->unlock();
 
-	for (int real = 0; real < scale * 3; real++)
+	for (int x = 0; x < scale * 3; x++)
 	{
-		std::cout << "\r" << (int)(real / (scale * 3.0) * 100) << "%";
-		for (int imag = 0; imag < scale * 2; imag++)
+		std::cout << "\r" << (int)(x / (scale * 3.0) * 100) << "%";
+		for (int y = 0; y < scale * 2; y++)
 		{
-			int iter = iteration(std::complex<double>(real / (double)scale - 2.0, imag / (double)scale - 1.0));
-			canvas->setPixel({ iter, iter, iter }, imag * scale * 3 + real, false);
+			double real = x / (double)scale - 2.0;
+			double imag = y / (double)scale - 1.0;
+			int iter = mandelbrot(real, imag);
+			canvas->setPixel({ iter, iter, iter }, (size_t)y * scale * 3 + x, false);
 		}
 	}
 
 	canvas->lock();
 	core->run();
+
+	return 0;
 }
 

@@ -12,7 +12,7 @@
 using namespace DINOGUI;
 
 Image::Image(Core* core, const std::string& filename)
-    : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr)
+    : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr), m_imageWidth(0), m_imageHeight(0)
 {
     m_type = WidgetType::IMAGE;
     m_drawBorder = true;
@@ -71,5 +71,4 @@ void Image::loadImageFromFile(const std::string& filename)
     safeReleaseInterface(&decoder);
     safeReleaseInterface(&frameDecode);
     safeReleaseInterface(&converter);
-
 }

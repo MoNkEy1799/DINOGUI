@@ -45,6 +45,11 @@ struct Font
 	FontWeight weight;
 };
 
+struct Point
+{
+	float x, y;
+};
+
 struct Color
 {
 	int r, g, b, a = 255;
@@ -71,6 +76,7 @@ struct DPIHandler
 	static float PixelsToDips(float f);
 	static D2D1_POINT_2F adjusted(D2D1_POINT_2F point);
 	static D2D1_RECT_F adjusted(D2D1_RECT_F rect);
+	static float getScale();
 
 private:
     static float m_scale;

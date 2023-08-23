@@ -28,6 +28,7 @@ class Label;
 class Checkbox;
 class Textedit;
 class Image;
+class Canvas;
 enum class WidgetState { NORMAL, HOVER, CLICKED };
 enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS };
 
@@ -293,12 +294,13 @@ public:
 	void clicked(float mouseX, float mouseY) override {};
 
 	void fill(Color color, bool autoLock = true);
+	void setPixel(Color color, int x, int y, bool autoLock = true);
 	void setPixel(Color color, size_t pos, bool autoLock = true);
-	void drawLine(int xa, int ya, int xb, int yb, Color color, bool autoLock = true);
-	void drawRectangle(int xa, int ya, int xb, int yb, Color color, bool autoLock = true);
-	void drawTriangle();
-	void drawCircle(int x, int y, int r, Color color, bool autoLock = true);
-	void drawEllipse(int x, int y, int ra, int rb, Color color, bool autoLock = true);
+	void drawLine(Point p1, Point p2, Color color, bool autoLock = true);
+	void drawRectangle(Point p1, Point p2, Color color, bool autoLock = true);
+	void drawTriangle(Point p1, Point p2, Point p3, Color color, bool autoLock = true);
+	void drawCircle(Point p, int r, Color color, bool autoLock = true);
+	void drawEllipse(Point p, int ra, int rb, Color color, bool autoLock = true);
 	void lock();
 	void unlock();
 
@@ -310,7 +312,14 @@ private:
 	int m_bufferWidth, m_bufferHeight;
 
 	void createPixelBuffer();
-	void checkBounds(int& n);
+	void setColor(Color color, size_t pos);
+	void checkBounds(int& n) const;
+	int bytePosFromXY(int x, int y) const;
+
+	static void swap(int* a, int* b);
+	static void swap(Point a, Point b);
+	static float frac(float a);
+	static float rfrac(float a);
 };
 
 }

@@ -146,6 +146,10 @@ int Core::createFactoryAndDPI()
     }
 
     DPIHandler::Initialize(m_windowHandle);
+    if (!SetWindowPos(m_windowHandle, nullptr, 0, 0, m_width * DPIHandler::getScale(), m_height * DPIHandler::getScale(), SWP_NOMOVE))
+    {
+        return -1;
+    }
     return 0;
 }
 
