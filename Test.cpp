@@ -28,7 +28,7 @@ int main()
 	canvas->drawEllipse({ -20, 100 }, 90, 40, { 0, 0, 255 });
 	canvas->drawCircle({ 240, 240 }, 24, { 255, 0, 0 });
 	canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });
-	canvas->drawTriangle({ 10, 10 }, { 20, 20 }, { 30, 30 }, { 255, 0, 255 });
+	canvas->drawTriangle({ 250, 60 }, { 280, 200 }, { 200, 70 }, { 255, 0, 255 });
 
 	button->connect([textedit] { testClickFunc(textedit); });
 

@@ -11,7 +11,7 @@
 
 using namespace DINOGUI;
 
-Canvas::Canvas(Core* core, int width, int height, Color fillColor)
+Canvas::Canvas(Core* core, int width, int height, const Color& fillColor)
     : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr), m_wicLock(nullptr),
       m_buffer(nullptr), m_bufferWidth(width), m_bufferHeight(height)
 {
@@ -48,41 +48,7 @@ void Canvas::place(int x, int y)
     basicPlace(x, y);
 }
 
-void Canvas::createPixelBuffer()
-{
-    uint32_t* buffer = new uint32_t[m_bufferWidth * m_bufferHeight]{ 0 };
-    throwIfFailed(m_core->getImageFactory()->CreateBitmapFromMemory(m_bufferWidth, m_bufferHeight, GUID_WICPixelFormat32bppPRGBA,
-        m_bufferWidth * 4, m_bufferWidth * m_bufferHeight * 4, (byte*)buffer, &m_wicBitmap));
-    setSize(m_bufferWidth, m_bufferHeight);
-    delete[] buffer;
-}
-
-void Canvas::setColor(Color color, size_t bytePos)
-{
-    m_buffer[bytePos + 0] = (byte)color.r;
-    m_buffer[bytePos + 1] = (byte)color.g;
-    m_buffer[bytePos + 2] = (byte)color.b;
-    m_buffer[bytePos + 3] = (byte)color.a;
-}
-
-void Canvas::checkBounds(int& n) const
-{
-    if (n < 0)
-    {
-        n = 0;
-    }
-    else if (n > m_bufferWidth)
-    {
-        n = m_bufferWidth;
-    }
-}
-
-int Canvas::bytePosFromXY(int x, int y) const
-{
-    return (y * m_bufferWidth + x) * 4;
-}
-
-void Canvas::fill(Color color, bool autoLock)
+void Canvas::fill(const Color& color, bool autoLock)
 {
     if (autoLock)
     {
@@ -104,7 +70,7 @@ void Canvas::fill(Color color, bool autoLock)
     }
 }
 
-void Canvas::setPixel(Color color, int x, int y, bool autoLock)
+void Canvas::setPixel(const Color& color, int x, int y, bool autoLock)
 {
     if (autoLock)
     {
@@ -123,7 +89,7 @@ void Canvas::setPixel(Color color, int x, int y, bool autoLock)
     }
 }
 
-void Canvas::setPixel(Color color, size_t pos, bool autoLock)
+void Canvas::setPixel(const Color& color, size_t pos, bool autoLock)
 {
     if (autoLock)
     {
@@ -142,7 +108,7 @@ void Canvas::setPixel(Color color, size_t pos, bool autoLock)
     }
 }
 
-void Canvas::drawLine(Point p1, Point p2, Color color, bool autoLock)
+void Canvas::drawLine(Point p1, Point p2, const Color& color, bool autoLock)
 {
     if (autoLock)
     {
@@ -153,26 +119,26 @@ void Canvas::drawLine(Point p1, Point p2, Color color, bool autoLock)
         return;
     }
 
-    int xa = p1.x;
-    int ya = p1.y;
-    int xb = p2.x;
-    int yb = p2.y;
+    int xa = (int)p1.x;
+    int ya = (int)p1.y;
+    int xb = (int)p2.x;
+    int yb = (int)p2.y;
     bool steep = std::abs(yb - ya) > std::abs(xb - xa);
     if (steep)
     {
-        swap(&xa, &ya);
-        swap(&xb, &yb);
+        swap(xa, ya);
+        swap(xb, yb);
     }
     if (xa > xb)
     {
-        swap(&xa, &xb);
-        swap(&ya, &yb);
+        swap(xa, xb);
+        swap(ya, yb);
     }
 
-    float dx = xb - xa;
-    float dy = yb - ya;
+    float dx = (float)xb - xa;
+    float dy = (float)yb - ya;
     float grad = dy / dx;
-    float yInter = ya;
+    float yInter = (float)ya;
     if (dx == 0.0f)
     {
         grad = 1.0f;
@@ -184,16 +150,12 @@ void Canvas::drawLine(Point p1, Point p2, Color color, bool autoLock)
         {
             setColor(color, bytePosFromXY((int)yInter, x));
             setColor(color, bytePosFromXY((int)yInter - 1, x));
-            m_buffer[bytePosFromXY((int)yInter, x) + 3] = rfrac(yInter);
-            m_buffer[bytePosFromXY((int)yInter - 1, x) + 3] = frac(yInter);
             yInter += grad;
         }
         else
         {
             setColor(color, bytePosFromXY(x, (int)yInter));
             setColor(color, bytePosFromXY(x, (int)yInter - 1));
-            m_buffer[bytePosFromXY(x, (int)yInter) + 3] = rfrac(yInter);
-            m_buffer[bytePosFromXY(x, (int)yInter - 1) + 3] = frac(yInter);
             yInter += grad;
         }
     }
@@ -204,7 +166,7 @@ void Canvas::drawLine(Point p1, Point p2, Color color, bool autoLock)
     }
 }
 
-void Canvas::drawRectangle(Point p1, Point p2, Color color, bool autoLock)
+void Canvas::drawRectangle(Point p1, Point p2, const Color& color, bool autoLock)
 {
     if (autoLock)
     {
@@ -218,23 +180,23 @@ void Canvas::drawRectangle(Point p1, Point p2, Color color, bool autoLock)
     int xmin, xmax, ymin, ymax;
     if (p1.x < p2.x)
     {
-        xmin = p1.x;
-        xmax = p2.x;
+        xmin = (int)p1.x;
+        xmax = (int)p2.x;
     }
     else
     {
-        xmin = p2.x;
-        xmax = p1.x;
+        xmin = (int)p2.x;
+        xmax = (int)p1.x;
     }
     if (p1.y < p2.y)
     {
-        ymin = p1.y;
-        ymax = p2.y;
+        ymin = (int)p1.y;
+        ymax = (int)p2.y;
     }
     else
     {
-        ymin = p2.y;
-        ymax = p1.y;
+        ymin = (int)p2.y;
+        ymax = (int)p1.y;
     }
     checkBounds(xmin);
     checkBounds(xmax);
@@ -255,7 +217,7 @@ void Canvas::drawRectangle(Point p1, Point p2, Color color, bool autoLock)
     }
 }
 
-void Canvas::drawTriangle(Point p1, Point p2, Point p3, Color color, bool autoLock)
+void Canvas::drawTriangle(Point p1, Point p2, Point p3, const Color& color, bool autoLock)
 {
     if (autoLock)
     {
@@ -298,9 +260,20 @@ void Canvas::drawTriangle(Point p1, Point p2, Point p3, Color color, bool autoLo
         }
     }
 
-    std::cout << "P1: " << p1.x << " | " << p1.y << std::endl;
-    std::cout << "P2: " << p2.x << " | " << p2.y << std::endl;
-    std::cout << "P3: " << p3.x << " | " << p3.y << std::endl;
+    if (p2.y == p3.y)
+    {
+        fillBottomTriangle(p1, p2, p3, color);
+    }
+    else if (p1.y == p2.y)
+    {
+        fillTopTriangle(p1, p2, p3, color);
+    }
+    else
+    {
+        Point p4 = { p1.x + (p2.y - p1.y) / (p3.y - p1.y) * (p3.x - p1.x), p2.y };
+        fillBottomTriangle(p1, p2, p4, color);
+        fillTopTriangle(p2, p4, p3, color);
+    }
 
     if (autoLock)
     {
@@ -308,12 +281,12 @@ void Canvas::drawTriangle(Point p1, Point p2, Point p3, Color color, bool autoLo
     }
 }
 
-void Canvas::drawCircle(Point p, int r, Color color, bool autoLock)
+void Canvas::drawCircle(Point p, int r, const Color& color, bool autoLock)
 {
     drawEllipse(p, r, r, color, autoLock);
 }
 
-void Canvas::drawEllipse(Point p, int ra, int rb, Color color, bool autoLock)
+void Canvas::drawEllipse(Point p, int ra, int rb, const Color& color, bool autoLock)
 {
     if (autoLock)
     {
@@ -324,10 +297,10 @@ void Canvas::drawEllipse(Point p, int ra, int rb, Color color, bool autoLock)
         return;
     }
 
-    int xmin = p.x - ra;
-    int xmax = p.x + ra;
-    int ymin = p.y - rb;
-    int ymax = p.y + rb;
+    int xmin = (int)p.x - ra;
+    int xmax = (int)p.x + ra;
+    int ymin = (int)p.y - rb;
+    int ymax = (int)p.y + rb;
     checkBounds(xmin);
     checkBounds(xmax);
     checkBounds(ymin);
@@ -337,7 +310,7 @@ void Canvas::drawEllipse(Point p, int ra, int rb, Color color, bool autoLock)
     {
         for (int ys = ymin; ys <= ymax; ys++)
         {
-            float ellipse = std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2);
+            double ellipse = std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2);
             if (ellipse < 1)
             {
                 setColor(color, bytePosFromXY(xs, ys));
@@ -365,14 +338,92 @@ void Canvas::unlock()
     m_wicLock->GetDataPointer(&bufferSize, &m_buffer);
 }
 
-void Canvas::swap(int* a, int* b)
+void Canvas::createPixelBuffer()
 {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
+    uint32_t* buffer = new uint32_t[m_bufferWidth * m_bufferHeight]{ 0 };
+    throwIfFailed(m_core->getImageFactory()->CreateBitmapFromMemory(m_bufferWidth, m_bufferHeight, GUID_WICPixelFormat32bppPRGBA,
+        m_bufferWidth * 4, m_bufferWidth * m_bufferHeight * 4, (byte*)buffer, &m_wicBitmap));
+    setSize(m_bufferWidth, m_bufferHeight);
+    delete[] buffer;
 }
 
-void Canvas::swap(Point a, Point b)
+void Canvas::setColor(const Color& color, size_t bytePos)
+{
+    m_buffer[bytePos + 0] = (byte)color.r;
+    m_buffer[bytePos + 1] = (byte)color.g;
+    m_buffer[bytePos + 2] = (byte)color.b;
+    m_buffer[bytePos + 3] = (byte)color.a;
+}
+
+void Canvas::checkBounds(int& n) const
+{
+    if (n < 0)
+    {
+        n = 0;
+    }
+    else if (n > m_bufferWidth)
+    {
+        n = m_bufferWidth;
+    }
+}
+
+int Canvas::bytePosFromXY(int x, int y) const
+{
+    return (y * m_bufferWidth + x) * 4;
+}
+
+void Canvas::fillBottomTriangle(Point p1, Point p2, Point p3, const Color& color)
+{
+    if (p2.x > p3.x)
+    {
+        swap(p2, p3);
+    }
+    float grad1 = (p2.x - p1.x) / (p2.y - p1.y);
+    float grad2 = (p3.x - p1.x) / (p3.y - p1.y);
+    float x1 = p1.x;
+    float x2 = p1.x;
+
+    for (int y = p1.y; y <= p2.y; y++)
+    {
+        for (int x = (int)x1; x <= (int)x2; x++)
+        {
+            setColor(color, bytePosFromXY(x, y));
+        }
+        x1 += grad1;
+        x2 += grad2;
+    }
+}
+
+void Canvas::fillTopTriangle(Point p1, Point p2, Point p3, const Color& color)
+{
+    if (p1.x > p2.x)
+    {
+        swap(p1, p2);
+    }
+    float grad1 = (p3.x - p1.x) / (p3.y - p1.y);
+    float grad2 = (p3.x - p2.x) / (p3.y - p2.y);
+    float x1 = p3.x;
+    float x2 = p3.x;
+
+    for (int y = p3.y; y >= p1.y; y--)
+    {
+        for (int x = (int)x1; x <= (int)x2; x++)
+        {
+            setColor(color, bytePosFromXY(x, y));
+        }
+        x1 -= grad1;
+        x2 -= grad2;
+    }
+}
+
+void Canvas::swap(int& a, int& b)
+{
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+void Canvas::swap(Point& a, Point& b)
 {
     float temp = a.x;
     a.x = b.x;

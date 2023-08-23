@@ -282,7 +282,7 @@ private:
 class Canvas : public Widget
 {
 public:
-	Canvas(Core* core, int width = 100, int height = 100, Color fillColor = { 255, 255, 255 });
+	Canvas(Core* core, int width = 100, int height = 100, const Color& fillColor = { 255, 255, 255 });
 	~Canvas();
 	Canvas(const Canvas&) = delete;
 	Canvas(Canvas&&) = delete;
@@ -293,14 +293,14 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
 
-	void fill(Color color, bool autoLock = true);
-	void setPixel(Color color, int x, int y, bool autoLock = true);
-	void setPixel(Color color, size_t pos, bool autoLock = true);
-	void drawLine(Point p1, Point p2, Color color, bool autoLock = true);
-	void drawRectangle(Point p1, Point p2, Color color, bool autoLock = true);
-	void drawTriangle(Point p1, Point p2, Point p3, Color color, bool autoLock = true);
-	void drawCircle(Point p, int r, Color color, bool autoLock = true);
-	void drawEllipse(Point p, int ra, int rb, Color color, bool autoLock = true);
+	void fill(const Color& color, bool autoLock = true);
+	void setPixel(const Color& color, int x, int y, bool autoLock = true);
+	void setPixel(const Color& color, size_t pos, bool autoLock = true);
+	void drawLine(Point p1, Point p2, const Color& color, bool autoLock = true);
+	void drawRectangle(Point p1, Point p2, const Color& color, bool autoLock = true);
+	void drawTriangle(Point p1, Point p2, Point p3, const Color& color, bool autoLock = true);
+	void drawCircle(Point p, int r, const Color& color, bool autoLock = true);
+	void drawEllipse(Point p, int ra, int rb, const Color& color, bool autoLock = true);
 	void lock();
 	void unlock();
 
@@ -312,12 +312,15 @@ private:
 	int m_bufferWidth, m_bufferHeight;
 
 	void createPixelBuffer();
-	void setColor(Color color, size_t pos);
+	void setColor(const Color& color, size_t pos);
 	void checkBounds(int& n) const;
 	int bytePosFromXY(int x, int y) const;
 
-	static void swap(int* a, int* b);
-	static void swap(Point a, Point b);
+	void fillBottomTriangle(Point p1, Point p2, Point p3, const Color& color);
+	void fillTopTriangle(Point p1, Point p2, Point p3, const Color& color);
+
+	static void swap(int& a, int& b);
+	static void swap(Point& a, Point& b);
 	static float frac(float a);
 	static float rfrac(float a);
 };
