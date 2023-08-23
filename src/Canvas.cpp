@@ -16,7 +16,6 @@ Canvas::Canvas(Core* core, int width, int height, const Color& fillColor)
       m_buffer(nullptr), m_bufferWidth(width), m_bufferHeight(height)
 {
     m_type = WidgetType::CANVAS;
-    m_drawBorder = true;
     m_size = { (float)width, (float)height };
     createPixelBuffer();
 }
@@ -383,7 +382,7 @@ void Canvas::fillBottomTriangle(Point p1, Point p2, Point p3, const Color& color
     float x1 = p1.x;
     float x2 = p1.x;
 
-    for (int y = p1.y; y <= p2.y; y++)
+    for (int y = (int)p1.y; y <= p2.y; y++)
     {
         for (int x = (int)x1; x <= (int)x2; x++)
         {
@@ -405,7 +404,7 @@ void Canvas::fillTopTriangle(Point p1, Point p2, Point p3, const Color& color)
     float x1 = p3.x;
     float x2 = p3.x;
 
-    for (int y = p3.y; y >= p1.y; y--)
+    for (int y = (int)p3.y; y >= p1.y; y--)
     {
         for (int x = (int)x1; x <= (int)x2; x++)
         {

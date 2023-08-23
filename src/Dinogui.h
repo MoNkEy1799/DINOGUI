@@ -30,7 +30,7 @@ class Textedit;
 class Image;
 class Canvas;
 enum class WidgetState { NORMAL, HOVER, CLICKED };
-enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS };
+enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE };
 
 class Core : public TemplateWindow<Core>
 {
@@ -323,6 +323,26 @@ private:
 	static void swap(Point& a, Point& b);
 	static float frac(float a);
 	static float rfrac(float a);
+};
+
+class Table : public Widget
+{
+public:
+	Table(Core* core);
+	~Table();
+	Table(const Table&) = delete;
+	Table(Table&&) = delete;
+	Table& operator=(const Table&) = delete;
+	Table& operator=(Table&&) = delete;
+
+	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void place(int x, int y) override;
+	void clicked(float mouseX, float mouseY) override {};
+
+	void addCell(const std::string& text, int row, int col);
+
+private:
+	int m_rows, m_cols;
 };
 
 }

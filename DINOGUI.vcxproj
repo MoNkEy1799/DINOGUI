@@ -133,6 +133,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="examples\Mandelbrot.cpp" />
+    <ClCompile Include="src\Table.cpp" />
     <ClCompile Include="Test.cpp" />
     <ClCompile Include="src\Button.cpp" />
     <ClCompile Include="src\Canvas.cpp" />
