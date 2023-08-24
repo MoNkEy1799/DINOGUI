@@ -339,10 +339,11 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
 
-	void addCell(const std::string& text, int row, int col);
+	void setCell(const std::string& text, int row, int col);
 
 private:
 	int m_rows, m_cols;
+	std::vector<std::string> m_entries;
 };
 
 }

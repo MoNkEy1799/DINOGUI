@@ -31,8 +31,7 @@ void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
     {
         for (int col = 0; col < m_cols; col++)
         {
-            //render white boxes on gray background
-            // --> leave gaps of 1 px to make it look like dividing lines
+            brush->SetColor({ 255, 255, 255 });
         }
     }
 
@@ -43,4 +42,31 @@ void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
 void Table::place(int x, int y)
 {
     basicPlace(x, y);
+}
+
+void Table::setCell(const std::string& text, int row, int col)
+{
+    if (row + 1 > m_rows)
+    {
+        for (int i = m_rows - 1; i < row; i++)
+        {
+            for (int j = 0; j < m_cols; j++)
+            {
+                m_entries.push_back("");
+            }
+        }
+        m_rows = row + 1;
+    }
+    if (col + 1 > m_cols)
+    {
+        for (int j = m_cols; j < col + 1; j++)
+        {
+            for (int i = 0; i < m_rows; i++)
+            {
+                m_entries.insert(m_entries.begin() + i * j + j + i, 0);
+            }
+        }
+        m_cols = col + 1;
+    }
+    m_entries[row * m_cols + col] = text;
 }
