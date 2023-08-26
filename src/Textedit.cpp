@@ -28,50 +28,16 @@ Textedit::~Textedit()
 
 void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    D2D1_COLOR_F background;
-    D2D1_COLOR_F border;
-    D2D1_COLOR_F text;
-    D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
-    D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
-
-    switch (m_state)
-    {
-    case WidgetState::NORMAL:
-        background = Color::d2d1(Color{ 255, 255, 255 });
-        border = Color::d2d1(Color{ 51, 51, 51 });
-        text = Color::d2d1(m_theme.txt);
-        break;
-
-    case WidgetState::HOVER:
-        background = Color::d2d1(Color{ 255, 255, 255 });
-        border = Color::d2d1(m_theme.brd_h);
-        text = Color::d2d1(m_theme.txt_h);
-        break;
-
-    case WidgetState::CLICKED:
-        background = Color::d2d1(Color{ 255, 255, 255 });
-        border = Color::d2d1(m_theme.brd_c);
-        text = Color::d2d1(m_theme.txt_c);
-        break;
-    }
-
+    m_theme.bg = Color{ 255, 255, 255 };
+    m_theme.bg_h = Color{ 255, 255, 255 };
+    m_theme.bg_c = Color{ 255, 255, 255 };
+    m_theme.brd = Color{ 51, 51, 51 };
     if (m_selected)
     {
-        background = Color::d2d1(Color{ 255, 255, 255 });
-        border = Color::d2d1(m_theme.brd_c);
-        text = Color::d2d1(m_theme.txt);
+        m_theme.brd = Color{ 1, 86, 155 };
     }
-
-    if (m_drawBackground)
-    {
-        brush->SetColor(background);
-        renderTarget->FillRectangle(rectangle, brush);
-    }
-    if (m_drawBorder)
-    {
-        brush->SetColor(border);
-        renderTarget->DrawRectangle(rectangle, brush);
-    }
+    drawBasicShape(renderTarget, brush);
+    D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
 
     if (!m_fontFormat)
     {
@@ -89,7 +55,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         }
     }
 
-    brush->SetColor(text);
+    brush->SetColor(Color::d2d1(m_theme.txt));
     renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, textRect, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
     
     if (m_drawCursor)

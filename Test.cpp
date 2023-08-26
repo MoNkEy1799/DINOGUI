@@ -16,6 +16,7 @@ int main()
 	DINOGUI::Textedit* textedit = new DINOGUI::Textedit(core);
 	DINOGUI::Image* image = new DINOGUI::Image(core, "Dino.png");
 	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, 300, 300);
+	DINOGUI::Table* table = new DINOGUI::Table(core);
 
 	button->place(50, 50);
 	label->place(120, 50);
@@ -23,6 +24,8 @@ int main()
 	textedit->place(300, 50);
 	image->place(50, 100);
 	canvas->place(180, 100);
+	table->place(60, 500);
+
 	canvas->fill({ 0, 255, 255 });
 	canvas->drawRectangle({ -10, -10 }, { 40, 40 }, { 0, 255, 0 });
 	canvas->drawEllipse({ -20, 100 }, 90, 40, { 0, 0, 255 });

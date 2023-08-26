@@ -343,7 +343,10 @@ public:
 
 private:
 	int m_rows, m_cols;
+	float m_lineWidth;
 	std::vector<std::string> m_entries;
+
+	void adjustSize();
 };
 
 }
