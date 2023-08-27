@@ -25,6 +25,13 @@ int main()
 	image->place(50, 100);
 	canvas->place(180, 100);
 	table->place(60, 500);
+	for (int i = 0; i < 6; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			table->setCell(std::to_string(i) + std::to_string(j), i, j);
+		}
+	}
 
 	canvas->fill({ 0, 255, 255 });
 	canvas->drawRectangle({ -10, -10 }, { 40, 40 }, { 0, 255, 0 });

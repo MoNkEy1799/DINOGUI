@@ -8,6 +8,7 @@ using namespace DINOGUI;
 
 void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
 {
+    std::cout << "\n" << std::endl;
     std::cout << "### Adj. Coords for " << str << " ###" << std::endl;
     std::cout << "top-left: " << rect.left << ", " << rect.top << std::endl;
     std::cout << "bottom-right: " << rect.right << ", " << rect.bottom << std::endl;
@@ -15,6 +16,7 @@ void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
     std::cout << "### Act. Coords for " << str << " ###" << std::endl;
     std::cout << "top-left: " << rect.left * 1.0f / DPIHandler::PixelsToDips(1.0f) << ", " << rect.top * 1.0f / DPIHandler::PixelsToDips(1.0f) << std::endl;
     std::cout << "bottom-right: " << rect.right * 1.0f / DPIHandler::PixelsToDips(1.0f) << ", " << rect.bottom * 1.0f / DPIHandler::PixelsToDips(1.0f) << std::endl;
+    std::cout << "\n" << std::endl;
 }
 
 Widget::Widget(Core* core)
@@ -232,6 +234,7 @@ bool Widget::hoverableWidget(const WidgetType& type)
     case WidgetType::LABEL:
     case WidgetType::IMAGE:
     case WidgetType::CANVAS:
+    case WidgetType::TABLE:
         return false;
     }
     return true;
@@ -246,6 +249,7 @@ bool Widget::clickableWidget(const WidgetType& type)
     case WidgetType::TEXTEDIT:
     case WidgetType::IMAGE:
     case WidgetType::CANVAS:
+    case WidgetType::TABLE:
         return false;
     }
     return true;
@@ -260,6 +264,7 @@ bool Widget::selectableWidget(const WidgetType& type)
     case WidgetType::CHECKBOX:
     case WidgetType::IMAGE:
     case WidgetType::CANVAS:
+    case WidgetType::TABLE:
         return false;
     }
     return true;

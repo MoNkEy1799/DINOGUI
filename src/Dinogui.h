@@ -329,7 +329,7 @@ class Table : public Widget
 {
 public:
 	Table(Core* core);
-	~Table();
+	~Table() = default;
 	Table(const Table&) = delete;
 	Table(Table&&) = delete;
 	Table& operator=(const Table&) = delete;
@@ -343,10 +343,11 @@ public:
 
 private:
 	int m_rows, m_cols;
-	float m_lineWidth;
+	float m_colWidth, m_rowHeight, m_lineWidth;
 	std::vector<std::string> m_entries;
 
-	void adjustSize();
+	void drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+	void drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 };
 
 }

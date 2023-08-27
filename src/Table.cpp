@@ -4,46 +4,35 @@
 using namespace DINOGUI;
 
 Table::Table(Core* core)
-	: Widget(core), m_rows(0), m_cols(0), m_lineWidth(1.0f)
+	: Widget(core), m_rows(1), m_cols(1), m_lineWidth(1.0f), m_entries({""})
 {
     m_type = WidgetType::TABLE;
     m_drawBackground = true;
     m_drawBorder = true;
     m_size = { 120.0f, 140.0f };
-    m_rows = 10;
-    m_cols = 4;
-}
-
-Table::~Table()
-{
 }
 
 void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    m_theme.bg = DINOCOLOR_LIGHTGRAY;
+    m_theme.bg = Color{ 255, 255, 255 };
+    m_theme.brd = DINOCOLOR_LIGHTGRAY;
     drawBasicShape(renderTarget, brush);
-    D2D1_COLOR_F colText = Color::d2d1(m_theme.txt);
 
     if (!m_fontFormat)
     {
         throwIfFailed(createFontFormat(), "Failed to create text format");
     }
-
-    float colWidth = (m_size.width - (m_cols + 1) * m_lineWidth) / m_cols;
-    float rowHeight = (m_size.height - (m_rows + 1) * m_lineWidth) / m_rows;
-    D2D1_RECT_F cell;
+    
+    m_colWidth = std::floor((m_size.width - (m_cols - 1) * m_lineWidth) / m_cols);
+    m_rowHeight = std::floor((m_size.height - (m_rows - 1) * m_lineWidth) / m_rows);
     for (int row = 0; row < m_rows; row++)
     {
         for (int col = 0; col < m_cols; col++)
         {
-            cell = { m_point.x + (col + 1) * m_lineWidth + col * colWidth,
-                     m_point.y + (row + 1) * m_lineWidth + row * rowHeight,
-                     m_point.x + (col + 1) * m_lineWidth + (col + 1) * colWidth,
-                     m_point.y + (row + 1) * m_lineWidth + (row + 1) * rowHeight };
-            brush->SetColor({ 255, 255, 255, 255 });
-            renderTarget->FillRectangle(DPIHandler::adjusted(cell), brush);
+            drawTextInCell(row, col, renderTarget, brush);
         }
     }
+    drawCellLines(renderTarget, brush);
 }
 
 void Table::place(int x, int y)
@@ -76,15 +65,36 @@ void Table::setCell(const std::string& text, int row, int col)
         m_cols = col + 1;
     }
     m_entries[row * m_cols + col] = text;
-    adjustSize();
 }
 
-void Table::adjustSize()
+void Table::drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    float colWidth = std::floor((m_size.width - (m_cols + 1) * m_lineWidth) / m_cols);
-    float restWidth = m_size.width - (m_cols + 1) * m_lineWidth - m_cols * colWidth;
-    float rowHeight = std::floor((m_size.height - (m_rows + 1) * m_lineWidth) / m_rows);
-    float restHeight = m_size.height - (m_rows + 1) * m_lineWidth - m_rows * rowHeight;
-    m_size.width -= std::floor(restWidth);
-    m_size.height -= std::floor(restHeight);
+    D2D1_RECT_F cell = DPIHandler::adjusted({ m_point.x + (col + 1) * m_lineWidth + col * m_colWidth,
+                         m_point.y + (row + 1) * m_lineWidth + row * m_rowHeight,
+                         m_point.x + (col + 1) * m_lineWidth + (col + 1) * m_colWidth,
+                         m_point.y + (row + 1) * m_lineWidth + (row + 1) * m_rowHeight });
+    brush->SetColor(Color::d2d1(m_theme.txt));
+    std::wstring text = toWideString(m_entries[row * m_cols + col]);
+    renderTarget->DrawText(text.c_str(), (uint32_t)text.size(), m_fontFormat, cell, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+}
+
+void Table::drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+{
+    D2D1_RECT_F line;
+    float curHeight = m_point.y + m_rowHeight + m_lineWidth;
+    float curWidth = m_point.x + m_colWidth + m_lineWidth;
+    for (int row = 0; row < m_rows - 1; row++)
+    {
+        line = DPIHandler::adjusted({ m_point.x, curHeight, m_point.x + m_size.width, curHeight + m_lineWidth });
+        brush->SetColor(Color::d2d1(m_theme.brd));
+        renderTarget->FillRectangle(line, brush);
+        curHeight += m_rowHeight + m_lineWidth;
+    }
+    for (int col = 0; col < m_cols - 1; col++)
+    {
+        line = DPIHandler::adjusted({ curWidth, m_point.y, curWidth + m_lineWidth, m_point.y + m_size.height });
+        brush->SetColor(Color::d2d1(m_theme.brd));
+        renderTarget->FillRectangle(line, brush);
+        curWidth += m_colWidth + m_lineWidth;
+    }
 }
