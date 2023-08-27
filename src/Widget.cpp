@@ -14,8 +14,8 @@ void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
     std::cout << "bottom-right: " << rect.right << ", " << rect.bottom << std::endl;
     std::cout << std::endl;
     std::cout << "### Act. Coords for " << str << " ###" << std::endl;
-    std::cout << "top-left: " << rect.left * 1.0f / DPIHandler::PixelsToDips(1.0f) << ", " << rect.top * 1.0f / DPIHandler::PixelsToDips(1.0f) << std::endl;
-    std::cout << "bottom-right: " << rect.right * 1.0f / DPIHandler::PixelsToDips(1.0f) << ", " << rect.bottom * 1.0f / DPIHandler::PixelsToDips(1.0f) << std::endl;
+    std::cout << "top-left: " << rect.left * DPIHandler::PixelsToDips(1.0f) << ", " << rect.top * DPIHandler::PixelsToDips(1.0f) << std::endl;
+    std::cout << "bottom-right: " << rect.right * DPIHandler::PixelsToDips(1.0f) << ", " << rect.bottom * DPIHandler::PixelsToDips(1.0f) << std::endl;
     std::cout << "\n" << std::endl;
 }
 

@@ -18,6 +18,7 @@ Canvas::Canvas(Core* core, int width, int height, const Color& fillColor)
     m_type = WidgetType::CANVAS;
     m_size = { (float)width, (float)height };
     createPixelBuffer();
+    fill(fillColor);
 }
 
 Canvas::~Canvas()
@@ -38,7 +39,7 @@ void Canvas::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
 
     if (m_drawingBitmap)
     {
-        renderTarget->DrawBitmap(m_drawingBitmap, currentRect());
+        renderTarget->DrawBitmap(m_drawingBitmap, DPIHandler::adjusted(currentRect()));
     }
 }
 

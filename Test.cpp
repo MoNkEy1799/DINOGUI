@@ -9,6 +9,20 @@ void testClickFunc(DINOGUI::Widget* wid)
 
 int main()
 {
+	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 1900, 800);
+	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, 500, 600, { 255, 0, 0 });
+	DINOGUI::Button* button = new DINOGUI::Button(core, "Test");
+	DINOGUI::Button* button2 = new DINOGUI::Button(core, "Test2");
+	button->place(0, 0);
+	button->setSize(100, 200);
+	button2->place(100, 200);
+	button2->setSize(100, 200);
+	canvas->place(700, 0);
+	core->run();
+}
+
+int main2()
+{
 	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 600, 600);
 	DINOGUI::Button* button = new DINOGUI::Button(core, "Button");
 	DINOGUI::Label* label = new DINOGUI::Label(core, "Label");

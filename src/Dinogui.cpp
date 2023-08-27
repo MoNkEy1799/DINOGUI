@@ -21,7 +21,6 @@ void DPIHandler::Initialize(HWND windowHandle)
 {
     uint32_t dpi = GetDpiForWindow(windowHandle);
     m_scale = dpi / 96.0f;
-	//std::cout << "DPI Scale : " << m_scale << "\n" << std::endl;
 }
 
 float DPIHandler::PixelsToDips(float f)
@@ -40,14 +39,14 @@ D2D1_RECT_F DPIHandler::adjusted(D2D1_RECT_F rect)
 			 DpiAdjusted(rect.right), DpiAdjusted(rect.bottom) };
 }
 
-float DINOGUI::DPIHandler::getScale()
+float DPIHandler::getScale()
 {
 	return m_scale;
 }
 
 float DPIHandler::DpiAdjusted(float f)
 {
-	return (std::floor(f * m_scale) + 0.5f) / m_scale;
+	return (std::floor(f) + 0.5f) / m_scale;
 }
 
 Timer::Timer(HWND windowHandle, uint32_t timeout, std::function<void()> callback)
