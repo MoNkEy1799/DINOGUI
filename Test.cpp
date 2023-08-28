@@ -9,22 +9,20 @@ void testClickFunc(DINOGUI::Widget* wid)
 
 int main2()
 {
-	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 1900, 800);
-	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, 500, 600, { 255, 0, 0 });
+	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 800, 800);
 	DINOGUI::Button* button = new DINOGUI::Button(core, "Test");
 	DINOGUI::Button* button2 = new DINOGUI::Button(core, "Test2");
 	button->place(0, 0);
-	button->setSize(100, 200);
-	button2->place(100, 200);
-	button2->setSize(100, 200);
-	canvas->place(700, 0);
+	button->setSize(100, 100);
+	button2->place(50, 100);
+	button2->setSize(100, 100);
 	core->run();
 	return 0;
 }
 
 int main()
 {
-	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 600, 600);
+	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 800, 1000);
 	DINOGUI::Button* button = new DINOGUI::Button(core, "Button");
 	DINOGUI::Label* label = new DINOGUI::Label(core, "Label");
 	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(core, "Checkbox");
@@ -49,7 +47,7 @@ int main()
 	}
 
 	canvas->fill({ 0, 255, 255 });
-	canvas->drawRectangle({ -10, -10 }, { 40, 40 }, { 0, 255, 0 });
+	canvas->drawRectangle({ 1, 1 }, { 40, 40 }, { 0, 255, 0 });
 	canvas->drawEllipse({ -20, 100 }, 90, 40, { 0, 0, 255 });
 	canvas->drawCircle({ 240, 240 }, 24, { 255, 0, 0 });
 	canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });

@@ -16,6 +16,7 @@ Canvas::Canvas(Core* core, int width, int height, const Color& fillColor)
       m_buffer(nullptr), m_bufferWidth(width), m_bufferHeight(height)
 {
     m_type = WidgetType::CANVAS;
+    m_drawBorder = true;
     m_size = { (float)width, (float)height };
     createPixelBuffer();
     fill(fillColor);
@@ -39,7 +40,7 @@ void Canvas::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
 
     if (m_drawingBitmap)
     {
-        renderTarget->DrawBitmap(m_drawingBitmap, DPIHandler::adjusted(currentRect()));
+        renderTarget->DrawBitmap(m_drawingBitmap, DPIHandler::adjusted(bufferRect()));
     }
 }
 
@@ -370,6 +371,12 @@ void Canvas::checkBounds(int& n) const
 int Canvas::bytePosFromXY(int x, int y) const
 {
     return (y * m_bufferWidth + x) * 4;
+}
+
+D2D1_RECT_F Canvas::bufferRect() const
+{
+    D2D1_RECT_F current = currentRect();
+    return { current.left + 1.0f, current.top + 1.0f, current.right, current.bottom };
 }
 
 void Canvas::fillBottomTriangle(Point p1, Point p2, Point p3, const Color& color)

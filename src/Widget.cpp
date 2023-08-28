@@ -14,8 +14,8 @@ void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
     std::cout << "bottom-right: " << rect.right << ", " << rect.bottom << std::endl;
     std::cout << std::endl;
     std::cout << "### Act. Coords for " << str << " ###" << std::endl;
-    std::cout << "top-left: " << rect.left * DPIHandler::PixelsToDips(1.0f) << ", " << rect.top * DPIHandler::PixelsToDips(1.0f) << std::endl;
-    std::cout << "bottom-right: " << rect.right * DPIHandler::PixelsToDips(1.0f) << ", " << rect.bottom * DPIHandler::PixelsToDips(1.0f) << std::endl;
+    std::cout << "top-left: " << rect.left * DPIHandler::getScale() << ", " << rect.top * DPIHandler::getScale() << std::endl;
+    std::cout << "bottom-right: " << rect.right * DPIHandler::getScale() << ", " << rect.bottom * DPIHandler::getScale() << std::endl;
     std::cout << "\n" << std::endl;
 }
 
@@ -297,6 +297,6 @@ void Widget::drawBasicShape(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColor
 
 void Widget::basicPlace(int x, int y)
 {
-    m_point = D2D1::Point2F(DPIHandler::PixelsToDips((float)x), DPIHandler::PixelsToDips((float)y));
+    m_point = D2D1::Point2F((float)x, (float)y);
     show();
 }

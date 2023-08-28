@@ -315,6 +315,7 @@ private:
 	void setColor(const Color& color, size_t pos);
 	void checkBounds(int& n) const;
 	int bytePosFromXY(int x, int y) const;
+	D2D1_RECT_F bufferRect() const;
 
 	void fillBottomTriangle(Point p1, Point p2, Point p3, const Color& color);
 	void fillTopTriangle(Point p1, Point p2, Point p3, const Color& color);

@@ -20,7 +20,7 @@ Table::Table(Core* core)
 void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
     m_theme.bg = Color{ 255, 255, 255 };
-    m_theme.brd = DINOCOLOR_LIGHTGRAY;
+    m_theme.brd = Color{ 51, 51, 51 };
     drawBasicShape(renderTarget, brush);
 
     if (!m_fontFormat)
@@ -91,14 +91,15 @@ void Table::drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBr
     for (int row = 0; row < m_rows - 1; row++)
     {
         line = DPIHandler::adjusted({ m_point.x, curHeight, m_point.x + m_size.width, curHeight + m_lineWidth });
-        brush->SetColor(Color::d2d1(m_theme.brd));
+        DEBUG_PRINT_COORDS(line);
+        brush->SetColor(Color::d2d1(DINOCOLOR_LIGHTGRAY));
         renderTarget->FillRectangle(line, brush);
         curHeight += m_rowHeight + m_lineWidth;
     }
     for (int col = 0; col < m_cols - 1; col++)
     {
         line = DPIHandler::adjusted({ curWidth, m_point.y, curWidth + m_lineWidth, m_point.y + m_size.height });
-        brush->SetColor(Color::d2d1(m_theme.brd));
+        brush->SetColor(Color::d2d1(DINOCOLOR_LIGHTGRAY));
         renderTarget->FillRectangle(line, brush);
         curWidth += m_colWidth + m_lineWidth;
     }

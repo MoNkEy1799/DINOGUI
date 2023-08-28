@@ -36,7 +36,7 @@ D2D1_POINT_2F DPIHandler::adjusted(D2D1_POINT_2F point)
 D2D1_RECT_F DPIHandler::adjusted(D2D1_RECT_F rect)
 {
 	return { DpiAdjusted(rect.left), DpiAdjusted(rect.top),
-			 DpiAdjusted(rect.right), DpiAdjusted(rect.bottom) };
+			 DpiAdjusted(rect.right, -0.5f), DpiAdjusted(rect.bottom, -0.5f) };
 }
 
 float DPIHandler::getScale()
@@ -44,9 +44,9 @@ float DPIHandler::getScale()
 	return m_scale;
 }
 
-float DPIHandler::DpiAdjusted(float f)
+float DPIHandler::DpiAdjusted(float f, float dir)
 {
-	return (std::floor(f * m_scale) + 0.5f) / m_scale;
+	return (std::floor(f * m_scale) + dir) / m_scale;
 }
 
 Timer::Timer(HWND windowHandle, uint32_t timeout, std::function<void()> callback)

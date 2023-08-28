@@ -18,8 +18,8 @@ void Core::DEBUG_DRAW_RECT(D2D1_RECT_F r)
 
 Core::Core(const std::string& windowName, int width, int height, int x, int y)
     : m_factory(nullptr), m_writeFactory(nullptr), m_imageFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr),
-    m_windowName(windowName), m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
-    m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr), m_changeCursor(true)
+      m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
+      m_windowName(windowName), m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr), m_changeCursor(true)
 {
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
@@ -146,6 +146,10 @@ int Core::createFactoryAndDPI()
     }
 
     DPIHandler::Initialize(m_windowHandle);
+    /*if (!SetWindowPos(m_windowHandle, HWND_TOP, 0, 0, m_width * DPIHandler::getScale(), m_height * DPIHandler::getScale(), SWP_NOMOVE))
+    {
+        return -1;
+    }*/
     return 0;
 }
 

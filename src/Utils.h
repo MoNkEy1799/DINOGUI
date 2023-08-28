@@ -80,7 +80,7 @@ struct DPIHandler
 
 private:
     static float m_scale;
-	static float DpiAdjusted(float f);
+	static float DpiAdjusted(float f, float dir = 0.5f);
 };
 
 struct Timer
