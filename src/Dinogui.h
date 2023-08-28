@@ -30,7 +30,7 @@ class Textedit;
 class Image;
 class Canvas;
 enum class WidgetState { NORMAL, HOVER, CLICKED };
-enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE };
+enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE, COMBOBOX };
 
 class Core : public TemplateWindow<Core>
 {
@@ -348,6 +348,23 @@ private:
 
 	void drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 	void drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+};
+
+class Combobox : public Widget
+{
+public:
+	Combobox(Core* core);
+	~Combobox() = default;
+	Combobox(const Combobox&) = delete;
+	Combobox(Combobox&&) = delete;
+	Combobox& operator=(const Combobox&) = delete;
+	Combobox& operator=(Combobox&&) = delete;
+
+	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void place(int x, int y) override;
+	void clicked(float mouseX, float mouseY) override {};
+
+private:
 };
 
 }

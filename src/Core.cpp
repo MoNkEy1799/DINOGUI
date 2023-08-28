@@ -60,11 +60,11 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
         resizeWindow();
         return 0;
 
-    /*case WM_DPICHANGED:
+    case WM_DPICHANGED:
         DPIHandler::Initialize(m_windowHandle);
         std::cout << "DPI " << GetDpiForWindow(m_windowHandle) << std::endl;
         redrawScreen();
-        return 0;*/
+        return 0;
 
     case WM_SETCURSOR:
         setCursor();
@@ -204,7 +204,7 @@ void Core::setCursor()
         return;
     }
 
-    if (m_hoverWidget && Widget::selectableWidget(m_hoverWidget->getWidgetType()))
+    if (m_hoverWidget && m_hoverWidget->getWidgetType() == WidgetType::TEXTEDIT)
     {
         SetCursor(LoadCursor(nullptr, IDC_IBEAM));
         m_changeCursor = false;
@@ -331,7 +331,6 @@ Widget* Core::getWidgetUnderMouse(float x, float y) const
             return widget;
         }
     }
-
     return nullptr;
 }
 

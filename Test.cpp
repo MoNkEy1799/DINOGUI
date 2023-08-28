@@ -7,7 +7,7 @@ void testClickFunc(DINOGUI::Widget* wid)
 	std::cout << ((DINOGUI::Textedit*)wid)->getText() << std::endl;
 }
 
-int main()
+int main2()
 {
 	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 1900, 800);
 	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, 500, 600, { 255, 0, 0 });
@@ -19,9 +19,10 @@ int main()
 	button2->setSize(100, 200);
 	canvas->place(700, 0);
 	core->run();
+	return 0;
 }
 
-int main2()
+int main()
 {
 	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 600, 600);
 	DINOGUI::Button* button = new DINOGUI::Button(core, "Button");

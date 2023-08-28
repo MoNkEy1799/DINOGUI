@@ -97,7 +97,7 @@ void Textedit::unselect()
     m_core->redrawScreen();
 }
 
-std::string DINOGUI::Textedit::getText()
+std::string Textedit::getText()
 {
     return m_text;
 }

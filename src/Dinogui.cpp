@@ -46,7 +46,7 @@ float DPIHandler::getScale()
 
 float DPIHandler::DpiAdjusted(float f)
 {
-	return (std::floor(f) + 0.5f) / m_scale;
+	return (std::floor(f * m_scale) + 0.5f) / m_scale;
 }
 
 Timer::Timer(HWND windowHandle, uint32_t timeout, std::function<void()> callback)

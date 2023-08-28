@@ -230,44 +230,33 @@ bool Widget::hoverableWidget(const WidgetType& type)
 {
     switch (type)
     {
-    case WidgetType::NONE:
-    case WidgetType::LABEL:
-    case WidgetType::IMAGE:
-    case WidgetType::CANVAS:
-    case WidgetType::TABLE:
-        return false;
+    case WidgetType::BUTTON:
+    case WidgetType::CHECKBOX:
+    case WidgetType::TEXTEDIT:
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool Widget::clickableWidget(const WidgetType& type)
 {
     switch (type)
     {
-    case WidgetType::NONE:
-    case WidgetType::LABEL:
-    case WidgetType::TEXTEDIT:
-    case WidgetType::IMAGE:
-    case WidgetType::CANVAS:
-    case WidgetType::TABLE:
-        return false;
+    case WidgetType::BUTTON:
+    case WidgetType::CHECKBOX:
+        return true;
     }
-    return true;
+    return false;
 }
 bool Widget::selectableWidget(const WidgetType& type)
 {
     switch (type)
     {
-    case WidgetType::NONE:
-    case WidgetType::BUTTON:
-    case WidgetType::LABEL:
-    case WidgetType::CHECKBOX:
-    case WidgetType::IMAGE:
-    case WidgetType::CANVAS:
-    case WidgetType::TABLE:
-        return false;
+    case WidgetType::TEXTEDIT:
+    case WidgetType::COMBOBOX:
+        return true;
     }
-    return true;
+    return false;
 }
 
 void Widget::drawBasicShape(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
