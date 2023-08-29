@@ -28,8 +28,8 @@ void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
         throwIfFailed(createFontFormat(), "Failed to create text format");
     }
     
-    m_colWidth = std::floor((m_size.width - (m_cols - 1) * m_lineWidth) / m_cols);
-    m_rowHeight = std::floor((m_size.height - (m_rows - 1) * m_lineWidth) / m_rows);
+    m_colWidth = (m_size.width - (m_cols + 1) * m_lineWidth) / m_cols;
+    m_rowHeight = (m_size.height - (m_rows + 1) * m_lineWidth) / m_rows;
     for (int row = 0; row < m_rows; row++)
     {
         for (int col = 0; col < m_cols; col++)
@@ -72,6 +72,11 @@ void Table::setCell(const std::string& text, int row, int col)
     m_entries[row * m_cols + col] = text;
 }
 
+void Table::setLineWidth(float lineWidth)
+{
+    m_lineWidth = lineWidth;
+}
+
 void Table::drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
     D2D1_RECT_F cell = DPIHandler::adjusted({ m_point.x + (col + 1) * m_lineWidth + col * m_colWidth,
@@ -85,22 +90,24 @@ void Table::drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget
 
 void Table::drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    D2D1_RECT_F line;
+    D2D1_POINT_2F p1, p2;
     float curHeight = m_point.y + m_rowHeight + m_lineWidth;
     float curWidth = m_point.x + m_colWidth + m_lineWidth;
     for (int row = 0; row < m_rows - 1; row++)
     {
-        line = DPIHandler::adjusted({ m_point.x, curHeight, m_point.x + m_size.width, curHeight + m_lineWidth });
-        DEBUG_PRINT_COORDS(line);
+        p1 = { m_point.x + 1.0f, curHeight };
+        p2 = { m_point.x + m_size.width - 0.5f, curHeight };
         brush->SetColor(Color::d2d1(DINOCOLOR_LIGHTGRAY));
-        renderTarget->FillRectangle(line, brush);
+        renderTarget->DrawLine(DPIHandler::adjusted(p1), DPIHandler::adjusted(p2), brush, m_lineWidth);
+        DEBUG_PRINT(curHeight, row);
         curHeight += m_rowHeight + m_lineWidth;
     }
     for (int col = 0; col < m_cols - 1; col++)
     {
-        line = DPIHandler::adjusted({ curWidth, m_point.y, curWidth + m_lineWidth, m_point.y + m_size.height });
+        p1 = { curWidth, m_point.y + 1.0f };
+        p2 = { curWidth, m_point.y + m_size.height - 0.5f };
         brush->SetColor(Color::d2d1(DINOCOLOR_LIGHTGRAY));
-        renderTarget->FillRectangle(line, brush);
+        renderTarget->DrawLine(DPIHandler::adjusted(p1), DPIHandler::adjusted(p2), brush, m_lineWidth);
         curWidth += m_colWidth + m_lineWidth;
     }
 }

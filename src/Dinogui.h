@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <functional>
 
-#define DEBUG_PRINT(x) std::cout << x << std::endl
+#define DEBUG_PRINT(x, m) std::cout << m << " : " << x << std::endl
 #define DEBUG_PRINTW(x) std::wcout << x << std::endl
 
 namespace DINOGUI
@@ -341,6 +341,7 @@ public:
 	void clicked(float mouseX, float mouseY) override {};
 
 	void setCell(const std::string& text, int row, int col);
+	void setLineWidth(float lineWidth);
 
 private:
 	int m_rows, m_cols;

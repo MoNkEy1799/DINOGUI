@@ -24,6 +24,8 @@ int main()
 {
 	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 800, 1000);
 	DINOGUI::Button* button = new DINOGUI::Button(core, "Button");
+	DINOGUI::Button* button2 = new DINOGUI::Button(core, "Button2");
+	DINOGUI::Button* button3 = new DINOGUI::Button(core, "Button3");
 	DINOGUI::Label* label = new DINOGUI::Label(core, "Label");
 	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(core, "Checkbox");
 	DINOGUI::Textedit* textedit = new DINOGUI::Textedit(core);
@@ -32,17 +34,20 @@ int main()
 	DINOGUI::Table* table = new DINOGUI::Table(core);
 
 	button->place(50, 50);
+	button2->place(110, 70);
+	button3->place(50, 70);
 	label->place(120, 50);
 	checkbox->place(190, 50);
 	textedit->place(300, 50);
 	image->place(50, 100);
 	canvas->place(180, 100);
 	table->place(60, 500);
-	for (int i = 0; i < 6; i++)
+	table->setSize(400, 200);
+	for (int i = 0; i < 8; i++)
 	{
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < 10; j++)
 		{
-			table->setCell(std::to_string(i) + std::to_string(j), i, j);
+			table->setCell(std::to_string(i + 1) + std::to_string(j + 1), i, j);
 		}
 	}
 

@@ -9,13 +9,9 @@ using namespace DINOGUI;
 void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
 {
     std::cout << "\n" << std::endl;
-    std::cout << "### Adj. Coords for " << str << " ###" << std::endl;
+    std::cout << "### Coords for " << str << " ###" << std::endl;
     std::cout << "top-left: " << rect.left << ", " << rect.top << std::endl;
     std::cout << "bottom-right: " << rect.right << ", " << rect.bottom << std::endl;
-    std::cout << std::endl;
-    std::cout << "### Act. Coords for " << str << " ###" << std::endl;
-    std::cout << "top-left: " << rect.left * DPIHandler::getScale() << ", " << rect.top * DPIHandler::getScale() << std::endl;
-    std::cout << "bottom-right: " << rect.right * DPIHandler::getScale() << ", " << rect.bottom * DPIHandler::getScale() << std::endl;
     std::cout << "\n" << std::endl;
 }
 
