@@ -340,13 +340,13 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
 
-	void setCell(const std::string& text, int row, int col);
+	void setCell(const std::string& text, int row, int col, int rowSpan = 1, int colSpan = 1);
 	void setLineWidth(float lineWidth);
 
 private:
 	int m_rows, m_cols;
 	float m_colWidth, m_rowHeight, m_lineWidth;
-	std::vector<std::string> m_entries;
+	std::vector<GridEntry<std::string>> m_entries;
 
 	void drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 	void drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);

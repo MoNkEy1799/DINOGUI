@@ -9,7 +9,8 @@
 using namespace DINOGUI;
 
 Table::Table(Core* core)
-	: Widget(core), m_rows(1), m_cols(1), m_lineWidth(1.0f), m_entries({""})
+    : Widget(core), m_rows(1), m_cols(1), m_entries({ {"", 1, 1} }),
+      m_lineWidth(1.0f), m_rowHeight(0.0f), m_colWidth(0.0f)
 {
     m_type = WidgetType::TABLE;
     m_drawBackground = true;
@@ -30,6 +31,7 @@ void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
     
     m_colWidth = (m_size.width - (m_cols + 1) * m_lineWidth) / m_cols;
     m_rowHeight = (m_size.height - (m_rows + 1) * m_lineWidth) / m_rows;
+    drawCellLines(renderTarget, brush);
     for (int row = 0; row < m_rows; row++)
     {
         for (int col = 0; col < m_cols; col++)
@@ -37,7 +39,6 @@ void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
             drawTextInCell(row, col, renderTarget, brush);
         }
     }
-    drawCellLines(renderTarget, brush);
 }
 
 void Table::place(int x, int y)
@@ -45,7 +46,7 @@ void Table::place(int x, int y)
     basicPlace(x, y);
 }
 
-void Table::setCell(const std::string& text, int row, int col)
+void Table::setCell(const std::string& text, int row, int col, int rowSpan, int colSpan)
 {
     if (row + 1 > m_rows)
     {
@@ -53,7 +54,7 @@ void Table::setCell(const std::string& text, int row, int col)
         {
             for (int j = 0; j < m_cols; j++)
             {
-                m_entries.push_back("");
+                m_entries.push_back({ "", 1, 1 });
             }
         }
         m_rows = row + 1;
@@ -64,12 +65,15 @@ void Table::setCell(const std::string& text, int row, int col)
         {
             for (int i = 0; i < m_rows; i++)
             {
-                m_entries.insert(m_entries.begin() + i * j + j + i, "");
+                m_entries.insert(m_entries.begin() + i * j + j + i, { "", 1, 1 });
             }
         }
         m_cols = col + 1;
     }
-    m_entries[row * m_cols + col] = text;
+    GridEntry<std::string>& entry = m_entries[row * m_cols + col];
+    entry.entry = text;
+    entry.rowSpan = rowSpan;
+    entry.colSpan = colSpan;
 }
 
 void Table::setLineWidth(float lineWidth)
@@ -79,12 +83,15 @@ void Table::setLineWidth(float lineWidth)
 
 void Table::drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
+    GridEntry<std::string>& entry = m_entries[row * m_cols + col];
     D2D1_RECT_F cell = DPIHandler::adjusted({ m_point.x + (col + 1) * m_lineWidth + col * m_colWidth,
                          m_point.y + (row + 1) * m_lineWidth + row * m_rowHeight,
-                         m_point.x + (col + 1) * m_lineWidth + (col + 1) * m_colWidth,
-                         m_point.y + (row + 1) * m_lineWidth + (row + 1) * m_rowHeight });
+                         m_point.x + (col + 1) * m_lineWidth + (col + 1 + entry.colSpan) * m_colWidth,
+                         m_point.y + (row + 1) * m_lineWidth + (row + 1 + entry.rowSpan) * m_rowHeight });
+    brush->SetColor(Color::d2d1(m_theme.bg));
+    renderTarget->FillRectangle(cell, brush);
     brush->SetColor(Color::d2d1(m_theme.txt));
-    std::wstring text = toWideString(m_entries[row * m_cols + col]);
+    std::wstring text = toWideString(entry.entry);
     renderTarget->DrawText(text.c_str(), (uint32_t)text.size(), m_fontFormat, cell, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }
 

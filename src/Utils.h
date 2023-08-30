@@ -45,11 +45,6 @@ struct Font
 	FontWeight weight;
 };
 
-struct Point
-{
-	float x, y;
-};
-
 struct Color
 {
 	int r, g, b, a = 255;
@@ -108,6 +103,18 @@ struct Event
 	Event(EventType type, float mouseX, float mouseY) : type(type), mouseX(mouseX), mouseY(mouseY) {};
 	EventType type;
 	float mouseX, mouseY;
+};
+
+struct Point
+{
+	float x, y;
+};
+
+template<typename T>
+struct GridEntry
+{
+	T entry;
+	int rowSpan, colSpan;
 };
 
 std::wstring toWideString(const std::string& string);
