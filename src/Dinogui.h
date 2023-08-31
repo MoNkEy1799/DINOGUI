@@ -15,6 +15,7 @@
 #include <iostream>
 #include <algorithm>
 #include <functional>
+#include <utility>
 
 #define DEBUG_PRINT(x, m) std::cout << m << " : " << x << std::endl
 #define DEBUG_PRINTW(x) std::wcout << x << std::endl
@@ -347,6 +348,7 @@ private:
 	int m_rows, m_cols;
 	float m_colWidth, m_rowHeight, m_lineWidth;
 	std::vector<GridEntry<std::string>> m_entries;
+	std::vector<int> m_blockedEntries;
 
 	void drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 	void drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);

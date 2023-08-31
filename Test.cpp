@@ -43,14 +43,17 @@ int main()
 	canvas->place(180, 100);
 	table->place(60, 500);
 	table->setSize(400, 200);
-	for (int i = 0; i < 8; i++)
+	table->setCell("One", 0, 0, 1, 2);
+	table->setCell("Two", 0, 2, 1, 2);
+	table->setCell("Three", 0, 4, 1, 2);
+	for (int i = 0; i < 3; i++)
 	{
-		for (int j = 0; j < 10; j++)
+		for (int j = 0; j < 6; j++)
 		{
-			table->setCell(std::to_string(i + 1) + std::to_string(j + 1), i, j);
+			table->setCell(std::to_string(j), i + 1, j);
 		}
 	}
-
+	
 	canvas->fill({ 0, 255, 255 });
 	canvas->drawRectangle({ 1, 1 }, { 40, 40 }, { 0, 255, 0 });
 	canvas->drawEllipse({ -20, 100 }, 90, 40, { 0, 0, 255 });

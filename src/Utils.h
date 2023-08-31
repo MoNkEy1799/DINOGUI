@@ -21,7 +21,7 @@
 	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 76, 76, 76 }, DINOGUI::Color{ 25, 25, 25 }, \
 }
 
-#define DINOGUI_FONT_DEFAULT DINOGUI::Font{ 12.0f, "Segoe UI", DINOGUI::FontWeight::NORMAL }
+#define DINOGUI_FONT_DEFAULT DINOGUI::Font{ 12.0f, "Segoe UI", DINOGUI::FontWeight::NORMAL, DINOGUI::FontStyle::NORMAL }
 
 #define DINOGUI_ALL_MOUSE_BUTTONS MK_LBUTTON + MK_MBUTTON + MK_RBUTTON + MK_XBUTTON1 + MK_XBUTTON2
 
@@ -37,12 +37,46 @@ enum FontWeight
 	XBOLD = DWRITE_FONT_WEIGHT_HEAVY
 };
 
+enum FontStyle
+{
+	NORMAL = DWRITE_FONT_STYLE_NORMAL,
+	ITALIC = DWRITE_FONT_STYLE_ITALIC,
+	OBLIQUE = DWRITE_FONT_STYLE_OBLIQUE
+};
+
 struct Font
 {
-	Font(float fontSize, const std::string& fontFamily, FontWeight fontWeight) : size(fontSize), family(fontFamily), weight(fontWeight) {};
+	Font(float size, const std::string& family, FontWeight weight, FontStyle style)
+		: size(size), family(family), weight(weight), style(style) {};
 	float size;
 	std::string family;
 	FontWeight weight;
+	FontStyle style;
+};
+
+enum H_TextAlignment
+{
+	LEADING = DWRITE_TEXT_ALIGNMENT_LEADING,
+	CENTER = DWRITE_TEXT_ALIGNMENT_CENTER,
+	TRAILING = DWRITE_TEXT_ALIGNMENT_TRAILING,
+	JUSTIFIED = DWRITE_TEXT_ALIGNMENT_JUSTIFIED
+};
+
+enum V_TextAlignment
+{
+	TOP = DWRITE_PARAGRAPH_ALIGNMENT_NEAR,
+	CENTER = DWRITE_PARAGRAPH_ALIGNMENT_CENTER,
+	BOTTOM = DWRITE_PARAGRAPH_ALIGNMENT_FAR
+};
+
+struct Text
+{
+	Text(const std::string& text, const Font& font = DINOGUI_FONT_DEFAULT);
+	~Text();
+
+	Font font;
+	H_TextAlignment horizontalAlignment;
+	V_TextAlignment verticalAlignment;
 };
 
 struct Color

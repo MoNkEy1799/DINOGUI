@@ -48,32 +48,32 @@ void Table::place(int x, int y)
 
 void Table::setCell(const std::string& text, int row, int col, int rowSpan, int colSpan)
 {
-    if (row + 1 > m_rows)
+    if (row + rowSpan > m_rows)
     {
-        for (int i = m_rows - 1; i < row; i++)
+        for (int i = m_rows - 1; i < row + rowSpan; i++)
         {
             for (int j = 0; j < m_cols; j++)
             {
                 m_entries.push_back({ "", 1, 1 });
             }
         }
-        m_rows = row + 1;
+        m_rows = row + rowSpan;
     }
-    if (col + 1 > m_cols)
+    if (col + colSpan > m_cols)
     {
-        for (int j = m_cols; j < col + 1; j++)
+        for (int j = m_cols; j < col + colSpan; j++)
         {
             for (int i = 0; i < m_rows; i++)
             {
                 m_entries.insert(m_entries.begin() + i * j + j + i, { "", 1, 1 });
             }
         }
-        m_cols = col + 1;
+        m_cols = col + colSpan;
     }
     GridEntry<std::string>& entry = m_entries[row * m_cols + col];
     entry.entry = text;
-    entry.rowSpan = rowSpan;
-    entry.colSpan = colSpan;
+    entry.rowSpan = (rowSpan < 1) ? 1 : rowSpan;
+    entry.colSpan = (colSpan < 1) ? 1 : colSpan;
 }
 
 void Table::setLineWidth(float lineWidth)
@@ -86,10 +86,13 @@ void Table::drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget
     GridEntry<std::string>& entry = m_entries[row * m_cols + col];
     D2D1_RECT_F cell = DPIHandler::adjusted({ m_point.x + (col + 1) * m_lineWidth + col * m_colWidth,
                          m_point.y + (row + 1) * m_lineWidth + row * m_rowHeight,
-                         m_point.x + (col + 1) * m_lineWidth + (col + 1 + entry.colSpan) * m_colWidth,
-                         m_point.y + (row + 1) * m_lineWidth + (row + 1 + entry.rowSpan) * m_rowHeight });
-    brush->SetColor(Color::d2d1(m_theme.bg));
-    renderTarget->FillRectangle(cell, brush);
+                         m_point.x + (col + 1 + entry.colSpan) * m_lineWidth + (col + entry.colSpan) * m_colWidth,
+                         m_point.y + (row + 1 + entry.rowSpan) * m_lineWidth + (row + entry.rowSpan) * m_rowHeight });
+    if (entry.rowSpan > 1 || entry.colSpan > 1)
+    {
+        brush->SetColor(Color::d2d1(m_theme.bg));
+        renderTarget->FillRectangle(cell, brush);
+    }
     brush->SetColor(Color::d2d1(m_theme.txt));
     std::wstring text = toWideString(entry.entry);
     renderTarget->DrawText(text.c_str(), (uint32_t)text.size(), m_fontFormat, cell, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
@@ -106,7 +109,6 @@ void Table::drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBr
         p2 = { m_point.x + m_size.width - 0.5f, curHeight };
         brush->SetColor(Color::d2d1(DINOCOLOR_LIGHTGRAY));
         renderTarget->DrawLine(DPIHandler::adjusted(p1), DPIHandler::adjusted(p2), brush, m_lineWidth);
-        DEBUG_PRINT(curHeight, row);
         curHeight += m_rowHeight + m_lineWidth;
     }
     for (int col = 0; col < m_cols - 1; col++)
