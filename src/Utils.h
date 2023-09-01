@@ -69,14 +69,29 @@ enum V_TextAlignment
 	BOTTOM = DWRITE_PARAGRAPH_ALIGNMENT_FAR
 };
 
-struct Text
+class Text
 {
-	Text(const std::string& text, const Font& font = DINOGUI_FONT_DEFAULT);
+public:
+	Text(Core* core, const std::string& text);
 	~Text();
 
-	Font font;
-	H_TextAlignment horizontalAlignment;
-	V_TextAlignment verticalAlignment;
+	void draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+	void setText(const std::string& text);
+	void setFont(const Font& font);
+	void setColor(const Color& color);
+	void setHorizontalAlignment(H_TextAlignment hAlign);
+	void setVerticalAlignment(V_TextAlignment vAlign);
+
+private:
+	IDWriteTextFormat* m_fontFormat;
+	Core* m_core;
+	std::string m_text;
+	Font m_font;
+	H_TextAlignment m_hAlign;
+	V_TextAlignment m_vAlign;
+	Color m_color;
+
+	bool createFontFormat();
 };
 
 struct Color

@@ -7,8 +7,85 @@
 #include <dwrite.h>
 #include <cmath>
 #include <functional>
+#include <string>
 
 using namespace DINOGUI;
+
+Text::Text(Core* core, const std::string& text)
+	: font(DINOGUI_FONT_DEFAULT), hAlign(H_TextAlignment::CENTER), vAlign(V_TextAlignment::CENTER),
+	color({ 0, 0, 0 }), m_fontFormat(nullptr), m_core(core)
+{
+
+}
+
+Text::~Text()
+{
+	safeReleaseInterface(&m_fontFormat);
+}
+
+void Text::draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+{
+	if (!m_fontFormat)
+	{
+		throwIfFailed(createFontFormat(), "Failed to create text format");
+	}
+
+	brush->SetColor(Color::d2d1(m_color));
+	renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, rectangle, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+}
+
+void Text::setText(const std::string& text)
+{
+	m_text = text;
+}
+
+void Text::setFont(const Font& font)
+{
+	m_font = font;
+	safeReleaseInterface(&m_fontFormat);
+}
+
+void Text::setColor(const Color& color)
+{
+	m_color = color;
+}
+
+void Text::setHorizontalAlignment(H_TextAlignment hAlign)
+{
+	m_hAlign = hAlign;
+	safeReleaseInterface(&m_fontFormat);
+}
+
+void Text::setVerticalAlignment(V_TextAlignment vAlign)
+{
+	m_vAlign = vAlign;
+	safeReleaseInterface(&m_fontFormat);
+}
+
+bool Text::createFontFormat()
+{
+	HRESULT hResult = m_core->getWriteFactory()->CreateTextFormat(
+		toWideString(m_font.family).c_str(), NULL, (DWRITE_FONT_WEIGHT)m_font.weight,
+		DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, m_font.size, L"en-us", &m_fontFormat);
+
+	if (FAILED(hResult))
+	{
+		return false;
+	}
+	if (!SUCCEEDED(m_fontFormat->SetTextAlignment((DWRITE_TEXT_ALIGNMENT)m_hAlign)))
+	{
+		return false;
+	}
+	if (!SUCCEEDED(m_fontFormat->SetParagraphAlignment((DWRITE_PARAGRAPH_ALIGNMENT)m_vAlign)))
+	{
+		return false;
+	}
+	if (!SUCCEEDED(m_fontFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP)))
+	{
+		return false;
+	}
+	return true;
+}
 
 D2D1_COLOR_F Color::d2d1(Color c)
 {
