@@ -162,6 +162,7 @@ void Core::destroyWindow()
     destroyGraphicsResources();
     safeReleaseInterface(&m_factory);
     safeReleaseInterface(&m_writeFactory);
+    safeReleaseInterface(&m_imageFactory);
     PostQuitMessage(0);
 }
 

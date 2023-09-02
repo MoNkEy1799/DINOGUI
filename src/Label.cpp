@@ -10,10 +10,15 @@
 using namespace DINOGUI;
 
 Label::Label(Core* core, const std::string& text)
-    : Widget(core)
+    : Widget(core), m_text(nullptr)
 {
+    m_text = new Text(core, text);
 	m_type = WidgetType::LABEL;
-    m_text = text;
+}
+
+Label::~Label()
+{
+    delete m_text;
 }
 
 void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
@@ -21,17 +26,15 @@ void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
     drawBasicShape(renderTarget, brush);
     D2D1_COLOR_F colText = Color::d2d1(m_theme.txt);
     D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
-
-    if (!m_fontFormat)
-    {
-        throwIfFailed(createFontFormat(), "Failed to create text format");
-    }
-
-    brush->SetColor(colText);
-    renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, rectangle, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+    m_text->draw(rectangle, renderTarget, brush);
 }
 
 void Label::place(int x, int y)
 {
     basicPlace(x, y);
+}
+
+void Label::setText(const std::string& text)
+{
+    m_text->setText(text);
 }

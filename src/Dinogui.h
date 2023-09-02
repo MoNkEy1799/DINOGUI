@@ -3,6 +3,7 @@
 #pragma comment(lib, "Dwrite.lib")
 #pragma comment(lib, "Dwmapi.lib")
 #pragma comment(linker, "/ENTRY:mainCRTStartup")
+#define NOMINMAX
 
 #include "Utils.h"
 
@@ -114,8 +115,6 @@ public:
 	void drawBorder(bool draw = true);
 	void drawBackground(bool draw = true);
 	void setTheme(const ColorTheme& theme);
-	void setText(const std::string& text);
-	void setFont(const Font& font);
 	virtual void setSize(int width, int height);
 
 	WidgetType getWidgetType() const;
@@ -133,24 +132,19 @@ public:
 	static bool selectableWidget(const WidgetType& type);
 
 protected:
-	IDWriteTextFormat* m_fontFormat;
 	D2D1_POINT_2F m_point;
 	D2D1_SIZE_F m_size;
 	Core* m_core;
 	ColorTheme m_theme;
-	Font m_font;
 	WidgetState m_state;
 	WidgetType m_type;
-	std::string m_text;
 	bool m_drawBackground, m_drawBorder;
 
 	D2D1_RECT_F mapToLocal(D2D1_RECT_F rect);
 	D2D1_POINT_2F mapToLocal(D2D1_POINT_2F point);
 	D2D1_RECT_F mapToGlobal(D2D1_RECT_F rect);
 	D2D1_POINT_2F mapToGlobal(D2D1_POINT_2F point);
-
 	D2D1_RECT_F currentRect() const;
-	bool createFontFormat();
 
 	void drawBasicShape(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 	void basicPlace(int x, int y);
@@ -160,7 +154,7 @@ class Button : public Widget
 {
 public:
 	Button(Core* core, const std::string& text = "", std::function<void()> function = nullptr);
-	~Button() = default;
+	~Button();
 	Button(const Button&) = delete;
 	Button(Button&&) = delete;
 	Button& operator=(const Button&) = delete;
@@ -171,16 +165,18 @@ public:
 	void clicked(float mouseX, float mouseY) override;
 
 	void connect(std::function<void()> function);
+	void setText(const std::string& text);
 
 private:
 	std::function<void()> m_clickFunction;
+	Text* m_text;
 };
 
 class Label : public Widget
 {
 public:
 	Label(Core* core, const std::string& text = "");
-	~Label() = default;
+	~Label();
 	Label(const Label&) = delete;
 	Label(Label&&) = delete;
 	Label& operator=(const Label&) = delete;
@@ -189,13 +185,18 @@ public:
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
+
+	void setText(const std::string& text);
+
+private:
+	Text* m_text;
 };
 
 class Checkbox : public Widget
 {
 public:
 	Checkbox(Core* core, const std::string& text = "");
-	~Checkbox() = default;
+	~Checkbox();
 	Checkbox(const Checkbox&) = delete;
 	Checkbox(Checkbox&&) = delete;
 	Checkbox& operator=(const Checkbox&) = delete;
@@ -206,9 +207,11 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override;
 
+	void setText(const std::string& text);
 	bool isChecked();
 
 private:
+	Text* m_text;
 	D2D1_POINT_2F m_boxPoint, m_textPoint;
 	D2D1_SIZE_F m_boxSize, m_textSize;
 	bool m_check;
@@ -240,6 +243,7 @@ public:
 	void otherKeys(uint32_t key);
 
 private:
+	Text* m_text;
 	std::vector<float> m_charWidths;
 	float m_lineHeight;
 	Timer* m_cursorTimer;
@@ -331,7 +335,7 @@ class Table : public Widget
 {
 public:
 	Table(Core* core);
-	~Table() = default;
+	~Table();
 	Table(const Table&) = delete;
 	Table(Table&&) = delete;
 	Table& operator=(const Table&) = delete;
@@ -347,7 +351,7 @@ public:
 private:
 	int m_rows, m_cols;
 	float m_colWidth, m_rowHeight, m_lineWidth;
-	std::vector<GridEntry<std::string>> m_entries;
+	std::vector<GridEntry<Text*>> m_entries;
 	std::vector<int> m_blockedEntries;
 
 	void drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);

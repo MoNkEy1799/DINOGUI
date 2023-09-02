@@ -16,11 +16,8 @@ void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
 }
 
 Widget::Widget(Core* core)
-    : m_fontFormat(nullptr), m_core(core), m_text(""),
-      m_theme(DINOGUI_THEME_LIGHT), m_font(DINOGUI_FONT_DEFAULT),
-      m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }),
-      m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
-      m_drawBackground(false), m_drawBorder(false)
+    : m_core(core), m_theme(DINOGUI_THEME_LIGHT), m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
+      m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_drawBackground(false), m_drawBorder(false)
 {
     m_core->addWidget(this);
 }
@@ -29,23 +26,11 @@ Widget::~Widget()
 {
     m_core->removeWidget(this);
     m_core->removeDisplayWidget(this);
-    safeReleaseInterface(&m_fontFormat);
 }
 
 void Widget::setTheme(const ColorTheme& theme)
 {
 	m_theme = theme;
-}
-
-void Widget::setText(const std::string& text)
-{
-    m_text = text;
-}
-
-void Widget::setFont(const Font& font)
-{
-    m_font = font;
-    safeReleaseInterface(&m_fontFormat);
 }
 
 void Widget::setSize(int width, int height)
@@ -195,31 +180,6 @@ D2D1_POINT_2F Widget::mapToGlobal(D2D1_POINT_2F point)
 D2D1_RECT_F Widget::currentRect() const
 {
     return { m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height };
-}
-
-bool Widget::createFontFormat()
-{
-    HRESULT hResult = m_core->getWriteFactory()->CreateTextFormat(
-        toWideString(m_font.family).c_str(), NULL, (DWRITE_FONT_WEIGHT)m_font.weight,
-        DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, m_font.size, L"en-us", &m_fontFormat);
-
-    if (FAILED(hResult))
-    {
-        return false;
-    }
-    if (!SUCCEEDED(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER)))
-    {
-        return false;
-    }
-    if (!SUCCEEDED(m_fontFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER)))
-    {
-        return false;
-    }
-    if (!SUCCEEDED(m_fontFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP)))
-    {
-        return false;
-    }
-    return true;
 }
 
 bool Widget::hoverableWidget(const WidgetType& type)

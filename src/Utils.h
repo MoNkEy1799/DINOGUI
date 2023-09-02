@@ -28,71 +28,7 @@
 namespace DINOGUI
 {
 
-enum FontWeight
-{
-	XLIGHT = DWRITE_FONT_WEIGHT_THIN,
-	LIGHT = DWRITE_FONT_WEIGHT_LIGHT,
-	NORMAL = DWRITE_FONT_WEIGHT_NORMAL,
-	BOLD = DWRITE_FONT_WEIGHT_BOLD,
-	XBOLD = DWRITE_FONT_WEIGHT_HEAVY
-};
-
-enum FontStyle
-{
-	NORMAL = DWRITE_FONT_STYLE_NORMAL,
-	ITALIC = DWRITE_FONT_STYLE_ITALIC,
-	OBLIQUE = DWRITE_FONT_STYLE_OBLIQUE
-};
-
-struct Font
-{
-	Font(float size, const std::string& family, FontWeight weight, FontStyle style)
-		: size(size), family(family), weight(weight), style(style) {};
-	float size;
-	std::string family;
-	FontWeight weight;
-	FontStyle style;
-};
-
-enum H_TextAlignment
-{
-	LEADING = DWRITE_TEXT_ALIGNMENT_LEADING,
-	CENTER = DWRITE_TEXT_ALIGNMENT_CENTER,
-	TRAILING = DWRITE_TEXT_ALIGNMENT_TRAILING,
-	JUSTIFIED = DWRITE_TEXT_ALIGNMENT_JUSTIFIED
-};
-
-enum V_TextAlignment
-{
-	TOP = DWRITE_PARAGRAPH_ALIGNMENT_NEAR,
-	CENTER = DWRITE_PARAGRAPH_ALIGNMENT_CENTER,
-	BOTTOM = DWRITE_PARAGRAPH_ALIGNMENT_FAR
-};
-
-class Text
-{
-public:
-	Text(Core* core, const std::string& text);
-	~Text();
-
-	void draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
-	void setText(const std::string& text);
-	void setFont(const Font& font);
-	void setColor(const Color& color);
-	void setHorizontalAlignment(H_TextAlignment hAlign);
-	void setVerticalAlignment(V_TextAlignment vAlign);
-
-private:
-	IDWriteTextFormat* m_fontFormat;
-	Core* m_core;
-	std::string m_text;
-	Font m_font;
-	H_TextAlignment m_hAlign;
-	V_TextAlignment m_vAlign;
-	Color m_color;
-
-	bool createFontFormat();
-};
+class Core;
 
 struct Color
 {
@@ -114,8 +50,79 @@ struct ColorTheme
 	Color{ 0, 0, 0 }, Color{ 204, 228, 247 }, Color{ 1, 86, 155 } \
 }
 
-struct DPIHandler
+enum class FontWeight
 {
+	XLIGHT = DWRITE_FONT_WEIGHT_THIN,
+	LIGHT = DWRITE_FONT_WEIGHT_LIGHT,
+	NORMAL = DWRITE_FONT_WEIGHT_NORMAL,
+	BOLD = DWRITE_FONT_WEIGHT_BOLD,
+	XBOLD = DWRITE_FONT_WEIGHT_HEAVY
+};
+
+enum class FontStyle
+{
+	NORMAL = DWRITE_FONT_STYLE_NORMAL,
+	ITALIC = DWRITE_FONT_STYLE_ITALIC,
+	OBLIQUE = DWRITE_FONT_STYLE_OBLIQUE
+};
+
+struct Font
+{
+	Font(float size, const std::string& family, FontWeight weight, FontStyle style)
+		: size(size), family(family), weight(weight), style(style) {};
+	float size;
+	std::string family;
+	FontWeight weight;
+	FontStyle style;
+};
+
+enum class H_TextAlignment
+{
+	LEADING = DWRITE_TEXT_ALIGNMENT_LEADING,
+	CENTER = DWRITE_TEXT_ALIGNMENT_CENTER,
+	TRAILING = DWRITE_TEXT_ALIGNMENT_TRAILING,
+	JUSTIFIED = DWRITE_TEXT_ALIGNMENT_JUSTIFIED
+};
+
+enum class V_TextAlignment
+{
+	TOP = DWRITE_PARAGRAPH_ALIGNMENT_NEAR,
+	CENTER = DWRITE_PARAGRAPH_ALIGNMENT_CENTER,
+	BOTTOM = DWRITE_PARAGRAPH_ALIGNMENT_FAR
+};
+
+class Text
+{
+public:
+	Text(Core* core, const std::string& text);
+	~Text();
+
+	void draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+	void setText(const std::string& text);
+	void setFont(const Font& font);
+	void setColor(const Color& color);
+	void setHorizontalAlignment(H_TextAlignment hAlign);
+	void setVerticalAlignment(V_TextAlignment vAlign);
+
+	std::string& getText();
+	IDWriteTextFormat* getFontFormat();
+	bool fontFormatChanged;
+
+private:
+	IDWriteTextFormat* m_fontFormat;
+	Core* m_core;
+	std::string m_text;
+	Font m_font;
+	H_TextAlignment m_hAlign;
+	V_TextAlignment m_vAlign;
+	Color m_color;
+
+	bool createFontFormat();
+};
+
+class DPIHandler
+{
+public:
 	static void Initialize(HWND windowHandle);
 	static float PixelsToDips(float f);
 	static D2D1_POINT_2F adjusted(D2D1_POINT_2F point);
@@ -127,8 +134,9 @@ private:
 	static float DpiAdjusted(float f, float dir = 0.5f);
 };
 
-struct Timer
+class Timer
 {
+public:
 	Timer(HWND windowHandle, uint32_t timeout = 1000, std::function<void()> callback = nullptr);
 	void start();
 	void stop();

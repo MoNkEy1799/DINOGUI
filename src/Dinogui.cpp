@@ -12,10 +12,9 @@
 using namespace DINOGUI;
 
 Text::Text(Core* core, const std::string& text)
-	: font(DINOGUI_FONT_DEFAULT), hAlign(H_TextAlignment::CENTER), vAlign(V_TextAlignment::CENTER),
-	color({ 0, 0, 0 }), m_fontFormat(nullptr), m_core(core)
+	: m_font(DINOGUI_FONT_DEFAULT), m_hAlign(H_TextAlignment::CENTER), m_vAlign(V_TextAlignment::CENTER),
+	  m_color({ 0, 0, 0 }), m_fontFormat(nullptr), m_core(core), fontFormatChanged(false), m_text(text)
 {
-
 }
 
 Text::~Text()
@@ -28,6 +27,7 @@ void Text::draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D
 	if (!m_fontFormat)
 	{
 		throwIfFailed(createFontFormat(), "Failed to create text format");
+		fontFormatChanged = true;
 	}
 
 	brush->SetColor(Color::d2d1(m_color));
@@ -60,6 +60,16 @@ void Text::setVerticalAlignment(V_TextAlignment vAlign)
 {
 	m_vAlign = vAlign;
 	safeReleaseInterface(&m_fontFormat);
+}
+
+std::string& Text::getText()
+{
+	return m_text;
+}
+
+IDWriteTextFormat* Text::getFontFormat()
+{
+	return m_fontFormat;
 }
 
 bool Text::createFontFormat()

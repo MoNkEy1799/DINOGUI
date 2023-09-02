@@ -11,11 +11,17 @@ using namespace DINOGUI;
 
 Checkbox::Checkbox(Core* core, const std::string& text)
     : Widget(core), m_check(false), m_boxPoint(m_point), m_textPoint(m_point),
-      m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size)
+      m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size), m_text(nullptr)
 {
+    m_text = new Text(core, text);
+    m_text->setHorizontalAlignment(H_TextAlignment::LEADING);
     m_type = WidgetType::CHECKBOX;
-    m_text = text;
     m_size = { 80.0f, 20.0f };
+}
+
+Checkbox::~Checkbox()
+{
+    delete m_text;
 }
 
 void Checkbox::setSize(int width, int height)
@@ -58,12 +64,7 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     renderTarget->FillRectangle(boxRect, brush);
     brush->SetColor(border);
     renderTarget->DrawRectangle(boxRect, brush);
-
-    if (!m_fontFormat)
-    {
-        throwIfFailed(createFontFormat(), "Failed to create text format");
-        throwIfFailed(m_fontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING), "Failed to align text format");
-    }
+    m_text->draw(textRect, renderTarget, brush);
 
     if (m_check)
     {
@@ -74,9 +75,6 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         renderTarget->DrawLine(box[1], box[2], brush);
         renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
     }
-
-    brush->SetColor(text);
-    renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, textRect, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }
 
 void Checkbox::place(int x, int y)
@@ -90,7 +88,12 @@ void Checkbox::clicked(float mouseX, float mouseY)
     m_check = !m_check;
 }
 
-bool DINOGUI::Checkbox::isChecked()
+void Checkbox::setText(const std::string& text)
+{
+    m_text->setText(text);
+}
+
+bool Checkbox::isChecked()
 {
     return m_check;
 }
