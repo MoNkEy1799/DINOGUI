@@ -12,8 +12,9 @@
 using namespace DINOGUI;
 
 Text::Text(Core* core, const std::string& text)
-	: m_font(DINOGUI_FONT_DEFAULT), m_hAlign(H_TextAlignment::CENTER), m_vAlign(V_TextAlignment::CENTER),
-	  m_color({ 0, 0, 0 }), m_fontFormat(nullptr), m_core(core), fontFormatChanged(false), m_text(text)
+	: m_font(DINOGUI_FONT_DEFAULT), m_color({ 0, 0, 0 }), m_fontFormat(nullptr),
+	  m_core(core), fontFormatChanged(false), m_text(text),
+	  m_hAlign(DWRITE_TEXT_ALIGNMENT_CENTER), m_vAlign(DWRITE_PARAGRAPH_ALIGNMENT_CENTER)
 {
 }
 
@@ -50,15 +51,25 @@ void Text::setColor(const Color& color)
 	m_color = color;
 }
 
-void Text::setHorizontalAlignment(H_TextAlignment hAlign)
+void Text::setAlignment(Alignment align)
 {
-	m_hAlign = hAlign;
-	safeReleaseInterface(&m_fontFormat);
-}
+	switch (align)
+	{
+	case Alignment::LEFT:
+	case Alignment::RIGHT:
+		m_hAlign = (DWRITE_TEXT_ALIGNMENT)DWrite_Alignment_Map[(int)align];
+		break;
 
-void Text::setVerticalAlignment(V_TextAlignment vAlign)
-{
-	m_vAlign = vAlign;
+	case Alignment::TOP:
+	case Alignment::BOTTOM:
+		m_vAlign = (DWRITE_PARAGRAPH_ALIGNMENT)DWrite_Alignment_Map[(int)align];
+		break;
+
+	case Alignment::CENTER:
+		m_hAlign = (DWRITE_TEXT_ALIGNMENT)DWrite_Alignment_Map[(int)align];
+		m_vAlign = (DWRITE_PARAGRAPH_ALIGNMENT)DWrite_Alignment_Map[(int)align];
+		break;
+	}
 	safeReleaseInterface(&m_fontFormat);
 }
 

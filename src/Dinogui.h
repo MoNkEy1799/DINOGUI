@@ -31,6 +31,7 @@ class Checkbox;
 class Textedit;
 class Image;
 class Canvas;
+class Combobox;
 enum class WidgetState { NORMAL, HOVER, CLICKED };
 enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE, COMBOBOX };
 
@@ -238,12 +239,15 @@ public:
 	void unselect();
 
 	std::string getText();
+	void setPlaceholderText(const std::string& text);
 
 	void keyInput(char key);
 	void otherKeys(uint32_t key);
 
 private:
 	Text* m_text;
+	Text* m_placeholder;
+	Text* m_cutoffText;
 	std::vector<float> m_charWidths;
 	float m_lineHeight;
 	Timer* m_cursorTimer;
@@ -256,7 +260,6 @@ private:
 	void updateCursorPosition(bool increase);
 
 	D2D1_RECT_F currentCursorLine() const;
-	D2D1_RECT_F currentTextRect() const;
 
 	void switchCursor();
 	void restartCursorTimer();

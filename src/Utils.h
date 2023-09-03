@@ -76,19 +76,22 @@ struct Font
 	FontStyle style;
 };
 
-enum class H_TextAlignment
+enum class Alignment
 {
-	LEADING = DWRITE_TEXT_ALIGNMENT_LEADING,
-	CENTER = DWRITE_TEXT_ALIGNMENT_CENTER,
-	TRAILING = DWRITE_TEXT_ALIGNMENT_TRAILING,
-	JUSTIFIED = DWRITE_TEXT_ALIGNMENT_JUSTIFIED
+	LEFT,
+	RIGHT,
+	TOP,
+	BOTTOM,
+	CENTER
 };
 
-enum class V_TextAlignment
+static const std::array<int, 5> DWrite_Alignment_Map =
 {
-	TOP = DWRITE_PARAGRAPH_ALIGNMENT_NEAR,
-	CENTER = DWRITE_PARAGRAPH_ALIGNMENT_CENTER,
-	BOTTOM = DWRITE_PARAGRAPH_ALIGNMENT_FAR
+	DWRITE_TEXT_ALIGNMENT_LEADING,
+	DWRITE_TEXT_ALIGNMENT_TRAILING,
+	DWRITE_PARAGRAPH_ALIGNMENT_NEAR,
+	DWRITE_PARAGRAPH_ALIGNMENT_FAR,
+	DWRITE_TEXT_ALIGNMENT_CENTER
 };
 
 class Text
@@ -101,8 +104,7 @@ public:
 	void setText(const std::string& text);
 	void setFont(const Font& font);
 	void setColor(const Color& color);
-	void setHorizontalAlignment(H_TextAlignment hAlign);
-	void setVerticalAlignment(V_TextAlignment vAlign);
+	void setAlignment(Alignment align);
 
 	std::string& getText();
 	IDWriteTextFormat* getFontFormat();
@@ -113,8 +115,8 @@ private:
 	Core* m_core;
 	std::string m_text;
 	Font m_font;
-	H_TextAlignment m_hAlign;
-	V_TextAlignment m_vAlign;
+	DWRITE_TEXT_ALIGNMENT m_hAlign;
+	DWRITE_PARAGRAPH_ALIGNMENT m_vAlign;
 	Color m_color;
 
 	bool createFontFormat();

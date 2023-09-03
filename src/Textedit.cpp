@@ -12,10 +12,12 @@ using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
     : Widget(core), m_selected(false), m_drawCursor(false), m_cursorTimer(nullptr),
-      m_cursorPosition(0), m_lineHeight(0.0f), m_text(nullptr)
+      m_cursorPosition(0), m_lineHeight(0.0f), m_text(nullptr), m_placeholder(nullptr)
 {
     m_text = new Text(core, "");
-    m_text->setHorizontalAlignment(H_TextAlignment::LEADING);
+    m_text->setAlignment(Alignment::LEFT);
+    m_cutoffText = new Text(core, "");
+    m_cutoffText->setAlignment(Alignment::LEFT);
     m_type = WidgetType::TEXTEDIT;
     m_drawBackground = true;
     m_drawBorder = true;
@@ -40,7 +42,8 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         m_theme.brd = Color{ 1, 86, 155 };
     }
     drawBasicShape(renderTarget, brush);
-    D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
+    D2D1_RECT_F textRect = currentRect();
+    textRect.left += 2.0f;
     m_text->draw(textRect, renderTarget, brush);
 
     if (m_text->fontFormatChanged)
@@ -57,6 +60,11 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
                 m_charWidths.push_back(calculateCharDimension(c));
             }
         }
+    }
+
+    if (m_placeholder && !m_selected && m_charWidths.empty())
+    {
+        m_placeholder->draw(textRect, renderTarget, brush);
     }
     
     if (m_drawCursor)
@@ -104,6 +112,17 @@ std::string Textedit::getText()
     return m_text->getText();
 }
 
+void Textedit::setPlaceholderText(const std::string& text)
+{
+    if (!m_placeholder)
+    {
+        m_placeholder = new Text(m_core, "");
+    }
+    m_placeholder->setText(text);
+    m_placeholder->setColor(DINOCOLOR_LIGHTGRAY);
+    m_placeholder->setAlignment(Alignment::LEFT);
+}
+
 void Textedit::keyInput(char key)
 {
     std::string& text = m_text->getText();
@@ -122,6 +141,12 @@ void Textedit::keyInput(char key)
         text.insert(m_cursorPosition, 1, key);
         m_charWidths.insert(m_charWidths.begin() + m_cursorPosition, calculateCharDimension(key));
         updateCursorPosition(true);
+    }
+
+    D2D1_RECT_F rect = currentRect();
+    if (std::accumulate(m_charWidths.begin(), m_charWidths.end(), 0.0) > rect.right - rect.left - 2.0f)
+    {
+
     }
     m_core->redrawScreen();
 }
@@ -173,7 +198,7 @@ uint32_t Textedit::getCursorPosition(float x)
         return 0;
     }
 
-    float width = currentTextRect().left;
+    float width = currentRect().left + 2.0f;
     size_t pos = 0;
     while (pos < text.size())
     {
@@ -205,18 +230,13 @@ void Textedit::updateCursorPosition(bool increase)
 
 D2D1_RECT_F Textedit::currentCursorLine() const
 {
-    D2D1_RECT_F textRect = currentTextRect();
-    float yGap = (textRect.bottom - textRect.top - m_lineHeight) / 2.0f;
+    D2D1_RECT_F rect = currentRect();
+    float yGap = (rect.bottom - rect.top - m_lineHeight) / 2.0f;
     float xGap = std::accumulate(m_charWidths.begin(), m_charWidths.begin() + m_cursorPosition, 0.0f);
-    xGap = std::min(xGap, textRect.right - textRect.left);
-    return { textRect.left + xGap, textRect.top + yGap,
-             textRect.left + xGap, textRect.top + yGap + m_lineHeight };
-}
-
-D2D1_RECT_F Textedit::currentTextRect() const
-{
-    D2D1_RECT_F current = currentRect();
-    return { current.left + 2.0f, current.top, current.right - 2.0f, current.bottom };
+    yGap = std::max(yGap, 0.0f);
+    xGap = std::min(xGap, rect.right - rect.left - 4.0f);
+    return { rect.left + xGap + 2.0f, rect.top + yGap,
+             rect.left + xGap + 2.0f, rect.top + yGap + m_lineHeight };
 }
 
 void Textedit::switchCursor()

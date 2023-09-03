@@ -14,7 +14,7 @@ Checkbox::Checkbox(Core* core, const std::string& text)
       m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size), m_text(nullptr)
 {
     m_text = new Text(core, text);
-    m_text->setHorizontalAlignment(H_TextAlignment::LEADING);
+    m_text->setAlignment(Alignment::LEFT);
     m_type = WidgetType::CHECKBOX;
     m_size = { 80.0f, 20.0f };
 }

@@ -39,6 +39,7 @@ int main()
 	label->place(120, 50);
 	checkbox->place(190, 50);
 	textedit->place(300, 50);
+	textedit->setPlaceholderText("Edit now");
 	image->place(50, 100);
 	canvas->place(180, 100);
 	table->place(60, 500);
