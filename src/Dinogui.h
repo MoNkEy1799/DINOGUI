@@ -251,8 +251,7 @@ private:
 	std::vector<float> m_charWidths;
 	float m_lineHeight;
 	Timer* m_cursorTimer;
-	bool m_selected;
-	bool m_drawCursor;
+	bool m_selected, m_drawCursor, m_trailing;
 	uint32_t m_cursorPosition;
 
 	float calculateCharDimension(char character);
@@ -364,8 +363,8 @@ private:
 class Combobox : public Widget
 {
 public:
-	Combobox(Core* core);
-	~Combobox() = default;
+	Combobox(Core* core, const std::string& text = "");
+	~Combobox();
 	Combobox(const Combobox&) = delete;
 	Combobox(Combobox&&) = delete;
 	Combobox& operator=(const Combobox&) = delete;
@@ -373,9 +372,11 @@ public:
 
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override {};
+	void clicked(float mouseX, float mouseY) override;
+	void unselect();
 
 private:
+	std::vector<Text*> m_boxText;
 };
 
 }

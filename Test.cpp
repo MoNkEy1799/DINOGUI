@@ -32,6 +32,7 @@ int main()
 	DINOGUI::Image* image = new DINOGUI::Image(core, "Dino.png");
 	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, 300, 300);
 	DINOGUI::Table* table = new DINOGUI::Table(core);
+	DINOGUI::Combobox* combo = new DINOGUI::Combobox(core, "combo");
 
 	button->place(50, 50);
 	button2->place(110, 70);
@@ -61,6 +62,8 @@ int main()
 	canvas->drawCircle({ 240, 240 }, 24, { 255, 0, 0 });
 	canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });
 	canvas->drawTriangle({ 250, 60 }, { 280, 200 }, { 200, 70 }, { 255, 0, 255 });
+
+	combo->place(300, 20);
 
 	button->connect([textedit] { testClickFunc(textedit); });
 

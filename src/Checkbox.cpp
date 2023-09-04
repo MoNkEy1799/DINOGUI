@@ -35,7 +35,6 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     //drawBasicShape(renderTarget, brush);
     D2D1_COLOR_F background = Color::d2d1(m_theme.bg);
     D2D1_COLOR_F border = Color::d2d1(m_theme.brd);
-    D2D1_COLOR_F text = Color::d2d1(m_theme.txt);
     D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
     D2D1_RECT_F boxRect = DPIHandler::adjusted(currentBoxRect());
 
@@ -44,19 +43,16 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     case WidgetState::NORMAL:
         background = Color::d2d1(Color{ 255, 255, 255 });
         border = Color::d2d1(Color{ 51, 51, 51 });
-        text = Color::d2d1(m_theme.txt);
         break;
 
     case WidgetState::HOVER:
         background = Color::d2d1(m_theme.bg_h);
         border = Color::d2d1(Color{ 0, 120, 215 });
-        text = Color::d2d1(m_theme.txt_h);
         break;
 
     case WidgetState::CLICKED:
         background = Color::d2d1(m_theme.bg_c);
         border = Color::d2d1(m_theme.brd_c);
-        text = Color::d2d1(m_theme.txt_c);
         break;
     }
 

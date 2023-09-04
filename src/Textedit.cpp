@@ -144,7 +144,7 @@ void Textedit::keyInput(char key)
     }
 
     D2D1_RECT_F rect = currentRect();
-    if (std::accumulate(m_charWidths.begin(), m_charWidths.end(), 0.0) > rect.right - rect.left - 2.0f)
+    if (std::accumulate(m_charWidths.begin(), m_charWidths.begin(), 0.0) > rect.right - rect.left - 2.0f)
     {
 
     }
