@@ -7,11 +7,18 @@
 #include <string>
 #include <iostream>
 #include <functional>
+#include <random>
 
 #define DINOCOLOR_WINDOW_DARK DINOGUI::Color{ 36, 37, 46 }
 #define DINOCOLOR_WINDOW_LIGHT DINOGUI::Color{ 240, 240, 240 }
 
+#define DINOCOLOR_WHITE DINOGUI::Color{ 255, 255, 255 }
 #define DINOCOLOR_LIGHTGRAY DINOGUI::Color{ 178, 178, 178 }
+#define DINOCOLOR_DARKGRAY DINOGUI::Color{ 98, 98, 98 }
+#define DINOCOLOR_BLACK DINOGUI::Color{ 0, 0, 0 }
+#define DINOCOLOR_RED DINOGUI::Color{ 255, 0, 0 }
+#define DINOCOLOR_GREEN DINOGUI::Color{ 0, 255, 0}
+#define DINOCOLOR_BLUE DINOGUI::Color{ 0, 0, 255 }
 
 
 #define DINOGUI_THEME_DARK \
@@ -129,11 +136,12 @@ public:
 	static float PixelsToDips(float f);
 	static D2D1_POINT_2F adjusted(D2D1_POINT_2F point);
 	static D2D1_RECT_F adjusted(D2D1_RECT_F rect);
+	static float adjusted(float f);
 	static float getScale();
 
 private:
     static float m_scale;
-	static float DpiAdjusted(float f, float dir = 0.5f);
+	static float adjust(float f, float dir = 0.5f);
 };
 
 class Timer
@@ -153,6 +161,20 @@ private:
 	
 	bool m_active;
 	HWND m_windowHandle;
+};
+
+class Random
+{
+public:
+	static void seed(uint32_t seed = std::random_device()());
+	static std::mt19937 getEngine();
+
+	static float randFloat(float min = 0.0f, float max = 1.0f);
+	static int randInt(int min, int max);
+	static bool randBool();
+
+private:
+	static std::mt19937 m_randomEngine;
 };
 
 enum class EventType { ENTER_EVENT, LEAVE_EVENT, CLICK_EVENT, REALEASE_EVENT, UNSELECT_EVENT };

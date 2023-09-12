@@ -1,5 +1,4 @@
 #include "src/Dinogui.h"
-#include "src/Random.h"
 
 void testClickFunc(DINOGUI::Widget* wid)
 {
@@ -64,6 +63,10 @@ int main()
 	canvas->drawTriangle({ 250, 60 }, { 280, 200 }, { 200, 70 }, { 255, 0, 255 });
 
 	combo->place(300, 20);
+	combo->addItem("One");
+	combo->addItem("Two");
+	combo->addItem("Three");
+	combo->addItem("Four");
 
 	button->connect([textedit] { testClickFunc(textedit); });
 

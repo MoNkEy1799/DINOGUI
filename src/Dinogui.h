@@ -209,7 +209,7 @@ public:
 	void clicked(float mouseX, float mouseY) override;
 
 	void setText(const std::string& text);
-	bool isChecked();
+	bool isChecked() const;
 
 private:
 	Text* m_text;
@@ -217,7 +217,7 @@ private:
 	D2D1_SIZE_F m_boxSize, m_textSize;
 	bool m_check;
 
-	std::array<D2D1_POINT_2F, 3> currentCheckbox();
+	std::array<D2D1_POINT_2F, 3> currentCheckbox() const;
 	void calculateBoxAndTextLayout();
 	D2D1_RECT_F currentTextRect() const;
 	D2D1_RECT_F currentBoxRect() const;
@@ -238,7 +238,7 @@ public:
 	void clicked(float mouseX, float mouseY) override;
 	void unselect();
 
-	std::string getText();
+	std::string getText() const;
 	void setPlaceholderText(const std::string& text);
 
 	void keyInput(char key);
@@ -255,7 +255,7 @@ private:
 	uint32_t m_cursorPosition;
 
 	float calculateCharDimension(char character);
-	uint32_t getCursorPosition(float x);
+	uint32_t getCursorPosition(float x) const;
 	void updateCursorPosition(bool increase);
 
 	D2D1_RECT_F currentCursorLine() const;
@@ -374,9 +374,23 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override;
 	void unselect();
+	bool dropdownContains(float x, float y) const;
+	void setHoverIndex(int index);
+
+	void addItem(const std::string& text);
+	void insertItem(const std::string& text, int index);
+	void removeItem(int index);
+	std::string getCurrentText() const;
+	int getCurrentIndex() const;
 
 private:
 	std::vector<Text*> m_boxText;
+	int m_currentIndex, m_hoverIndex;
+	bool m_dropdown;
+
+	std::array<D2D1_POINT_2F, 3> getArrowPoints() const;
+	int indexUnderMouse(float x, float y) const;
+	void drawDropdown(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 };
 
 }

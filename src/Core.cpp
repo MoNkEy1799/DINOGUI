@@ -191,6 +191,10 @@ void Core::paintWidgets()
     {
         widget->draw(m_renderTarget, m_colorBrush);
     }
+    if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::COMBOBOX)
+    {
+        dynamic_cast<Combobox*>(m_selectedWidget)->draw(m_renderTarget, m_colorBrush);
+    }
 
     HRESULT hResult = m_renderTarget->EndDraw();
 
@@ -329,11 +333,18 @@ D2D1_SIZE_U Core::getCurrentWindowSize() const
 
 Widget* Core::getWidgetUnderMouse(float x, float y) const
 {
-    for (Widget* widget : m_displayWidgets)
+    if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::COMBOBOX)
     {
-        if (widget->contains(x, y))
+        if (dynamic_cast<const Combobox*>(m_selectedWidget)->dropdownContains(x, y))
         {
-            return widget;
+            return m_selectedWidget;
+        }
+    }
+    for (auto rev = m_displayWidgets.rbegin(); rev != m_displayWidgets.rend(); rev++)
+    {
+        if ((*rev)->contains(x, y))
+        {
+            return (*rev);
         }
     }
     return nullptr;

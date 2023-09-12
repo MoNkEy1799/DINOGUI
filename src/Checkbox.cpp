@@ -89,15 +89,15 @@ void Checkbox::setText(const std::string& text)
     m_text->setText(text);
 }
 
-bool Checkbox::isChecked()
+bool Checkbox::isChecked() const
 {
     return m_check;
 }
 
-std::array<D2D1_POINT_2F, 3> Checkbox::currentCheckbox()
+std::array<D2D1_POINT_2F, 3> Checkbox::currentCheckbox() const
 {
     D2D1_RECT_F box = currentBoxRect();
-    return { { {box.left + 10.5f, box.top + 3.5f}, { box.left + 5.0f, box.top + 10.0f }, { box.left + 2.0f, box.top + 7.0f } } };
+    return { {{ box.left + 10.5f, box.top + 3.5f }, { box.left + 5.0f, box.top + 10.0f }, { box.left + 2.0f, box.top + 7.0f }} };
 }
 
 void Checkbox::calculateBoxAndTextLayout()

@@ -43,7 +43,6 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     }
     drawBasicShape(renderTarget, brush);
     D2D1_RECT_F textRect = currentRect();
-    textRect.left += 2.0f;
     m_text->draw(textRect, renderTarget, brush);
 
     if (m_text->fontFormatChanged)
@@ -107,7 +106,7 @@ void Textedit::unselect()
     m_core->redrawScreen();
 }
 
-std::string Textedit::getText()
+std::string Textedit::getText() const
 {
     return m_text->getText();
 }
@@ -190,7 +189,7 @@ float Textedit::calculateCharDimension(char character)
     return metrics.widthIncludingTrailingWhitespace;
 }
 
-uint32_t Textedit::getCursorPosition(float x)
+uint32_t Textedit::getCursorPosition(float x) const
 {
     std::string& text = m_text->getText();
     if (text.empty())

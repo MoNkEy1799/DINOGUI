@@ -45,8 +45,8 @@ WidgetType Widget::getWidgetType() const
 
 bool Widget::contains(float x, float y) const
 {
-	bool inX = (x > m_point.x && x < m_point.x + m_size.width);
-	bool inY = (y > m_point.y && y < m_point.y + m_size.height);
+	bool inX = (x >= m_point.x && x <= m_point.x + m_size.width);
+	bool inY = (y >= m_point.y && y <= m_point.y + m_size.height);
 	return ( inX && inY );
 }
 
@@ -151,6 +151,10 @@ void Widget::unselectEvent()
     if (m_type == WidgetType::TEXTEDIT)
     {
         dynamic_cast<Textedit*>(this)->unselect();
+    }
+    if (m_type == WidgetType::COMBOBOX)
+    {
+        dynamic_cast<Combobox*>(this)->unselect();
     }
     m_state = WidgetState::NORMAL;
     m_core->setSelectedWidget(nullptr);

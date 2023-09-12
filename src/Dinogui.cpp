@@ -8,6 +8,7 @@
 #include <cmath>
 #include <functional>
 #include <string>
+#include <random>
 
 using namespace DINOGUI;
 
@@ -31,6 +32,10 @@ void Text::draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D
 		fontFormatChanged = true;
 	}
 
+	rectangle.left += 2.0f;
+	rectangle.top += 2.0f;
+	rectangle.right -= 2.0f;
+	rectangle.bottom -= 2.0f;
 	brush->SetColor(Color::d2d1(m_color));
 	renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, rectangle, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }
@@ -128,13 +133,17 @@ float DPIHandler::PixelsToDips(float f)
 
 D2D1_POINT_2F DPIHandler::adjusted(D2D1_POINT_2F point)
 {
-	return { DpiAdjusted(point.x), DpiAdjusted(point.y) };
+	return { adjust(point.x), adjust(point.y) };
 }
 
 D2D1_RECT_F DPIHandler::adjusted(D2D1_RECT_F rect)
 {
-	return { DpiAdjusted(rect.left), DpiAdjusted(rect.top),
-			 DpiAdjusted(rect.right, -0.5f), DpiAdjusted(rect.bottom, -0.5f) };
+	return { adjust(rect.left), adjust(rect.top),
+			 adjust(rect.right, -0.5f), adjust(rect.bottom, -0.5f) };
+}
+float DPIHandler::adjusted(float f)
+{
+	return adjust(f);
 }
 
 float DPIHandler::getScale()
@@ -142,7 +151,7 @@ float DPIHandler::getScale()
 	return m_scale;
 }
 
-float DPIHandler::DpiAdjusted(float f, float dir)
+float DPIHandler::adjust(float f, float dir)
 {
 	return (std::floor(f * m_scale) + dir) / m_scale;
 }
@@ -187,6 +196,35 @@ void Timer::timerFunction(HWND, uint32_t, uint64_t classPtr, DWORD)
 {
 	Timer* self = (Timer*)classPtr;
 	self->callback();
+}
+
+std::mt19937 Random::m_randomEngine;
+
+void Random::seed(uint32_t seed)
+{
+	m_randomEngine.seed(seed);
+}
+
+std::mt19937 Random::getEngine()
+{
+	return m_randomEngine;
+}
+
+float Random::randFloat(float min, float max)
+{
+	std::uniform_real_distribution<float> floatDist(min, max);
+	return floatDist(m_randomEngine);
+}
+
+int Random::randInt(int min, int max)
+{
+	std::uniform_int_distribution<int> intDist(min, max);
+	return intDist(m_randomEngine);
+}
+
+bool Random::randBool()
+{
+	return (randFloat() <= 0.5) ? true : false;
 }
 
 std::wstring DINOGUI::toWideString(const std::string& string)
