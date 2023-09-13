@@ -194,6 +194,7 @@ bool Widget::hoverableWidget(const WidgetType& type)
     case WidgetType::CHECKBOX:
     case WidgetType::TEXTEDIT:
     case WidgetType::COMBOBOX:
+    case WidgetType::SLIDER:
         return true;
     }
     return false;
@@ -205,6 +206,7 @@ bool Widget::clickableWidget(const WidgetType& type)
     {
     case WidgetType::BUTTON:
     case WidgetType::CHECKBOX:
+    case WidgetType::SLIDER:
         return true;
     }
     return false;

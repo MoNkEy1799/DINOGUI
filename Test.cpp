@@ -6,19 +6,6 @@ void testClickFunc(DINOGUI::Widget* wid)
 	std::cout << ((DINOGUI::Combobox*)wid)->getCurrentIndex() << std::endl;
 }
 
-int main2()
-{
-	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 800, 800);
-	DINOGUI::Button* button = new DINOGUI::Button(core, "Test");
-	DINOGUI::Button* button2 = new DINOGUI::Button(core, "Test2");
-	button->place(0, 0);
-	button->setSize(100, 100);
-	button2->place(50, 100);
-	button2->setSize(100, 100);
-	core->run();
-	return 0;
-}
-
 int main()
 {
 	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 800, 1000);
@@ -31,7 +18,8 @@ int main()
 	DINOGUI::Image* image = new DINOGUI::Image(core, "Dino.png");
 	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, 300, 300);
 	DINOGUI::Table* table = new DINOGUI::Table(core);
-	DINOGUI::Combobox* combo = new DINOGUI::Combobox(core, "combo");
+	DINOGUI::Combobox* combo = new DINOGUI::Combobox(core, "Combo");
+	DINOGUI::Slider* slider = new DINOGUI::Slider(core);
 
 	button->place(50, 50);
 	button2->place(110, 70);
@@ -67,6 +55,8 @@ int main()
 	combo->addItem("Two");
 	combo->addItem("Three");
 	combo->addItem("Four");
+
+	slider->place(100, 420);
 
 	button->connect([textedit] { testClickFunc(textedit); });
 	button2->connect([combo] { testClickFunc(combo); });

@@ -32,8 +32,9 @@ class Textedit;
 class Image;
 class Canvas;
 class Combobox;
+class Slider;
 enum class WidgetState { NORMAL, HOVER, CLICKED };
-enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE, COMBOBOX };
+enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE, COMBOBOX, SLIDER };
 
 class Core : public TemplateWindow<Core>
 {
@@ -392,6 +393,30 @@ private:
 	std::array<D2D1_POINT_2F, 3> getArrowPoints() const;
 	int indexUnderMouse(float x, float y) const;
 	void drawDropdown(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+};
+
+class Slider : public Widget
+{
+public:
+	Slider(Core* core);
+	~Slider() = default;
+	Slider(const Slider&) = delete;
+	Slider(Slider&&) = delete;
+	Slider& operator=(const Slider&) = delete;
+	Slider& operator=(Slider&&) = delete;
+
+	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void place(int x, int y) override;
+	void clicked(float mouseX, float mouseY) override;
+	void moveSlider(float x, float y);
+
+	void setVertical();
+	void setMaxTicks(int ticks);
+	int getCurrentTick();
+
+private:
+	int m_ticks, m_currentTick;
+	bool m_vertical;
 };
 
 }
