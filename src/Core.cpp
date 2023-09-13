@@ -248,14 +248,16 @@ void Core::mouseMove(int posX, int posY, DWORD flags)
             underMouse->receiveEvent(new Event(EventType::ENTER_EVENT, x, y));
         }
     }
+    else if (underMouse && underMouse->getWidgetType() == WidgetType::COMBOBOX)
+    {
+        dynamic_cast<Combobox*>(underMouse)->setHoverIndex(x, y);
+    }
 }
 
 void Core::leftClick(int posX, int posY, DWORD flags)
 {
     float x = DPIHandler::PixelsToDips((float)posX);
     float y = DPIHandler::PixelsToDips((float)posY);
-
-    //std::cout << "Mouse Pos: " << x << " | " << y << std::endl;
 
     Widget* underMouse = getWidgetUnderMouse(x, y);
     if (!underMouse)

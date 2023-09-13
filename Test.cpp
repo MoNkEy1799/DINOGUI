@@ -3,7 +3,7 @@
 void testClickFunc(DINOGUI::Widget* wid)
 {
 	std::cout << "Button clicked" << std::endl;
-	std::cout << ((DINOGUI::Textedit*)wid)->getText() << std::endl;
+	std::cout << ((DINOGUI::Combobox*)wid)->getCurrentIndex() << std::endl;
 }
 
 int main2()
@@ -69,6 +69,7 @@ int main()
 	combo->addItem("Four");
 
 	button->connect([textedit] { testClickFunc(textedit); });
+	button2->connect([combo] { testClickFunc(combo); });
 
 	core->run();
 	return 0;

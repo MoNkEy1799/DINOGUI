@@ -9,7 +9,8 @@
 using namespace DINOGUI;
 
 Combobox::Combobox(Core* core, const std::string& text)
-	: Widget(core), m_boxText({ nullptr }), m_currentIndex(0), m_hoverIndex(-1), m_dropdown(false)
+	: Widget(core), m_boxText({ nullptr }), m_currentIndex(0), m_hoverIndex(-1),
+      m_dropdown(false), m_upward(false)
 {
     m_boxText[0] = new Text(core, text);
     m_boxText[0]->setAlignment(Alignment::LEFT);
@@ -50,7 +51,13 @@ void Combobox::place(int x, int y)
 
 void Combobox::clicked(float mouseX, float mouseY)
 {
-    m_dropdown = true;
+    m_dropdown = !m_dropdown;
+    if (m_hoverIndex != -1)
+    {
+        m_currentIndex = m_hoverIndex;
+        m_core->setSelectedWidget(nullptr);
+        m_state = WidgetState::NORMAL;
+    }
 }
 
 void Combobox::unselect()
@@ -67,19 +74,28 @@ bool Combobox::dropdownContains(float x, float y) const
     return true;
 }
 
-void Combobox::setHoverIndex(int index)
+void Combobox::setHoverIndex(float x, float y)
 {
-    m_hoverIndex = index;
+    int index = indexUnderMouse(x, y);
+    if (index != m_hoverIndex)
+    {
+        m_hoverIndex = index;
+        m_core->redrawScreen();
+    }
 }
 
 void Combobox::addItem(const std::string& text)
 {
-    m_boxText.push_back(new Text(m_core, text));
+    Text* textWidget = new Text(m_core, text);
+    textWidget->setAlignment(Alignment::LEFT);
+    m_boxText.push_back(textWidget);
 }
 
 void Combobox::insertItem(const std::string& text, int index)
 {
-    m_boxText.insert(m_boxText.begin() + index, new Text(m_core, text));
+    Text* textWidget = new Text(m_core, text);
+    textWidget->setAlignment(Alignment::LEFT);
+    m_boxText.insert(m_boxText.begin() + index, textWidget);
 }
 
 void Combobox::removeItem(int index)
@@ -89,6 +105,11 @@ void Combobox::removeItem(int index)
         return;
     }
     m_boxText.erase(m_boxText.begin() + index);
+}
+
+void Combobox::changeUnfoldDirection(bool upward)
+{
+    m_upward = true;
 }
 
 std::string Combobox::getCurrentText() const
@@ -105,16 +126,17 @@ std::array<D2D1_POINT_2F, 3> Combobox::getArrowPoints() const
 {
     D2D1_RECT_F rect = currentRect();
     rect = { rect.right - 16.0f, rect.top, rect.right, rect.bottom };
-    float midWidth = rect.left + (rect.right - rect.left) / 2.0f;
-    float midHeight = rect.top + (rect.bottom - rect.top) / 2.0f;
+    float midWidth = std::floor(rect.left + (rect.right - rect.left) / 2.0f);
+    float midHeight = std::floor(rect.top + (rect.bottom - rect.top) / 2.0f);
     return { {{ midWidth - 4.0f, midHeight - 1.0f }, { midWidth, midHeight + 3.0f }, { midWidth + 5.0f, midHeight - 2.0f }} };
 }
 
 int Combobox::indexUnderMouse(float x, float y) const
 {
+    int dir = m_upward ? 1 : -1;
     for (int i = 0; i < m_boxText.size(); i++)
     {
-        if (contains(x, y - m_size.height * (i + 1)))
+        if (contains(x, y + dir * m_size.height * (i + 1)))
         {
             return i;
         }
@@ -130,7 +152,9 @@ void Combobox::drawDropdown(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColor
     }
 
     D2D1_RECT_F rect = currentRect();
-    rect = { rect.left, rect.bottom, rect.right, rect.bottom + m_boxText.size() * m_size.height };
+    int dir = m_upward ? -1 : 1;
+    float y = m_upward ? rect.top : rect.bottom;
+    rect = { rect.left, y, rect.right, y + dir * (int)m_boxText.size() * m_size.height };
     brush->SetColor(Color::d2d1(DINOCOLOR_WHITE));
     renderTarget->FillRectangle(DPIHandler::adjusted(rect), brush);
     brush->SetColor(Color::d2d1(m_theme.brd));
@@ -139,8 +163,8 @@ void Combobox::drawDropdown(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColor
     D2D1_RECT_F boxRect = currentRect();
     for (int i = 0; i < m_boxText.size(); i++)
     {
-        boxRect.top += m_size.height;
-        boxRect.bottom += m_size.height;
+        boxRect.top += dir * m_size.height;
+        boxRect.bottom += dir * m_size.height;
         if (m_hoverIndex == i)
         {
             brush->SetColor(Color::d2d1(m_theme.brd_h));

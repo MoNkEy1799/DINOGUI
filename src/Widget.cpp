@@ -128,8 +128,8 @@ void Widget::clickEvent(float mouseX, float mouseY)
     }
     else if (selectableWidget(m_type))
     {
-        clicked(mouseX, mouseY);
         m_core->setSelectedWidget(this);
+        clicked(mouseX, mouseY);
         m_core->redrawScreen();
     }
 }

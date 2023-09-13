@@ -375,18 +375,19 @@ public:
 	void clicked(float mouseX, float mouseY) override;
 	void unselect();
 	bool dropdownContains(float x, float y) const;
-	void setHoverIndex(int index);
+	void setHoverIndex(float x, float y);
 
 	void addItem(const std::string& text);
 	void insertItem(const std::string& text, int index);
 	void removeItem(int index);
+	void changeUnfoldDirection(bool upward = true);
 	std::string getCurrentText() const;
 	int getCurrentIndex() const;
 
 private:
 	std::vector<Text*> m_boxText;
 	int m_currentIndex, m_hoverIndex;
-	bool m_dropdown;
+	bool m_dropdown, m_upward;
 
 	std::array<D2D1_POINT_2F, 3> getArrowPoints() const;
 	int indexUnderMouse(float x, float y) const;
