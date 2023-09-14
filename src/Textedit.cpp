@@ -11,7 +11,7 @@
 using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
-    : Widget(core), m_selected(false), m_drawCursor(false), m_cursorTimer(nullptr),
+    : Widget(core), m_selected(false), m_drawCursor(false), m_cursorTimer(nullptr), m_trailing(false),
       m_cursorPosition(0), m_lineHeight(0.0f), m_text(nullptr), m_placeholder(nullptr)
 {
     m_text = new Text(core, "");
@@ -23,6 +23,7 @@ Textedit::Textedit(Core* core)
     m_drawBorder = true;
     m_size = { 120.0f, 20.0f };
     m_cursorTimer = new Timer(m_core->getWindowHandle(), 500, [this] { switchCursor(); });
+    m_theme->background = { Color{ 255, 255, 255 }, Color{ 255, 255, 255 }, Color{ 255, 255, 255 } };
 }
 
 Textedit::~Textedit()
@@ -33,23 +34,20 @@ Textedit::~Textedit()
 
 void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    m_theme.bg = Color{ 255, 255, 255 };
-    m_theme.bg_h = Color{ 255, 255, 255 };
-    m_theme.bg_c = Color{ 255, 255, 255 };
-    m_theme.brd = Color{ 51, 51, 51 };
+    D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
+    m_theme->border = { Color{ 51, 51, 51 }, Color{ 0, 120, 215 }, Color{ 51, 51, 51 } };
     if (m_selected)
     {
-        m_theme.brd = Color{ 1, 86, 155 };
+        m_theme->border = { Color{ 1, 86, 155 }, Color{ 1, 86, 155 }, Color{ 1, 86, 155 } };
     }
-    drawBasicShape(renderTarget, brush);
-    D2D1_RECT_F textRect = currentRect();
-    m_text->draw(textRect, renderTarget, brush);
+    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    m_text->setColor(m_theme->text[(int)m_state]);
+    m_text->draw(rect, renderTarget, brush);
 
     if (m_text->fontFormatChanged)
     {
         m_text->fontFormatChanged = false;
         calculateCharDimension('A');
-
         std::string& text = m_text->getText();
         if (text.empty())
         {
@@ -63,15 +61,15 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (m_placeholder && !m_selected && m_charWidths.empty())
     {
-        m_placeholder->draw(textRect, renderTarget, brush);
+        m_placeholder->setColor(m_theme->texteditPlaceholder[(int)m_state]);
+        m_placeholder->draw(rect, renderTarget, brush);
     }
-    
     if (m_drawCursor)
     {
-        brush->SetColor(Color::d2d1(m_theme.txt));
-        D2D1_RECT_F rec = currentCursorLine();
-        renderTarget->DrawLine(DPIHandler::adjusted(D2D1_POINT_2F{ rec.left, rec.top }),
-            DPIHandler::adjusted(D2D1_POINT_2F{ rec.right, rec.bottom }), brush);
+        brush->SetColor(Color::d2d1(m_theme->texteditCursor[(int)m_state]));
+        D2D1_RECT_F cursor = currentCursorLine();
+        renderTarget->DrawLine(DPIHandler::adjusted(D2D1_POINT_2F{ cursor.left, cursor.top }),
+            DPIHandler::adjusted(D2D1_POINT_2F{ cursor.right, cursor.bottom }), brush);
     }
 }
 
@@ -118,7 +116,6 @@ void Textedit::setPlaceholderText(const std::string& text)
         m_placeholder = new Text(m_core, "");
     }
     m_placeholder->setText(text);
-    m_placeholder->setColor(DINOCOLOR_LIGHTGRAY);
     m_placeholder->setAlignment(Alignment::LEFT);
 }
 

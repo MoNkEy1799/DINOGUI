@@ -31,13 +31,13 @@ Canvas::~Canvas()
 
 void Canvas::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    drawBasicShape(renderTarget, brush);
+    D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
+    basicDrawBackgroundBorder(rect, renderTarget, brush);
 
     if (!m_drawingBitmap && m_wicBitmap)
     {
         throwIfFailed(renderTarget->CreateBitmapFromWicBitmap(m_wicBitmap, nullptr, &m_drawingBitmap), "Failed to create Bitmap");
     }
-
     if (m_drawingBitmap)
     {
         renderTarget->DrawBitmap(m_drawingBitmap, DPIHandler::adjusted(bufferRect()));
@@ -362,7 +362,7 @@ void Canvas::checkBounds(int& n) const
     {
         n = 0;
     }
-    else if (n > m_bufferWidth)
+    else if (n > (int)m_bufferWidth)
     {
         n = m_bufferWidth;
     }

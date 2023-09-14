@@ -29,14 +29,15 @@ Combobox::~Combobox()
 
 void Combobox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    drawBasicShape(renderTarget, brush);
-    D2D1_RECT_F rect = currentRect();
-    rect = { rect.left, rect.top, rect.right - 16.0f, rect.bottom };
+    D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
+    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    D2D1_RECT_F textRect = currentRect();
+    textRect = { textRect.left, textRect.top, textRect.right - 16.0f, textRect.bottom };
     std::array<D2D1_POINT_2F, 3> points = getArrowPoints();
-    brush->SetColor(Color::d2d1(DINOCOLOR_BLACK));
+    brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
     renderTarget->DrawLine(DPIHandler::adjusted(points[0]), DPIHandler::adjusted(points[1]), brush);
     renderTarget->DrawLine(DPIHandler::adjusted(points[1]), DPIHandler::adjusted(points[2]), brush);
-    m_boxText[m_currentIndex]->draw(rect, renderTarget, brush);
+    m_boxText[m_currentIndex]->draw(textRect, renderTarget, brush);
 
     if (m_dropdown)
     {
@@ -155,19 +156,20 @@ void Combobox::drawDropdown(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColor
     int dir = m_upward ? -1 : 1;
     float y = m_upward ? rect.top : rect.bottom;
     rect = { rect.left, y, rect.right, y + dir * (int)m_boxText.size() * m_size.height };
-    brush->SetColor(Color::d2d1(DINOCOLOR_WHITE));
+    brush->SetColor(Color::d2d1(m_theme->comboboxEntries[0]));
     renderTarget->FillRectangle(DPIHandler::adjusted(rect), brush);
-    brush->SetColor(Color::d2d1(m_theme.brd));
+    brush->SetColor(Color::d2d1(m_theme->border[(int)m_state]));
     renderTarget->DrawRectangle(DPIHandler::adjusted(rect), brush);
 
     D2D1_RECT_F boxRect = currentRect();
+    boxRect.left += 1.0f;
     for (int i = 0; i < m_boxText.size(); i++)
     {
         boxRect.top += dir * m_size.height;
         boxRect.bottom += dir * m_size.height;
         if (m_hoverIndex == i)
         {
-            brush->SetColor(Color::d2d1(m_theme.brd_h));
+            brush->SetColor(Color::d2d1(m_theme->comboboxEntries[1]));
             renderTarget->FillRectangle(DPIHandler::adjusted(boxRect), brush);
         }
         m_boxText[i]->draw(boxRect, renderTarget, brush);

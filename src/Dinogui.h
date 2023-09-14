@@ -116,7 +116,7 @@ public:
 	void hide();
 	void drawBorder(bool draw = true);
 	void drawBackground(bool draw = true);
-	void setTheme(const ColorTheme& theme);
+	void setTheme(ColorTheme* theme);
 	virtual void setSize(int width, int height);
 
 	WidgetType getWidgetType() const;
@@ -137,7 +137,7 @@ protected:
 	D2D1_POINT_2F m_point;
 	D2D1_SIZE_F m_size;
 	Core* m_core;
-	ColorTheme m_theme;
+	ColorTheme* m_theme;
 	WidgetState m_state;
 	WidgetType m_type;
 	bool m_drawBackground, m_drawBorder;
@@ -148,7 +148,7 @@ protected:
 	D2D1_POINT_2F mapToGlobal(D2D1_POINT_2F point);
 	D2D1_RECT_F currentRect() const;
 
-	void drawBasicShape(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+	void basicDrawBackgroundBorder(const D2D1_RECT_F& rect, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 	void basicPlace(int x, int y);
 };
 
@@ -285,6 +285,8 @@ private:
 	ID2D1Bitmap* m_drawingBitmap;
 	IWICBitmap* m_wicBitmap;
 	uint32_t m_imageWidth, m_imageHeight;
+
+	D2D1_RECT_F bitmapRect() const;
 };
 
 class Canvas : public Widget
@@ -317,7 +319,7 @@ private:
 	IWICBitmap* m_wicBitmap;
 	IWICBitmapLock* m_wicLock;
 	byte* m_buffer;
-	int m_bufferWidth, m_bufferHeight;
+	uint32_t m_bufferWidth, m_bufferHeight;
 
 	void createPixelBuffer();
 	void setColor(const Color& color, size_t pos);

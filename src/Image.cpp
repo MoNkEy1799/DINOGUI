@@ -31,16 +31,17 @@ Image::~Image()
 
 void Image::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    drawBasicShape(renderTarget, brush);
+    D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
+    basicDrawBackgroundBorder(rect, renderTarget, brush);
     
     if (!m_drawingBitmap && m_wicBitmap)
     {
         throwIfFailed(renderTarget->CreateBitmapFromWicBitmap(m_wicBitmap, nullptr, &m_drawingBitmap), "Failed to create Bitmap");
     }
-
     if (m_drawingBitmap)
     {
-        renderTarget->DrawBitmap(m_drawingBitmap, currentRect());
+        D2D1_RECT_F imageRect = DPIHandler::adjusted(bitmapRect());
+        renderTarget->DrawBitmap(m_drawingBitmap, rect);
     }
 }
 
@@ -71,4 +72,10 @@ void Image::loadImageFromFile(const std::string& filename)
     safeReleaseInterface(&decoder);
     safeReleaseInterface(&frameDecode);
     safeReleaseInterface(&converter);
+}
+
+D2D1_RECT_F Image::bitmapRect() const
+{
+    D2D1_RECT_F current = currentRect();
+    return { current.left + 1.0f, current.top + 1.0f, current.right, current.bottom };
 }

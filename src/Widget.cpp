@@ -16,19 +16,22 @@ void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
 }
 
 Widget::Widget(Core* core)
-    : m_core(core), m_theme(DINOGUI_THEME_LIGHT), m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
+    : m_core(core), m_theme(nullptr), m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
       m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_drawBackground(false), m_drawBorder(false)
 {
     m_core->addWidget(this);
+    m_theme = new ColorTheme();
+    ColorTheme::createFromDefault(m_theme);
 }
 
 Widget::~Widget()
 {
     m_core->removeWidget(this);
     m_core->removeDisplayWidget(this);
+    delete m_theme;
 }
 
-void Widget::setTheme(const ColorTheme& theme)
+void Widget::setTheme(ColorTheme* theme)
 {
 	m_theme = theme;
 }
@@ -52,6 +55,7 @@ bool Widget::contains(float x, float y) const
 
 void Widget::show()
 {
+    m_core->removeDisplayWidget(this);
     m_core->addDisplayWidget(this);
     m_core->redrawScreen();
 }
@@ -222,39 +226,17 @@ bool Widget::selectableWidget(const WidgetType& type)
     return false;
 }
 
-void Widget::drawBasicShape(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Widget::basicDrawBackgroundBorder(const D2D1_RECT_F& rect, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    D2D1_COLOR_F colBackground;
-    D2D1_COLOR_F colBorder;
-    D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
-
-    switch (m_state)
-    {
-    case WidgetState::NORMAL:
-        colBackground = Color::d2d1(m_theme.bg);
-        colBorder = Color::d2d1(m_theme.brd);
-        break;
-
-    case WidgetState::HOVER:
-        colBackground = Color::d2d1(m_theme.bg_h);
-        colBorder = Color::d2d1(m_theme.brd_h);
-        break;
-
-    case WidgetState::CLICKED:
-        colBackground = Color::d2d1(m_theme.bg_c);
-        colBorder = Color::d2d1(m_theme.brd_c);
-        break;
-    }
-
     if (m_drawBackground)
     {
-        brush->SetColor(colBackground);
-        renderTarget->FillRectangle(rectangle, brush);
+        brush->SetColor(Color::d2d1(m_theme->background[(int)m_state]));
+        renderTarget->FillRectangle(rect, brush);
     }
     if (m_drawBorder)
     {
-        brush->SetColor(colBorder);
-        renderTarget->DrawRectangle(rectangle, brush);
+        brush->SetColor(Color::d2d1(m_theme->border[(int)m_state]));
+        renderTarget->DrawRectangle(rect, brush);
     }
 }
 

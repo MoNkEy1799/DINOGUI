@@ -45,17 +45,23 @@ struct Color
 
 struct ColorTheme
 {
-	Color txt, bg, brd;
-	Color txt_h, bg_h, brd_h;
-	Color txt_c, bg_c, brd_c;
-};
+	std::array<Color, 3> background;
+	std::array<Color, 3> border;
+	std::array<Color, 3> text;
 
-#define DINOGUI_THEME_LIGHT ColorTheme \
-{ \
-	Color{ 0, 0, 0 }, Color{ 225, 225, 225 }, Color{ 173, 173, 173 }, \
-	Color{ 0, 0, 0 }, Color{ 229, 241, 251 }, Color{ 0, 120, 215 }, \
-	Color{ 0, 0, 0 }, Color{ 204, 228, 247 }, Color{ 1, 86, 155 } \
-}
+	std::array<Color, 3> checkboxBackground;
+	std::array<Color, 3> checkboxBorder;
+	std::array<Color, 3> checkboxCheckmark;
+	std::array<Color, 3> texteditPlaceholder;
+	std::array<Color, 3> texteditCursor;
+	std::array<Color, 3> tableLines;
+	std::array<Color, 3> comboboxEntries;
+	std::array<Color, 3> sliderBorder;
+	std::array<Color, 3> sliderBackground;
+
+	static void createFromDefault(ColorTheme* theme, const Color& accentColor = DINOCOLOR_BLUE, bool dark = false);
+	static void createFromFile(ColorTheme* theme, const std::string& filename);
+};
 
 enum class FontWeight
 {

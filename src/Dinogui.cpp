@@ -31,7 +31,6 @@ void Text::draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D
 		throwIfFailed(createFontFormat(), "Failed to create text format");
 		fontFormatChanged = true;
 	}
-
 	rectangle.left += 2.0f;
 	rectangle.top += 2.0f;
 	rectangle.right -= 2.0f;
@@ -116,6 +115,27 @@ bool Text::createFontFormat()
 D2D1_COLOR_F Color::d2d1(Color c)
 {
 	return D2D1::ColorF(c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, c.a / 255.0f);
+}
+
+void ColorTheme::createFromDefault(ColorTheme* theme, const Color& accentColor, bool dark)
+{
+	theme->background = { Color{ 225, 225, 225 }, Color{ 229, 241, 251 }, Color{ 204, 228, 247 } };
+	theme->border = { Color{ 173, 173, 173 }, Color{ 0, 120, 215 }, Color{ 1, 86, 155 } };
+	theme->text = { Color{ 0, 0, 0 }, Color{ 0, 0, 0 }, Color{ 0, 0, 0 } };
+	theme->checkboxBackground = { Color{ 255, 255, 255 }, Color{ 255, 255, 255 }, Color{ 255, 255, 255 } };
+	theme->checkboxBorder = { Color{ 51, 51, 51 }, Color{ 0, 120, 215 }, Color{ 1, 86, 155 } };
+	theme->checkboxCheckmark = { Color{ 0, 0, 0 }, Color{ 0, 0, 0 }, Color{ 0, 0, 0 } };
+	theme->texteditPlaceholder = { Color{ 173, 173, 173 }, Color{ 173, 173, 173 }, Color{ 173, 173, 173 } };
+	theme->texteditCursor = { Color{ 0, 0, 0 }, Color{ 0, 0, 0 }, Color{ 0, 0, 0 } };
+	theme->tableLines = { Color{ 178, 178, 178 }, Color{ 178, 178, 178 }, Color{ 178, 178, 178 } };
+	theme->comboboxEntries = { Color{ 255, 255, 255 }, Color{ 0, 120, 215 }, Color{ 0, 120, 215 } };
+	theme->sliderBorder = { Color{ 173, 173, 173 }, Color{ 0, 120, 215 }, Color{ 1, 86, 155 } };
+	theme->sliderBackground = { Color{ 240, 240, 240 }, Color{ 240, 240, 240 }, Color{ 240, 240, 240 } };
+};
+
+void ColorTheme::createFromFile(ColorTheme* theme, const std::string& filename)
+{
+
 }
 
 float DPIHandler::m_scale = 1.0f;

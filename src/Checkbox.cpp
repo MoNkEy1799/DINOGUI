@@ -32,40 +32,21 @@ void Checkbox::setSize(int width, int height)
 
 void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    //drawBasicShape(renderTarget, brush);
-    D2D1_COLOR_F background = Color::d2d1(m_theme.bg);
-    D2D1_COLOR_F border = Color::d2d1(m_theme.brd);
+    D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
     D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
     D2D1_RECT_F boxRect = DPIHandler::adjusted(currentBoxRect());
-
-    switch (m_state)
-    {
-    case WidgetState::NORMAL:
-        background = Color::d2d1(Color{ 255, 255, 255 });
-        border = Color::d2d1(Color{ 51, 51, 51 });
-        break;
-
-    case WidgetState::HOVER:
-        background = Color::d2d1(m_theme.bg_h);
-        border = Color::d2d1(Color{ 0, 120, 215 });
-        break;
-
-    case WidgetState::CLICKED:
-        background = Color::d2d1(m_theme.bg_c);
-        border = Color::d2d1(m_theme.brd_c);
-        break;
-    }
-
-    brush->SetColor(background);
+    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    brush->SetColor(Color::d2d1(m_theme->checkboxBackground[(int)m_state]));
     renderTarget->FillRectangle(boxRect, brush);
-    brush->SetColor(border);
+    brush->SetColor(Color::d2d1(m_theme->checkboxBorder[(int)m_state]));
     renderTarget->DrawRectangle(boxRect, brush);
+    m_text->setColor(m_theme->text[(int)m_state]);
     m_text->draw(textRect, renderTarget, brush);
 
     if (m_check)
     {
         renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
-        brush->SetColor(border);
+        brush->SetColor(Color::d2d1(m_theme->checkboxCheckmark[(int)m_state]));
         std::array<D2D1_POINT_2F, 3> box = currentCheckbox();
         renderTarget->DrawLine(box[0], box[1], brush);
         renderTarget->DrawLine(box[1], box[2], brush);

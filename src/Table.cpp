@@ -16,6 +16,7 @@ Table::Table(Core* core)
     m_drawBackground = true;
     m_drawBorder = true;
     m_size = { 120.0f, 140.0f };
+    m_theme->background = { Color{ 255, 255, 255 }, Color{ 255, 255, 255 }, Color{ 255, 255, 255 } };
 }
 
 Table::~Table()
@@ -28,9 +29,8 @@ Table::~Table()
 
 void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    m_theme.bg = Color{ 255, 255, 255 };
-    m_theme.brd = Color{ 51, 51, 51 };
-    drawBasicShape(renderTarget, brush);
+    D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
+    basicDrawBackgroundBorder(rect, renderTarget, brush);
 
     m_colWidth = (m_size.width - (m_cols + 1) * m_lineWidth) / m_cols;
     m_rowHeight = (m_size.height - (m_rows + 1) * m_lineWidth) / m_rows;
@@ -73,7 +73,7 @@ void Table::setCell(const std::string& text, int row, int col, int rowSpan, int 
         }
         m_cols = col + colSpan;
     }
-    GridEntry<Text*>& entry = m_entries[row * m_cols + col];
+    GridEntry<Text*>& entry = m_entries[(uint32_t)row * m_cols + col];
     if (text != "")
     {
         entry.entry = new Text(m_core, text);
@@ -96,11 +96,12 @@ void Table::drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget
                          m_point.y + (row + 1 + entry.rowSpan) * m_lineWidth + (row + entry.rowSpan) * m_rowHeight });
     if (entry.rowSpan > 1 || entry.colSpan > 1)
     {
-        brush->SetColor(Color::d2d1(m_theme.bg));
+        brush->SetColor(Color::d2d1(m_theme->background[(int)m_state]));
         renderTarget->FillRectangle(cell, brush);
     }
     if (entry.entry)
     {
+        entry.entry->setColor(m_theme->text[(int)m_state]);
         entry.entry->draw(cell, renderTarget, brush);
     }
 }
@@ -114,7 +115,7 @@ void Table::drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBr
     {
         p1 = { m_point.x + 1.0f, curHeight };
         p2 = { m_point.x + m_size.width - 0.5f, curHeight };
-        brush->SetColor(Color::d2d1(DINOCOLOR_LIGHTGRAY));
+        brush->SetColor(Color::d2d1(m_theme->tableLines[(int)m_state]));
         renderTarget->DrawLine(DPIHandler::adjusted(p1), DPIHandler::adjusted(p2), brush, m_lineWidth);
         curHeight += m_rowHeight + m_lineWidth;
     }
@@ -122,7 +123,7 @@ void Table::drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBr
     {
         p1 = { curWidth, m_point.y + 1.0f };
         p2 = { curWidth, m_point.y + m_size.height - 0.5f };
-        brush->SetColor(Color::d2d1(DINOCOLOR_LIGHTGRAY));
+        brush->SetColor(Color::d2d1(m_theme->tableLines[(int)m_state]));
         renderTarget->DrawLine(DPIHandler::adjusted(p1), DPIHandler::adjusted(p2), brush, m_lineWidth);
         curWidth += m_colWidth + m_lineWidth;
     }

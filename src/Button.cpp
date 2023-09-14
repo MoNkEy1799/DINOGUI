@@ -25,9 +25,10 @@ Button::~Button()
 
 void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    drawBasicShape(renderTarget, brush);
-    D2D1_RECT_F rectangle = DPIHandler::adjusted(currentRect());
-    m_text->draw(rectangle, renderTarget, brush);
+    D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
+    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    m_text->setColor(m_theme->text[(int)m_state]);
+    m_text->draw(rect, renderTarget, brush);
 }
 
 void Button::place(int x, int y)
