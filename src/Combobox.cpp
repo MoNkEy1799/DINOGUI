@@ -52,13 +52,16 @@ void Combobox::place(int x, int y)
 
 void Combobox::clicked(float mouseX, float mouseY)
 {
-    m_dropdown = !m_dropdown;
-    if (m_hoverIndex != -1)
+    if (m_dropdown)
     {
-        m_currentIndex = m_hoverIndex;
         m_core->setSelectedWidget(nullptr);
-        m_state = WidgetState::NORMAL;
+        if (m_hoverIndex != -1)
+        {
+            m_currentIndex = m_hoverIndex;
+            m_state = WidgetState::NORMAL;
+        }
     }
+    m_dropdown = !m_dropdown;
 }
 
 void Combobox::unselect()

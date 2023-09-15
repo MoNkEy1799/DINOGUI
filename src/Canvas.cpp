@@ -13,7 +13,7 @@ using namespace DINOGUI;
 
 Canvas::Canvas(Core* core, int width, int height, const Color& fillColor)
     : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr), m_wicLock(nullptr),
-      m_buffer(nullptr), m_bufferWidth(width), m_bufferHeight(height)
+      m_buffer(nullptr), m_bufferWidth(width), m_bufferHeight(height), m_antialias(true), m_thickness(2.0f)
 {
     m_type = WidgetType::CANVAS;
     m_drawBorder = true;
@@ -49,6 +49,12 @@ void Canvas::place(int x, int y)
     basicPlace(x, y);
 }
 
+void Canvas::antialias(bool b, float thickness)
+{
+    m_antialias = b;
+    m_thickness = thickness;
+}
+
 void Canvas::fill(const Color& color, bool autoLock)
 {
     if (autoLock)
@@ -62,13 +68,14 @@ void Canvas::fill(const Color& color, bool autoLock)
 
     for (size_t pos = 0; pos < m_bufferWidth * m_bufferHeight; pos++)
     {
-        setColor(color, pos * 4);
+        setColor({ color.r, color.g, color.b, 255 }, pos * 4);
     }
 
     if (autoLock)
     {
         lock();
     }
+    safeReleaseInterface(&m_drawingBitmap);
 }
 
 void Canvas::setPixel(const Color& color, int x, int y, bool autoLock)
@@ -88,6 +95,7 @@ void Canvas::setPixel(const Color& color, int x, int y, bool autoLock)
     {
         lock();
     }
+    safeReleaseInterface(&m_drawingBitmap);
 }
 
 void Canvas::setPixel(const Color& color, size_t pos, bool autoLock)
@@ -107,6 +115,7 @@ void Canvas::setPixel(const Color& color, size_t pos, bool autoLock)
     {
         lock();
     }
+    safeReleaseInterface(&m_drawingBitmap);
 }
 
 void Canvas::drawLine(Point p1, Point p2, const Color& color, bool autoLock)
@@ -120,6 +129,8 @@ void Canvas::drawLine(Point p1, Point p2, const Color& color, bool autoLock)
         return;
     }
 
+    checkBounds(p1);
+    checkBounds(p2);
     int xa = (int)p1.x;
     int ya = (int)p1.y;
     int xb = (int)p2.x;
@@ -145,18 +156,23 @@ void Canvas::drawLine(Point p1, Point p2, const Color& color, bool autoLock)
         grad = 1.0f;
     }
 
-    for (int x = xa; x <= xb; x++)
+    Color col = color;
+    for (int x = xa; x < xb; x++)
     {
         if (steep)
         {
-            setColor(color, bytePosFromXY((int)yInter, x));
-            setColor(color, bytePosFromXY((int)yInter - 1, x));
+            col.a = (1.0f - yInter - (int)yInter) * 255;
+            setColor(col, bytePosFromXY((int)yInter, x));
+            col.a = (yInter - (int)yInter) * 255;
+            setColor(col, bytePosFromXY((int)yInter - 1, x));
             yInter += grad;
         }
         else
         {
-            setColor(color, bytePosFromXY(x, (int)yInter));
-            setColor(color, bytePosFromXY(x, (int)yInter - 1));
+            col.a = (1.0f - yInter - (int)yInter) * 255;
+            setColor(col, bytePosFromXY(x, (int)yInter));
+            col.a = (yInter - (int)yInter) * 255;
+            setColor(col, bytePosFromXY(x, (int)yInter - 1));
             yInter += grad;
         }
     }
@@ -165,6 +181,7 @@ void Canvas::drawLine(Point p1, Point p2, const Color& color, bool autoLock)
     {
         lock();
     }
+    safeReleaseInterface(&m_drawingBitmap);
 }
 
 void Canvas::drawRectangle(Point p1, Point p2, const Color& color, bool autoLock)
@@ -178,6 +195,8 @@ void Canvas::drawRectangle(Point p1, Point p2, const Color& color, bool autoLock
         return;
     }
 
+    checkBounds(p1);
+    checkBounds(p2);
     int xmin, xmax, ymin, ymax;
     if (p1.x < p2.x)
     {
@@ -199,14 +218,10 @@ void Canvas::drawRectangle(Point p1, Point p2, const Color& color, bool autoLock
         ymin = (int)p2.y;
         ymax = (int)p1.y;
     }
-    checkBounds(xmin);
-    checkBounds(xmax);
-    checkBounds(ymin);
-    checkBounds(ymax);
 
-    for (int x = xmin; x <= xmax; x++)
+    for (int x = xmin; x < xmax; x++)
     {
-        for (int y = ymin; y <= ymax; y++)
+        for (int y = ymin; y < ymax; y++)
         {
             setColor(color, bytePosFromXY(x, y));
         }
@@ -216,6 +231,7 @@ void Canvas::drawRectangle(Point p1, Point p2, const Color& color, bool autoLock
     {
         lock();
     }
+    safeReleaseInterface(&m_drawingBitmap);
 }
 
 void Canvas::drawTriangle(Point p1, Point p2, Point p3, const Color& color, bool autoLock)
@@ -229,6 +245,9 @@ void Canvas::drawTriangle(Point p1, Point p2, Point p3, const Color& color, bool
         return;
     }
 
+    checkBounds(p1);
+    checkBounds(p2);
+    checkBounds(p3);
     if (p1.y < p2.y && p1.y < p3.y)
     {
         if (p3.y < p2.y)
@@ -280,6 +299,7 @@ void Canvas::drawTriangle(Point p1, Point p2, Point p3, const Color& color, bool
     {
         lock();
     }
+    safeReleaseInterface(&m_drawingBitmap);
 }
 
 void Canvas::drawCircle(Point p, int r, const Color& color, bool autoLock)
@@ -298,24 +318,28 @@ void Canvas::drawEllipse(Point p, int ra, int rb, const Color& color, bool autoL
         return;
     }
 
-    int xmin = (int)p.x - ra;
-    int xmax = (int)p.x + ra;
-    int ymin = (int)p.y - rb;
-    int ymax = (int)p.y + rb;
-    checkBounds(xmin);
-    checkBounds(xmax);
-    checkBounds(ymin);
-    checkBounds(ymax);
+    float extra = m_antialias ? 1.0f + m_thickness : 1.0f;
+    int xmin = (int)(p.x - (ra * extra));
+    int xmax = (int)(p.x + (ra * extra));
+    int ymin = (int)(p.y - (rb * extra));
+    int ymax = (int)(p.y + (rb * extra));
+    checkBounds(xmin, ymin);
+    checkBounds(xmax, ymax);
 
-    for (int xs = xmin; xs <= xmax; xs++)
+    for (int xs = xmin; xs < xmax; xs++)
     {
-        for (int ys = ymin; ys <= ymax; ys++)
+        for (int ys = ymin; ys < ymax; ys++)
         {
-            double ellipse = std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2);
-            if (ellipse < 1)
+            float ellipse = std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2);
+            Color col = color;
+            col.a = (ellipse < 1.0f) * 255;
+            if (m_antialias)
             {
-                setColor(color, bytePosFromXY(xs, ys));
+                float thickness = m_thickness / std::min(ra, rb);
+                float error = std::min(std::max(0.0f, ellipse - 1.0f) / thickness, 1.0f);
+                col.a = (1.0f - error) * 255;
             }
+            setColor(col, bytePosFromXY(xs, ys));
         }
     }
 
@@ -323,6 +347,7 @@ void Canvas::drawEllipse(Point p, int ra, int rb, const Color& color, bool autoL
     {
         lock();
     }
+    safeReleaseInterface(&m_drawingBitmap);
 }
 
 void Canvas::lock()
@@ -350,22 +375,47 @@ void Canvas::createPixelBuffer()
 
 void Canvas::setColor(const Color& color, size_t bytePos)
 {
-    m_buffer[bytePos + 0] = (byte)color.r;
-    m_buffer[bytePos + 1] = (byte)color.g;
-    m_buffer[bytePos + 2] = (byte)color.b;
-    m_buffer[bytePos + 3] = (byte)color.a;
+    if (color.a == 0)
+    {
+        return;
+    }
+    int R, G, B;
+    if (color.a != 255)
+    {
+        int r = (int)m_buffer[bytePos + 0];
+        int g = (int)m_buffer[bytePos + 1];
+        int b = (int)m_buffer[bytePos + 2];
+        float alpha = color.a / 255.0f;
+        R = alpha * color.r + (1.0f - alpha) * r;
+        G = alpha * color.g + (1.0f - alpha) * g;
+        B = alpha * color.b + (1.0f - alpha) * b;
+    }
+    else
+    {
+        R = color.r;
+        G = color.g;
+        B = color.b;
+    }
+    m_buffer[bytePos + 0] = (byte)R;
+    m_buffer[bytePos + 1] = (byte)G;
+    m_buffer[bytePos + 2] = (byte)B;
+    m_buffer[bytePos + 3] = (byte)255;
 }
 
-void Canvas::checkBounds(int& n) const
+void Canvas::checkBounds(int& x, int& y) const
 {
-    if (n < 0)
-    {
-        n = 0;
-    }
-    else if (n > (int)m_bufferWidth)
-    {
-        n = m_bufferWidth;
-    }
+    x = (x < 0) ? 0 : x;
+    x = (x > m_bufferWidth) ? (int)m_bufferWidth : x;
+    y = (y < 0) ? 0 : y;
+    y = (y > m_bufferHeight) ? (int)m_bufferHeight : y;
+}
+
+void Canvas::checkBounds(Point& p) const
+{
+    p.x = (p.x < 0.0f) ? 0.0f : p.x;
+    p.x = (p.x > m_bufferWidth) ? (float)m_bufferWidth : p.x;
+    p.y = (p.y < 0.0f) ? 0.0f : p.y;
+    p.y = (p.y > m_bufferHeight) ? (float)m_bufferHeight : p.y;
 }
 
 int Canvas::bytePosFromXY(int x, int y) const

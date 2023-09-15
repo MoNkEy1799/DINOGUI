@@ -3,7 +3,9 @@
 void testClickFunc(DINOGUI::Widget* wid)
 {
 	std::cout << "Button clicked" << std::endl;
-	std::cout << ((DINOGUI::Combobox*)wid)->getCurrentIndex() << std::endl;
+	DINOGUI::Random r;
+	r.seed();
+	((DINOGUI::Canvas*)wid)->drawCircle({ 0, 300 }, 24, { r.randInt(0, 255), r.randInt(0, 255), r.randInt(0, 255) });
 }
 
 int main()
@@ -45,6 +47,7 @@ int main()
 	
 	canvas->fill({ 0, 255, 255 });
 	canvas->drawRectangle({ 1, 1 }, { 40, 40 }, { 0, 255, 0 });
+	canvas->drawRectangle({ 21, 21 }, { 60, 60 }, { 255, 0, 0, 100 });
 	canvas->drawEllipse({ -20, 100 }, 90, 40, { 0, 0, 255 });
 	canvas->drawCircle({ 240, 240 }, 24, { 255, 0, 0 });
 	canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });
@@ -58,8 +61,7 @@ int main()
 
 	slider->place(100, 420);
 
-	button->connect([textedit] { testClickFunc(textedit); });
-	button2->connect([combo] { testClickFunc(combo); });
+	button->connect([canvas] { testClickFunc(canvas); });
 
 	core->run();
 	return 0;

@@ -303,6 +303,7 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
 
+	void antialias(bool b, float thickness = 2.0f);
 	void fill(const Color& color, bool autoLock = true);
 	void setPixel(const Color& color, int x, int y, bool autoLock = true);
 	void setPixel(const Color& color, size_t pos, bool autoLock = true);
@@ -320,10 +321,13 @@ private:
 	IWICBitmapLock* m_wicLock;
 	byte* m_buffer;
 	uint32_t m_bufferWidth, m_bufferHeight;
+	bool m_antialias;
+	float m_thickness;
 
 	void createPixelBuffer();
-	void setColor(const Color& color, size_t pos);
-	void checkBounds(int& n) const;
+	void setColor(const Color& color, size_t bytePos);
+	void checkBounds(int& x, int& y) const;
+	void checkBounds(Point& p) const;
 	int bytePosFromXY(int x, int y) const;
 	D2D1_RECT_F bufferRect() const;
 
