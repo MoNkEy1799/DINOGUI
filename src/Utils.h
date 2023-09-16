@@ -183,7 +183,7 @@ private:
 	static std::mt19937 m_randomEngine;
 };
 
-enum class EventType { ENTER_EVENT, LEAVE_EVENT, CLICK_EVENT, REALEASE_EVENT, UNSELECT_EVENT };
+enum class EventType { ENTER_EVENT, LEAVE_EVENT, CLICK_EVENT, REALEASE_EVENT, UNSELECT_EVENT, HOLD_EVENT };
 
 struct Event
 {

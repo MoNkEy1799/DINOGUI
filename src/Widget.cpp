@@ -99,6 +99,10 @@ void Widget::receiveEvent(Event* event)
     case EventType::UNSELECT_EVENT:
         unselectEvent();
         break;
+
+    case EventType::HOLD_EVENT:
+        holdEvent(event->mouseX, event->mouseY);
+        break;
     }
 
     delete event;
@@ -133,6 +137,19 @@ void Widget::clickEvent(float mouseX, float mouseY)
     else if (selectableWidget(m_type))
     {
         m_core->setSelectedWidget(this);
+        clicked(mouseX, mouseY);
+        m_core->redrawScreen();
+    }
+    if (holdableWidget(m_type))
+    {
+        clicked(mouseX, mouseY);
+    }
+}
+
+void Widget::holdEvent(float mouseX, float mouseY)
+{
+    if (holdableWidget(m_type))
+    {
         clicked(mouseX, mouseY);
         m_core->redrawScreen();
     }
@@ -221,6 +238,16 @@ bool Widget::selectableWidget(const WidgetType& type)
     {
     case WidgetType::TEXTEDIT:
     case WidgetType::COMBOBOX:
+        return true;
+    }
+    return false;
+}
+
+bool Widget::holdableWidget(const WidgetType& type)
+{
+    switch (type)
+    {
+    case WidgetType::SLIDER:
         return true;
     }
     return false;

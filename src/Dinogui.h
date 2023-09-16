@@ -126,12 +126,14 @@ public:
 	void enterEvent();
 	void leaveEvent();
 	void clickEvent(float mouseX, float mouseY);
+	void holdEvent(float mouseX, float mouseY);
 	void releaseEvent(float mouseX, float mouseY);
 	void unselectEvent();
 	
 	static bool hoverableWidget(const WidgetType& type);
 	static bool clickableWidget(const WidgetType& type);
 	static bool selectableWidget(const WidgetType& type);
+	static bool holdableWidget(const WidgetType& type);
 
 protected:
 	D2D1_POINT_2F m_point;
@@ -320,7 +322,7 @@ private:
 	IWICBitmap* m_wicBitmap;
 	IWICBitmapLock* m_wicLock;
 	byte* m_buffer;
-	uint32_t m_bufferWidth, m_bufferHeight;
+	int m_bufferWidth, m_bufferHeight;
 	bool m_antialias;
 	float m_thickness;
 
@@ -328,7 +330,7 @@ private:
 	void setColor(const Color& color, size_t bytePos);
 	void checkBounds(int& x, int& y) const;
 	void checkBounds(Point& p) const;
-	int bytePosFromXY(int x, int y) const;
+	size_t bytePosFromXY(int x, int y) const;
 	D2D1_RECT_F bufferRect() const;
 
 	void fillBottomTriangle(Point p1, Point p2, Point p3, const Color& color);
@@ -404,7 +406,7 @@ private:
 class Slider : public Widget
 {
 public:
-	Slider(Core* core);
+	Slider(Core* core, bool vertical = false);
 	~Slider() = default;
 	Slider(const Slider&) = delete;
 	Slider(Slider&&) = delete;
@@ -414,9 +416,8 @@ public:
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override;
-	void moveSlider(float x, float y);
 
-	void setVertical();
+	void setVertical(bool vertical = true);
 	void setMaxTicks(int ticks);
 	int getCurrentTick();
 

@@ -66,7 +66,7 @@ void Canvas::fill(const Color& color, bool autoLock)
         return;
     }
 
-    for (size_t pos = 0; pos < m_bufferWidth * m_bufferHeight; pos++)
+    for (size_t pos = 0; pos < (size_t)m_bufferWidth * m_bufferHeight; pos++)
     {
         setColor({ color.r, color.g, color.b, 255 }, pos * 4);
     }
@@ -161,17 +161,17 @@ void Canvas::drawLine(Point p1, Point p2, const Color& color, bool autoLock)
     {
         if (steep)
         {
-            col.a = (1.0f - yInter - (int)yInter) * 255;
+            col.a = (int)((1.0f - yInter - (int)yInter) * 255);
             setColor(col, bytePosFromXY((int)yInter, x));
-            col.a = (yInter - (int)yInter) * 255;
+            col.a = (int)((yInter - (int)yInter) * 255);
             setColor(col, bytePosFromXY((int)yInter - 1, x));
             yInter += grad;
         }
         else
         {
-            col.a = (1.0f - yInter - (int)yInter) * 255;
+            col.a = (int)((1.0f - yInter - (int)yInter) * 255);
             setColor(col, bytePosFromXY(x, (int)yInter));
-            col.a = (yInter - (int)yInter) * 255;
+            col.a = (int)((yInter - (int)yInter) * 255);
             setColor(col, bytePosFromXY(x, (int)yInter - 1));
             yInter += grad;
         }
@@ -330,14 +330,14 @@ void Canvas::drawEllipse(Point p, int ra, int rb, const Color& color, bool autoL
     {
         for (int ys = ymin; ys < ymax; ys++)
         {
-            float ellipse = std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2);
+            double ellipse = std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2);
             Color col = color;
-            col.a = (ellipse < 1.0f) * 255;
+            col.a = (int)((ellipse < 1.0) * 255);
             if (m_antialias)
             {
-                float thickness = m_thickness / std::min(ra, rb);
-                float error = std::min(std::max(0.0f, ellipse - 1.0f) / thickness, 1.0f);
-                col.a = (1.0f - error) * 255;
+                double thickness = m_thickness / std::min(ra, rb);
+                double error = std::min(std::max(0.0, ellipse - 1.0) / thickness, 1.0);
+                col.a = (int)((1.0f - error) * 255);
             }
             setColor(col, bytePosFromXY(xs, ys));
         }
@@ -386,9 +386,9 @@ void Canvas::setColor(const Color& color, size_t bytePos)
         int g = (int)m_buffer[bytePos + 1];
         int b = (int)m_buffer[bytePos + 2];
         float alpha = color.a / 255.0f;
-        R = alpha * color.r + (1.0f - alpha) * r;
-        G = alpha * color.g + (1.0f - alpha) * g;
-        B = alpha * color.b + (1.0f - alpha) * b;
+        R = (int)(alpha * color.r + (1.0f - alpha) * r);
+        G = (int)(alpha * color.g + (1.0f - alpha) * g);
+        B = (int)(alpha * color.b + (1.0f - alpha) * b);
     }
     else
     {
@@ -405,9 +405,9 @@ void Canvas::setColor(const Color& color, size_t bytePos)
 void Canvas::checkBounds(int& x, int& y) const
 {
     x = (x < 0) ? 0 : x;
-    x = (x > m_bufferWidth) ? (int)m_bufferWidth : x;
+    x = (x > m_bufferWidth) ? m_bufferWidth : x;
     y = (y < 0) ? 0 : y;
-    y = (y > m_bufferHeight) ? (int)m_bufferHeight : y;
+    y = (y > m_bufferHeight) ? m_bufferHeight : y;
 }
 
 void Canvas::checkBounds(Point& p) const
@@ -418,9 +418,9 @@ void Canvas::checkBounds(Point& p) const
     p.y = (p.y > m_bufferHeight) ? (float)m_bufferHeight : p.y;
 }
 
-int Canvas::bytePosFromXY(int x, int y) const
+size_t Canvas::bytePosFromXY(int x, int y) const
 {
-    return (y * m_bufferWidth + x) * 4;
+    return ((size_t)y * m_bufferWidth + x) * 4;
 }
 
 D2D1_RECT_F Canvas::bufferRect() const

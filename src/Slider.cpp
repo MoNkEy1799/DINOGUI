@@ -7,18 +7,31 @@
 
 using namespace DINOGUI;
 
-Slider::Slider(Core* core)
-    : Widget(core), m_ticks(100), m_currentTick(0), m_vertical(false)
+Slider::Slider(Core* core, bool vertical)
+    : Widget(core), m_ticks(100), m_currentTick(0), m_vertical(vertical)
 {
     m_type = WidgetType::SLIDER;
     m_drawBorder = true;
     m_size = { 200.0f, 20.0f };
+    if (vertical)
+    {
+        m_size = { m_size.height, m_size.width };
+    }
 }
 
 void Slider::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
     D2D1_RECT_F rect = currentRect();
-    rect = { rect.left, rect.top + 8.0f, rect.right, rect.bottom - 8.0f };
+    if (m_vertical)
+    {
+        rect.left += 8.0f;
+        rect.right -= 8.0f;
+    }
+    else
+    {
+        rect.top += 8.0f;
+        rect.bottom -= 8.0f;
+    }
     brush->SetColor(Color::d2d1(m_theme->border[(int)m_state]));
     renderTarget->DrawRectangle(DPIHandler::adjusted(rect), brush);
     float x = m_vertical ? 10.0f : 5.0f;
@@ -45,11 +58,15 @@ void Slider::place(int x, int y)
 
 void Slider::clicked(float mouseX, float mouseY)
 {
+    float pos = m_vertical ? mouseY - m_point.y : mouseX - m_point.x;
+    float param = m_vertical ? m_size.height : m_size.width;
+    pos = std::min(param, std::max(0.0f, pos));
+    m_currentTick = (int)std::round(pos / (param / m_ticks));
 }
 
 void Slider::setMaxTicks(int ticks)
 {
-    int maxTicks = m_vertical ? m_size.height : m_size.width;
+    int maxTicks = m_vertical ? (int)m_size.height : (int)m_size.width;
     m_ticks = std::min(ticks, maxTicks);
 }
 
@@ -58,13 +75,12 @@ int Slider::getCurrentTick()
     return m_currentTick;
 }
 
-void Slider::moveSlider(float x, float y)
+void Slider::setVertical(bool vertical)
 {
-
-}
-
-void Slider::setVertical()
-{
-    m_vertical = true;
+    if (m_vertical == vertical)
+    {
+        return;
+    }
+    m_vertical = vertical;
     m_size = { m_size.height, m_size.width };
 }

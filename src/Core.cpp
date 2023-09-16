@@ -230,7 +230,15 @@ void Core::mouseMove(int posX, int posY, DWORD flags)
     float x = DPIHandler::PixelsToDips((float)posX);
     float y = DPIHandler::PixelsToDips((float)posY);
 
-    if (flags & DINOGUI_ALL_MOUSE_BUTTONS)
+    if (flags & MK_LBUTTON)
+    {
+        if (m_clickWidget)
+        {
+            m_clickWidget->receiveEvent(new Event(EventType::HOLD_EVENT, x, y));
+        }
+        return;
+    }
+    else if (flags & DINOGUI_ALL_MOUSE_BUTTONS)
     {
         return;
     }

@@ -22,6 +22,7 @@ int main()
 	DINOGUI::Table* table = new DINOGUI::Table(core);
 	DINOGUI::Combobox* combo = new DINOGUI::Combobox(core, "Combo");
 	DINOGUI::Slider* slider = new DINOGUI::Slider(core);
+	DINOGUI::Slider* slider2 = new DINOGUI::Slider(core, true);
 
 	button->place(50, 50);
 	button2->place(110, 70);
@@ -60,6 +61,8 @@ int main()
 	combo->addItem("Four");
 
 	slider->place(100, 420);
+	slider2->place(90, 200);
+	slider2->setMaxTicks(10);
 
 	button->connect([canvas] { testClickFunc(canvas); });
 
