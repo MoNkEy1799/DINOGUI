@@ -15,6 +15,7 @@ Image::Image(Core* core, const std::string& filename)
     : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr), m_imageWidth(0), m_imageHeight(0)
 {
     m_type = WidgetType::IMAGE;
+    ColorTheme::createDefault(m_theme, m_type);
     m_drawBorder = true;
     m_size = { 200.0f, 200.0f };
     if (!filename.empty())

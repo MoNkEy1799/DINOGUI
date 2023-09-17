@@ -15,8 +15,11 @@ Combobox::Combobox(Core* core, const std::string& text)
     m_boxText[0] = new Text(core, text);
     m_boxText[0]->setAlignment(Alignment::LEFT);
     m_type = WidgetType::COMBOBOX;
+    ColorTheme::createDefault(m_theme, m_type);
     m_drawBackground = true;
     m_drawBorder = true;
+    m_hoverable = true;
+    m_selectable = true;
 }
 
 Combobox::~Combobox()
@@ -37,9 +40,10 @@ void Combobox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
     renderTarget->DrawLine(DPIHandler::adjusted(points[0]), DPIHandler::adjusted(points[1]), brush);
     renderTarget->DrawLine(DPIHandler::adjusted(points[1]), DPIHandler::adjusted(points[2]), brush);
+    m_boxText[m_currentIndex]->setColor(m_theme->text[(int)m_state]);
     m_boxText[m_currentIndex]->draw(textRect, renderTarget, brush);
 
-    if (m_dropdown)
+    if (m_selected)
     {
         drawDropdown(renderTarget, brush);
     }
@@ -54,7 +58,8 @@ void Combobox::clicked(float mouseX, float mouseY)
 {
     if (m_dropdown)
     {
-        m_core->setSelectedWidget(nullptr);
+        m_selected = false;
+        m_core->setSelectWidget(nullptr);
         if (m_hoverIndex != -1)
         {
             m_currentIndex = m_hoverIndex;
@@ -62,11 +67,6 @@ void Combobox::clicked(float mouseX, float mouseY)
         }
     }
     m_dropdown = !m_dropdown;
-}
-
-void Combobox::unselect()
-{
-    m_dropdown = false;
 }
 
 bool Combobox::dropdownContains(float x, float y) const
@@ -86,6 +86,11 @@ void Combobox::setHoverIndex(float x, float y)
         m_hoverIndex = index;
         m_core->redrawScreen();
     }
+}
+
+void Combobox::setDropdown(bool drop)
+{
+    m_dropdown = drop;
 }
 
 void Combobox::addItem(const std::string& text)
@@ -159,22 +164,23 @@ void Combobox::drawDropdown(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColor
     int dir = m_upward ? -1 : 1;
     float y = m_upward ? rect.top : rect.bottom;
     rect = { rect.left, y, rect.right, y + dir * (int)m_boxText.size() * m_size.height };
-    brush->SetColor(Color::d2d1(m_theme->comboboxEntries[0]));
+    brush->SetColor(Color::d2d1(m_theme->addColor[(int)m_state]));
     renderTarget->FillRectangle(DPIHandler::adjusted(rect), brush);
-    brush->SetColor(Color::d2d1(m_theme->border[(int)m_state]));
+    brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
     renderTarget->DrawRectangle(DPIHandler::adjusted(rect), brush);
 
     D2D1_RECT_F boxRect = currentRect();
-    boxRect.left += 1.0f;
     for (int i = 0; i < m_boxText.size(); i++)
     {
         boxRect.top += dir * m_size.height;
         boxRect.bottom += dir * m_size.height;
+        m_boxText[i]->setColor(m_theme->text[(int)m_state]);
         if (m_hoverIndex == i)
         {
-            brush->SetColor(Color::d2d1(m_theme->comboboxEntries[1]));
+            brush->SetColor(Color::d2d1(m_theme->background2[(int)m_state]));
             renderTarget->FillRectangle(DPIHandler::adjusted(boxRect), brush);
+            m_boxText[i]->setColor(m_theme->text2[(int)m_state]);
         }
-        m_boxText[i]->draw(boxRect, renderTarget, brush);
+        m_boxText[i]->draw(DPIHandler::adjusted(boxRect), renderTarget, brush);
     }
 }

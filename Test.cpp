@@ -65,6 +65,7 @@ int main()
 	slider2->setMaxTicks(10);
 
 	button->connect([canvas] { testClickFunc(canvas); });
+	button2->setCheckable();
 
 	core->run();
 	return 0;

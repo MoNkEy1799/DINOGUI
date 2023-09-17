@@ -17,11 +17,12 @@ void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
 
 Widget::Widget(Core* core)
     : m_core(core), m_theme(nullptr), m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
-      m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_drawBackground(false), m_drawBorder(false)
+      m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_drawBackground(false), m_drawBorder(false),
+      m_hoverable(false), m_clickable(false), m_holdable(false), m_selectable(false), m_checkable(false),
+      m_checked(false), m_selected(false)
 {
     m_core->addWidget(this);
     m_theme = new ColorTheme();
-    ColorTheme::createFromDefault(m_theme);
 }
 
 Widget::~Widget()
@@ -110,9 +111,10 @@ void Widget::receiveEvent(Event* event)
 
 void Widget::enterEvent()
 {
-    if (hoverableWidget(m_type))
+    if (m_hoverable)
     {
-        m_state = WidgetState::HOVER;
+        m_state = m_checked ? WidgetState::CHECKED_HOVER : WidgetState::HOVER;
+        m_state = m_selected ? WidgetState::SELECTED_HOVER : WidgetState::HOVER;
         m_core->setHoverWidget(this);
         m_core->redrawScreen();
     }
@@ -120,7 +122,8 @@ void Widget::enterEvent()
 
 void Widget::leaveEvent()
 {
-    m_state = WidgetState::NORMAL;
+    m_state = m_checked ? WidgetState::CLICKED : WidgetState::NORMAL;
+    m_state = m_selected ? WidgetState::SELECTED : WidgetState::NORMAL;
     m_core->setHoverWidget(nullptr);
     m_core->setClickWidget(nullptr);
     m_core->redrawScreen();
@@ -128,19 +131,21 @@ void Widget::leaveEvent()
 
 void Widget::clickEvent(float mouseX, float mouseY)
 {
-    if (clickableWidget(m_type))
+    if (m_clickable || m_checkable)
     {
         m_state = WidgetState::CLICKED;
         m_core->setClickWidget(this);
         m_core->redrawScreen();
     }
-    else if (selectableWidget(m_type))
+    else if (m_selectable)
     {
-        m_core->setSelectedWidget(this);
+        m_state = WidgetState::SELECTED_HOVER;
+        m_selected = true;
+        m_core->setSelectWidget(this);
         clicked(mouseX, mouseY);
         m_core->redrawScreen();
     }
-    if (holdableWidget(m_type))
+    if (m_holdable)
     {
         clicked(mouseX, mouseY);
     }
@@ -148,7 +153,7 @@ void Widget::clickEvent(float mouseX, float mouseY)
 
 void Widget::holdEvent(float mouseX, float mouseY)
 {
-    if (holdableWidget(m_type))
+    if (m_holdable)
     {
         clicked(mouseX, mouseY);
         m_core->redrawScreen();
@@ -157,11 +162,17 @@ void Widget::holdEvent(float mouseX, float mouseY)
 
 void Widget::releaseEvent(float mouseX, float mouseY)
 {
-    if (hoverableWidget(m_type))
+    m_state = WidgetState::NORMAL;
+    if (m_hoverable)
     {
         m_state = WidgetState::HOVER;
         m_core->setHoverWidget(this);
         m_core->redrawScreen();
+    }
+    if (m_checkable)
+    {
+        m_checked = !m_checked;
+        m_state = m_checked ? WidgetState::NORMAL : WidgetState::CHECKED;
     }
     clicked(mouseX, mouseY);
     m_core->setClickWidget(nullptr);
@@ -171,14 +182,15 @@ void Widget::unselectEvent()
 {
     if (m_type == WidgetType::TEXTEDIT)
     {
-        dynamic_cast<Textedit*>(this)->unselect();
+        dynamic_cast<Textedit*>(this)->stopCursorTimer();
     }
-    if (m_type == WidgetType::COMBOBOX)
+    else if (m_type == WidgetType::COMBOBOX)
     {
-        dynamic_cast<Combobox*>(this)->unselect();
+        dynamic_cast<Combobox*>(this)->setDropdown(false);
     }
     m_state = WidgetState::NORMAL;
-    m_core->setSelectedWidget(nullptr);
+    m_selected = false;
+    m_core->setSelectWidget(nullptr);
     m_core->redrawScreen();
 }
 
@@ -205,52 +217,6 @@ D2D1_POINT_2F Widget::mapToGlobal(D2D1_POINT_2F point)
 D2D1_RECT_F Widget::currentRect() const
 {
     return { m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height };
-}
-
-bool Widget::hoverableWidget(const WidgetType& type)
-{
-    switch (type)
-    {
-    case WidgetType::BUTTON:
-    case WidgetType::CHECKBOX:
-    case WidgetType::TEXTEDIT:
-    case WidgetType::COMBOBOX:
-    case WidgetType::SLIDER:
-        return true;
-    }
-    return false;
-}
-
-bool Widget::clickableWidget(const WidgetType& type)
-{
-    switch (type)
-    {
-    case WidgetType::BUTTON:
-    case WidgetType::CHECKBOX:
-    case WidgetType::SLIDER:
-        return true;
-    }
-    return false;
-}
-bool Widget::selectableWidget(const WidgetType& type)
-{
-    switch (type)
-    {
-    case WidgetType::TEXTEDIT:
-    case WidgetType::COMBOBOX:
-        return true;
-    }
-    return false;
-}
-
-bool Widget::holdableWidget(const WidgetType& type)
-{
-    switch (type)
-    {
-    case WidgetType::SLIDER:
-        return true;
-    }
-    return false;
 }
 
 void Widget::basicDrawBackgroundBorder(const D2D1_RECT_F& rect, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)

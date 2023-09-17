@@ -10,12 +10,15 @@
 using namespace DINOGUI;
 
 Checkbox::Checkbox(Core* core, const std::string& text)
-    : Widget(core), m_check(false), m_boxPoint(m_point), m_textPoint(m_point),
+    : Widget(core), m_checked(false), m_boxPoint(m_point), m_textPoint(m_point),
       m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size), m_text(nullptr)
 {
     m_text = new Text(core, text);
     m_text->setAlignment(Alignment::LEFT);
     m_type = WidgetType::CHECKBOX;
+    ColorTheme::createDefault(m_theme, m_type);
+    m_hoverable = true;
+    m_checkable = true;
     m_size = { 80.0f, 20.0f };
 }
 
@@ -36,17 +39,17 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
     D2D1_RECT_F boxRect = DPIHandler::adjusted(currentBoxRect());
     basicDrawBackgroundBorder(rect, renderTarget, brush);
-    brush->SetColor(Color::d2d1(m_theme->checkboxBackground[(int)m_state]));
+    brush->SetColor(Color::d2d1(m_theme->background2[(int)m_state]));
     renderTarget->FillRectangle(boxRect, brush);
-    brush->SetColor(Color::d2d1(m_theme->checkboxBorder[(int)m_state]));
+    brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
     renderTarget->DrawRectangle(boxRect, brush);
     m_text->setColor(m_theme->text[(int)m_state]);
     m_text->draw(textRect, renderTarget, brush);
 
-    if (m_check)
+    if (m_checked)
     {
         renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
-        brush->SetColor(Color::d2d1(m_theme->checkboxCheckmark[(int)m_state]));
+        brush->SetColor(Color::d2d1(m_theme->text2[(int)m_state]));
         std::array<D2D1_POINT_2F, 3> box = currentCheckbox();
         renderTarget->DrawLine(box[0], box[1], brush);
         renderTarget->DrawLine(box[1], box[2], brush);
@@ -62,7 +65,8 @@ void Checkbox::place(int x, int y)
 
 void Checkbox::clicked(float mouseX, float mouseY)
 {
-    m_check = !m_check;
+    std::cout << "clicked" << std::endl;
+    m_checked = !m_checked;
 }
 
 void Checkbox::setText(const std::string& text)
@@ -72,7 +76,7 @@ void Checkbox::setText(const std::string& text)
 
 bool Checkbox::isChecked() const
 {
-    return m_check;
+    return m_checked;
 }
 
 std::array<D2D1_POINT_2F, 3> Checkbox::currentCheckbox() const

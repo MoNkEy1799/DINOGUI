@@ -13,9 +13,11 @@ using namespace DINOGUI;
 
 Canvas::Canvas(Core* core, int width, int height, const Color& fillColor)
     : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr), m_wicLock(nullptr),
-      m_buffer(nullptr), m_bufferWidth(width), m_bufferHeight(height), m_antialias(true), m_thickness(2.0f)
+      m_buffer(nullptr), m_bufferWidth(width), m_bufferHeight(height),
+      m_antialias(true), m_thickness(1.2f)
 {
     m_type = WidgetType::CANVAS;
+    ColorTheme::createDefault(m_theme, m_type);
     m_drawBorder = true;
     m_size = { (float)width, (float)height };
     createPixelBuffer();
@@ -330,7 +332,7 @@ void Canvas::drawEllipse(Point p, int ra, int rb, const Color& color, bool autoL
     {
         for (int ys = ymin; ys < ymax; ys++)
         {
-            double ellipse = std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2);
+            double ellipse = std::sqrt(std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2));
             Color col = color;
             col.a = (int)((ellipse < 1.0) * 255);
             if (m_antialias)

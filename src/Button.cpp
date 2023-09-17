@@ -10,12 +10,15 @@
 using namespace DINOGUI;
 
 Button::Button(Core* core, const std::string& text, std::function<void()> function)
-    : Widget(core), m_clickFunction(function), m_text(nullptr)
+    : Widget(core), m_clickFunction(function), m_text(nullptr), m_checked(false)
 {
     m_text = new Text(core, text);
     m_type = WidgetType::BUTTON;
+    ColorTheme::createDefault(m_theme, m_type);
     m_drawBackground = true;
     m_drawBorder = true;
+    m_hoverable = true;
+    m_clickable = true;
 }
 
 Button::~Button()
@@ -52,4 +55,10 @@ void Button::connect(std::function<void()> function)
 void Button::setText(const std::string& text)
 {
     m_text->setText(text);
+}
+
+void Button::setCheckable(bool check)
+{
+    m_checkable = check;
+    m_clickable = !check;
 }

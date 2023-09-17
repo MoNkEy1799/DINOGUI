@@ -117,23 +117,88 @@ D2D1_COLOR_F Color::d2d1(Color c)
 	return D2D1::ColorF(c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, c.a / 255.0f);
 }
 
-void ColorTheme::createFromDefault(ColorTheme* theme, const Color& accentColor, bool dark)
+void ColorTheme::createDefault(ColorTheme* theme, WidgetType type, const Color& accentColor, bool dark)
 {
-	theme->background = { Color{ 225, 225, 225 }, Color{ 229, 241, 251 }, Color{ 204, 228, 247 } };
-	theme->border = { Color{ 173, 173, 173 }, Color{ 0, 120, 215 }, Color{ 1, 86, 155 } };
-	theme->text = { Color{ 0, 0, 0 }, Color{ 0, 0, 0 }, Color{ 0, 0, 0 } };
-	theme->checkboxBackground = { Color{ 255, 255, 255 }, Color{ 255, 255, 255 }, Color{ 255, 255, 255 } };
-	theme->checkboxBorder = { Color{ 51, 51, 51 }, Color{ 0, 120, 215 }, Color{ 1, 86, 155 } };
-	theme->checkboxCheckmark = { Color{ 0, 0, 0 }, Color{ 0, 0, 0 }, Color{ 0, 0, 0 } };
-	theme->texteditPlaceholder = { Color{ 173, 173, 173 }, Color{ 173, 173, 173 }, Color{ 173, 173, 173 } };
-	theme->texteditCursor = { Color{ 0, 0, 0 }, Color{ 0, 0, 0 }, Color{ 0, 0, 0 } };
-	theme->tableLines = { Color{ 178, 178, 178 }, Color{ 178, 178, 178 }, Color{ 178, 178, 178 } };
-	theme->comboboxEntries = { Color{ 255, 255, 255 }, Color{ 0, 120, 215 }, Color{ 0, 120, 215 } };
-	theme->sliderBorder = { Color{ 173, 173, 173 }, Color{ 0, 120, 215 }, Color{ 1, 86, 155 } };
-	theme->sliderBackground = { Color{ 240, 240, 240 }, Color{ 240, 240, 240 }, Color{ 240, 240, 240 } };
+	theme->background = {
+			Color{ 225, 225, 225 },
+			Color{ 229, 241, 251 },
+			Color{ 204, 228, 247 },
+			Color{ 229, 241, 251 },
+			Color{ 204, 228, 247 },
+			Color{ 204, 228, 247 },
+			Color{ 204, 228, 247 } };
+	theme->border = {
+			Color{ 173, 173, 173 },
+			Color{ 0, 120, 215 },
+			Color{ 1, 86, 155 },
+			Color{ 0, 120, 215 },
+			Color{ 1, 86, 155 },
+			Color{ 1, 86, 155 },
+			Color{ 1, 86, 155 } };
+	theme->text.fill(DINOCOLOR_BLACK);
+	theme->addColor.fill(DINOCOLOR_BLACK);
+
+	switch (type)
+	{
+	case WidgetType::NONE:
+	case WidgetType::BUTTON:
+	case WidgetType::LABEL:
+	case WidgetType::IMAGE:
+	case WidgetType::CANVAS:
+		theme->background2 = theme->background;
+		theme->border2 = theme->border;
+		theme->text2 = theme->text;
+		break;
+
+	case WidgetType::CHECKBOX:
+		theme->border[0] = DINOCOLOR_DARKGRAY;
+		theme->background2.fill(DINOCOLOR_WHITE);
+		theme->border2 = theme->border;
+		theme->text2 = theme->text;
+		break;
+
+	case WidgetType::TEXTEDIT:
+		theme->background.fill(DINOCOLOR_WHITE);
+		theme->border[0] = DINOCOLOR_DARKGRAY;
+		theme->border[1] = DINOCOLOR_BLACK;
+		theme->background2.fill(Color{ 0, 120, 215 });
+		theme->border2.fill(DINOCOLOR_BLACK);
+		theme->text2.fill(DINOCOLOR_WHITE);
+		theme->addColor.fill(DINOCOLOR_LIGHTGRAY);
+		break;
+
+	case WidgetType::TABLE:
+		theme->background2 = theme->background;
+		theme->border2.fill(DINOCOLOR_LIGHTGRAY);
+		theme->text2 = theme->text;
+		break;
+
+	case WidgetType::COMBOBOX:
+		theme->background2.fill(Color{ 0, 120, 215 });
+		theme->background2[3] = DINOCOLOR_DARKGRAY;
+		theme->border2 = theme->border;
+		theme->text2.fill(DINOCOLOR_WHITE);
+		theme->addColor.fill(DINOCOLOR_WHITE);
+		break;
+
+	case WidgetType::SLIDER:
+		theme->background[0] = DINOCOLOR_DARKGRAY;
+		theme->background[1] = Color{ 0, 120, 215 };
+		theme->background[2] = Color{ 1, 86, 155 };
+		theme->background2.fill(DINOCOLOR_WINDOW_LIGHT);
+		theme->border.fill(Color{ 173, 173, 173 });
+		theme->border2 = theme->border;
+		theme->text2 = theme->text;
+		break;
+	}
 };
 
-void ColorTheme::createFromFile(ColorTheme* theme, const std::string& filename)
+void ColorTheme::createFromFile(ColorTheme* theme, WidgetType type, const std::string& filename)
+{
+
+}
+
+void ColorTheme::createFromString(ColorTheme* theme, WidgetType type, const std::string& string)
 {
 
 }

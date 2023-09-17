@@ -33,14 +33,12 @@ class Image;
 class Canvas;
 class Combobox;
 class Slider;
-enum class WidgetState { NORMAL, HOVER, CLICKED };
+enum class WidgetState { NORMAL, HOVER, CLICKED, SELECTED, SELECTED_HOVER, CHECKED, CHECKED_HOVER };
 enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE, COMBOBOX, SLIDER };
 
 class Core : public TemplateWindow<Core>
 {
 public:
-	void DEBUG_DRAW_RECT(D2D1_RECT_F r);
-
 	Core(const std::string& windowName = "DINOGUI", int width = 200, int height = 200, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT);
 	int run();
 
@@ -58,7 +56,7 @@ public:
 
 	void setHoverWidget(Widget* widget) { m_hoverWidget = widget; };
 	void setClickWidget(Widget* widget) { m_clickWidget = widget; };
-	void setSelectedWidget(Widget* widget) { m_selectedWidget = widget; };
+	void setSelectWidget(Widget* widget) { m_selectWidget = widget; };
 
 private:
 	ID2D1Factory* m_factory;
@@ -72,7 +70,7 @@ private:
 	std::vector<Widget*> m_displayWidgets;
 	Widget* m_hoverWidget;
 	Widget* m_clickWidget;
-	Widget* m_selectedWidget;
+	Widget* m_selectWidget;
 	std::string m_windowName;
 	int m_width, m_height, m_xPos, m_yPos;
 	bool m_changeCursor;
@@ -130,11 +128,6 @@ public:
 	void releaseEvent(float mouseX, float mouseY);
 	void unselectEvent();
 	
-	static bool hoverableWidget(const WidgetType& type);
-	static bool clickableWidget(const WidgetType& type);
-	static bool selectableWidget(const WidgetType& type);
-	static bool holdableWidget(const WidgetType& type);
-
 protected:
 	D2D1_POINT_2F m_point;
 	D2D1_SIZE_F m_size;
@@ -143,6 +136,8 @@ protected:
 	WidgetState m_state;
 	WidgetType m_type;
 	bool m_drawBackground, m_drawBorder;
+	bool m_hoverable, m_clickable, m_holdable, m_selectable, m_checkable;
+	bool m_checked, m_selected;
 
 	D2D1_RECT_F mapToLocal(D2D1_RECT_F rect);
 	D2D1_POINT_2F mapToLocal(D2D1_POINT_2F point);
@@ -170,10 +165,12 @@ public:
 
 	void connect(std::function<void()> function);
 	void setText(const std::string& text);
+	void setCheckable(bool check = true);
 
 private:
 	std::function<void()> m_clickFunction;
 	Text* m_text;
+	bool m_checked;
 };
 
 class Label : public Widget
@@ -218,7 +215,7 @@ private:
 	Text* m_text;
 	D2D1_POINT_2F m_boxPoint, m_textPoint;
 	D2D1_SIZE_F m_boxSize, m_textSize;
-	bool m_check;
+	bool m_checked;
 
 	std::array<D2D1_POINT_2F, 3> currentCheckbox() const;
 	void calculateBoxAndTextLayout();
@@ -239,7 +236,7 @@ public:
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override;
-	void unselect();
+	void stopCursorTimer();
 
 	std::string getText() const;
 	void setPlaceholderText(const std::string& text);
@@ -254,7 +251,7 @@ private:
 	std::vector<float> m_charWidths;
 	float m_lineHeight;
 	Timer* m_cursorTimer;
-	bool m_selected, m_drawCursor, m_trailing;
+	bool m_drawCursor, m_trailing;
 	uint32_t m_cursorPosition;
 
 	float calculateCharDimension(char character);
@@ -382,9 +379,9 @@ public:
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override;
-	void unselect();
 	bool dropdownContains(float x, float y) const;
 	void setHoverIndex(float x, float y);
+	void setDropdown(bool drop = true);
 
 	void addItem(const std::string& text);
 	void insertItem(const std::string& text, int index);
@@ -420,6 +417,7 @@ public:
 	void setVertical(bool vertical = true);
 	void setMaxTicks(int ticks);
 	int getCurrentTick();
+	float getCurrentPercentage();
 
 private:
 	int m_ticks, m_currentTick;

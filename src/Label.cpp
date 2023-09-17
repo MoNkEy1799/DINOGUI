@@ -14,6 +14,7 @@ Label::Label(Core* core, const std::string& text)
 {
     m_text = new Text(core, text);
 	m_type = WidgetType::LABEL;
+    ColorTheme::createDefault(m_theme, m_type);
 }
 
 Label::~Label()

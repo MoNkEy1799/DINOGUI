@@ -13,6 +13,7 @@ Table::Table(Core* core)
       m_lineWidth(1.0f), m_rowHeight(0.0f), m_colWidth(0.0f)
 {
     m_type = WidgetType::TABLE;
+    ColorTheme::createDefault(m_theme, m_type);
     m_drawBackground = true;
     m_drawBorder = true;
     m_size = { 120.0f, 140.0f };
@@ -115,7 +116,7 @@ void Table::drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBr
     {
         p1 = { m_point.x + 1.0f, curHeight };
         p2 = { m_point.x + m_size.width - 0.5f, curHeight };
-        brush->SetColor(Color::d2d1(m_theme->tableLines[(int)m_state]));
+        brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
         renderTarget->DrawLine(DPIHandler::adjusted(p1), DPIHandler::adjusted(p2), brush, m_lineWidth);
         curHeight += m_rowHeight + m_lineWidth;
     }
@@ -123,7 +124,7 @@ void Table::drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBr
     {
         p1 = { curWidth, m_point.y + 1.0f };
         p2 = { curWidth, m_point.y + m_size.height - 0.5f };
-        brush->SetColor(Color::d2d1(m_theme->tableLines[(int)m_state]));
+        brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
         renderTarget->DrawLine(DPIHandler::adjusted(p1), DPIHandler::adjusted(p2), brush, m_lineWidth);
         curWidth += m_colWidth + m_lineWidth;
     }

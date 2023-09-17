@@ -14,6 +14,7 @@
 
 #define DINOCOLOR_WHITE DINOGUI::Color{ 255, 255, 255 }
 #define DINOCOLOR_LIGHTGRAY DINOGUI::Color{ 178, 178, 178 }
+#define DINOCOLOR_GRAY DINOGUI::Color{ 128, 128, 128 }
 #define DINOCOLOR_DARKGRAY DINOGUI::Color{ 98, 98, 98 }
 #define DINOCOLOR_BLACK DINOGUI::Color{ 0, 0, 0 }
 #define DINOCOLOR_RED DINOGUI::Color{ 255, 0, 0 }
@@ -43,24 +44,20 @@ struct Color
 	static D2D1_COLOR_F d2d1(Color c);
 };
 
+enum class WidgetType;
 struct ColorTheme
 {
-	std::array<Color, 3> background;
-	std::array<Color, 3> border;
-	std::array<Color, 3> text;
+	std::array<Color, 7> background;
+	std::array<Color, 7> border;
+	std::array<Color, 7> text;
+	std::array<Color, 7> background2;
+	std::array<Color, 7> border2;
+	std::array<Color, 7> text2;
+	std::array<Color, 7> addColor;
 
-	std::array<Color, 3> checkboxBackground;
-	std::array<Color, 3> checkboxBorder;
-	std::array<Color, 3> checkboxCheckmark;
-	std::array<Color, 3> texteditPlaceholder;
-	std::array<Color, 3> texteditCursor;
-	std::array<Color, 3> tableLines;
-	std::array<Color, 3> comboboxEntries;
-	std::array<Color, 3> sliderBorder;
-	std::array<Color, 3> sliderBackground;
-
-	static void createFromDefault(ColorTheme* theme, const Color& accentColor = DINOCOLOR_BLUE, bool dark = false);
-	static void createFromFile(ColorTheme* theme, const std::string& filename);
+	static void createDefault(ColorTheme* theme, WidgetType type, const Color& accentColor = DINOCOLOR_BLUE, bool dark = false);
+	static void createFromFile(ColorTheme* theme, WidgetType type, const std::string& filename);
+	static void createFromString(ColorTheme* theme, WidgetType type, const std::string& string);
 };
 
 enum class FontWeight

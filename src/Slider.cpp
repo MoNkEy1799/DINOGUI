@@ -8,11 +8,16 @@
 using namespace DINOGUI;
 
 Slider::Slider(Core* core, bool vertical)
-    : Widget(core), m_ticks(100), m_currentTick(0), m_vertical(vertical)
+    : Widget(core), m_ticks(0), m_currentTick(0), m_vertical(vertical)
 {
     m_type = WidgetType::SLIDER;
+    ColorTheme::createDefault(m_theme, m_type);
     m_drawBorder = true;
+    m_hoverable = true;
+    m_clickable = true;
+    m_holdable = true;
     m_size = { 200.0f, 20.0f };
+    m_ticks = (int)m_size.width;
     if (vertical)
     {
         m_size = { m_size.height, m_size.width };
@@ -26,13 +31,17 @@ void Slider::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
     {
         rect.left += 8.0f;
         rect.right -= 8.0f;
+        rect.top += 5.0f;
+        rect.bottom -= 5.0f;
     }
     else
     {
         rect.top += 8.0f;
         rect.bottom -= 8.0f;
+        rect.left += 5.0f;
+        rect.right -= 5.0f;
     }
-    brush->SetColor(Color::d2d1(m_theme->border[(int)m_state]));
+    brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
     renderTarget->DrawRectangle(DPIHandler::adjusted(rect), brush);
     float x = m_vertical ? 10.0f : 5.0f;
     float y = m_vertical ? 5.0f : 10.0f;
@@ -40,14 +49,14 @@ void Slider::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
     float midY = m_vertical ? rect.top : rect.top + ((rect.bottom - rect.top) / 2.0f);
     if (m_vertical)
     {
-        midY += m_currentTick * m_size.height / m_ticks;
+        midY += m_currentTick * (m_size.height - 10.0f) / m_ticks;
     }
     else
     {
-        midX += m_currentTick * m_size.width / m_ticks;
+        midX += m_currentTick * (m_size.width -10.0f) / m_ticks;
     }
     D2D1_RECT_F slider = { midX - x, midY - y, midX + x, midY + y };
-    brush->SetColor(Color::d2d1(m_theme->border[(int)m_state]));
+    brush->SetColor(Color::d2d1(m_theme->background[(int)m_state]));
     renderTarget->FillRectangle(DPIHandler::adjusted(slider), brush);
 }
 
@@ -66,13 +75,18 @@ void Slider::clicked(float mouseX, float mouseY)
 
 void Slider::setMaxTicks(int ticks)
 {
-    int maxTicks = m_vertical ? (int)m_size.height : (int)m_size.width;
+    int maxTicks = m_vertical ? (int)m_size.height - 10 : (int)m_size.width - 10;
     m_ticks = std::min(ticks, maxTicks);
 }
 
 int Slider::getCurrentTick()
 {
     return m_currentTick;
+}
+
+float Slider::getCurrentPercentage()
+{
+    return (float)m_currentTick / m_ticks;
 }
 
 void Slider::setVertical(bool vertical)

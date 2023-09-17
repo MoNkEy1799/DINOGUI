@@ -11,7 +11,7 @@
 using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
-    : Widget(core), m_selected(false), m_drawCursor(false), m_cursorTimer(nullptr), m_trailing(false),
+    : Widget(core), m_drawCursor(false), m_cursorTimer(nullptr), m_trailing(false),
       m_cursorPosition(0), m_lineHeight(0.0f), m_text(nullptr), m_placeholder(nullptr)
 {
     m_text = new Text(core, "");
@@ -19,11 +19,13 @@ Textedit::Textedit(Core* core)
     m_cutoffText = new Text(core, "");
     m_cutoffText->setAlignment(Alignment::LEFT);
     m_type = WidgetType::TEXTEDIT;
+    ColorTheme::createDefault(m_theme, m_type);
     m_drawBackground = true;
     m_drawBorder = true;
+    m_hoverable = true;
+    m_selectable = true;
     m_size = { 120.0f, 20.0f };
     m_cursorTimer = new Timer(m_core->getWindowHandle(), 500, [this] { switchCursor(); });
-    m_theme->background = { Color{ 255, 255, 255 }, Color{ 255, 255, 255 }, Color{ 255, 255, 255 } };
 }
 
 Textedit::~Textedit()
@@ -35,11 +37,6 @@ Textedit::~Textedit()
 void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
-    m_theme->border = { Color{ 51, 51, 51 }, Color{ 0, 120, 215 }, Color{ 51, 51, 51 } };
-    if (m_selected)
-    {
-        m_theme->border = { Color{ 1, 86, 155 }, Color{ 1, 86, 155 }, Color{ 1, 86, 155 } };
-    }
     basicDrawBackgroundBorder(rect, renderTarget, brush);
     m_text->setColor(m_theme->text[(int)m_state]);
     m_text->draw(rect, renderTarget, brush);
@@ -61,12 +58,12 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (m_placeholder && !m_selected && m_charWidths.empty())
     {
-        m_placeholder->setColor(m_theme->texteditPlaceholder[(int)m_state]);
+        m_placeholder->setColor(m_theme->addColor[(int)m_state]);
         m_placeholder->draw(rect, renderTarget, brush);
     }
     if (m_drawCursor)
     {
-        brush->SetColor(Color::d2d1(m_theme->texteditCursor[(int)m_state]));
+        brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
         D2D1_RECT_F cursor = currentCursorLine();
         renderTarget->DrawLine(DPIHandler::adjusted(D2D1_POINT_2F{ cursor.left, cursor.top }),
             DPIHandler::adjusted(D2D1_POINT_2F{ cursor.right, cursor.bottom }), brush);
@@ -80,9 +77,8 @@ void Textedit::place(int x, int y)
 
 void Textedit::clicked(float mouseX, float mouseY)
 {
-    if (!m_selected)
+    if (!m_cursorTimer->isActive())
     {
-        m_selected = true;
         m_cursorTimer->start();
     }
 
@@ -94,14 +90,10 @@ void Textedit::clicked(float mouseX, float mouseY)
     m_cursorPosition = newCursorPos;
 }
 
-void Textedit::unselect()
+void Textedit::stopCursorTimer()
 {
-    m_selected = false;
-    m_drawCursor = false;
     m_cursorTimer->stop();
-    m_state = WidgetState::NORMAL;
-    m_core->setSelectedWidget(nullptr);
-    m_core->redrawScreen();
+    m_drawCursor = false;
 }
 
 std::string Textedit::getText() const

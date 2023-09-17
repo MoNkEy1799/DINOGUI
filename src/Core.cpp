@@ -10,16 +10,10 @@
 
 using namespace DINOGUI;
 
-void Core::DEBUG_DRAW_RECT(D2D1_RECT_F r)
-{
-    m_colorBrush->SetColor(D2D1::ColorF(1.0f, 0.0f, 0.0f));
-    m_renderTarget->DrawRectangle(r, m_colorBrush);
-}
-
 Core::Core(const std::string& windowName, int width, int height, int x, int y)
     : m_factory(nullptr), m_writeFactory(nullptr), m_imageFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr),
       m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
-      m_windowName(windowName), m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectedWidget(nullptr), m_changeCursor(true)
+      m_windowName(windowName), m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectWidget(nullptr), m_changeCursor(true)
 {
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
@@ -191,9 +185,9 @@ void Core::paintWidgets()
     {
         widget->draw(m_renderTarget, m_colorBrush);
     }
-    if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::COMBOBOX)
+    if (m_selectWidget && m_selectWidget->getWidgetType() == WidgetType::COMBOBOX)
     {
-        dynamic_cast<Combobox*>(m_selectedWidget)->draw(m_renderTarget, m_colorBrush);
+        dynamic_cast<Combobox*>(m_selectWidget)->draw(m_renderTarget, m_colorBrush);
     }
 
     HRESULT hResult = m_renderTarget->EndDraw();
@@ -270,20 +264,20 @@ void Core::leftClick(int posX, int posY, DWORD flags)
     Widget* underMouse = getWidgetUnderMouse(x, y);
     if (!underMouse)
     {
-        if (m_selectedWidget)
+        if (m_selectWidget)
         {
-            m_selectedWidget->receiveEvent(new Event(EventType::UNSELECT_EVENT, x, y));
+            m_selectWidget->receiveEvent(new Event(EventType::UNSELECT_EVENT, x, y));
         }
         return;
     }
-    if (underMouse == m_selectedWidget)
+    if (underMouse == m_selectWidget)
     {
-        m_selectedWidget->receiveEvent(new Event(EventType::CLICK_EVENT, x, y));
+        m_selectWidget->receiveEvent(new Event(EventType::CLICK_EVENT, x, y));
         return;
     }
-    if (m_selectedWidget)
+    if (m_selectWidget)
     {
-        m_selectedWidget->receiveEvent(new Event(EventType::UNSELECT_EVENT, x, y));
+        m_selectWidget->receiveEvent(new Event(EventType::UNSELECT_EVENT, x, y));
     }
     underMouse->receiveEvent(new Event(EventType::CLICK_EVENT, x, y));
 }
@@ -302,11 +296,10 @@ void Core::leftRelease(int posX, int posY, DWORD flags)
         }
         return;
     }
-    if (underMouse == m_selectedWidget)
+    if (underMouse == m_selectWidget)
     {
         return;
     }
-
     if (underMouse == m_clickWidget)
     {
         underMouse->receiveEvent(new Event(EventType::REALEASE_EVENT, x, y));
@@ -320,17 +313,17 @@ void Core::leftRelease(int posX, int posY, DWORD flags)
 
 void Core::processKeys(char key)
 {
-    if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::TEXTEDIT)
+    if (m_selectWidget && m_selectWidget->getWidgetType() == WidgetType::TEXTEDIT)
     {
-        dynamic_cast<Textedit*>(m_selectedWidget)->keyInput(key);
+        dynamic_cast<Textedit*>(m_selectWidget)->keyInput(key);
     }
 }
 
 void Core::processOtherKeys(uint32_t key)
 {
-    if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::TEXTEDIT)
+    if (m_selectWidget && m_selectWidget->getWidgetType() == WidgetType::TEXTEDIT)
     {
-        dynamic_cast<Textedit*>(m_selectedWidget)->otherKeys(key);
+        dynamic_cast<Textedit*>(m_selectWidget)->otherKeys(key);
     }
 }
 
@@ -343,11 +336,11 @@ D2D1_SIZE_U Core::getCurrentWindowSize() const
 
 Widget* Core::getWidgetUnderMouse(float x, float y) const
 {
-    if (m_selectedWidget && m_selectedWidget->getWidgetType() == WidgetType::COMBOBOX)
+    if (m_selectWidget && m_selectWidget->getWidgetType() == WidgetType::COMBOBOX)
     {
-        if (dynamic_cast<const Combobox*>(m_selectedWidget)->dropdownContains(x, y))
+        if (dynamic_cast<const Combobox*>(m_selectWidget)->dropdownContains(x, y))
         {
-            return m_selectedWidget;
+            return m_selectWidget;
         }
     }
     for (auto rev = m_displayWidgets.rbegin(); rev != m_displayWidgets.rend(); rev++)
