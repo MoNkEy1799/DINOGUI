@@ -10,7 +10,7 @@
 using namespace DINOGUI;
 
 Button::Button(Core* core, const std::string& text, std::function<void()> function)
-    : Widget(core), m_clickFunction(function), m_text(nullptr), m_checked(false)
+    : Widget(core), m_clickFunction(function), m_text(nullptr)
 {
     m_text = new Text(core, text);
     m_type = WidgetType::BUTTON;
@@ -62,3 +62,9 @@ void Button::setCheckable(bool check)
     m_checkable = check;
     m_clickable = !check;
 }
+
+bool Button::isChecked()
+{
+    return m_checked;
+}
+

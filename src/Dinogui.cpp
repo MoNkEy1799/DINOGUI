@@ -151,9 +151,9 @@ void ColorTheme::createDefault(ColorTheme* theme, WidgetType type, const Color& 
 		break;
 
 	case WidgetType::CHECKBOX:
-		theme->border[0] = DINOCOLOR_DARKGRAY;
 		theme->background2.fill(DINOCOLOR_WHITE);
 		theme->border2 = theme->border;
+		theme->border2[0] = DINOCOLOR_DARKGRAY;
 		theme->text2 = theme->text;
 		break;
 

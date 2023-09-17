@@ -113,8 +113,15 @@ void Widget::enterEvent()
 {
     if (m_hoverable)
     {
-        m_state = m_checked ? WidgetState::CHECKED_HOVER : WidgetState::HOVER;
-        m_state = m_selected ? WidgetState::SELECTED_HOVER : WidgetState::HOVER;
+        m_state = WidgetState::HOVER;
+        if (m_checkable && m_checked)
+        {
+            WidgetState::CHECKED_HOVER;
+        }
+        else if (m_selectable && m_selected)
+        {
+            m_state = WidgetState::SELECTED_HOVER;
+        }
         m_core->setHoverWidget(this);
         m_core->redrawScreen();
     }
@@ -122,8 +129,15 @@ void Widget::enterEvent()
 
 void Widget::leaveEvent()
 {
-    m_state = m_checked ? WidgetState::CLICKED : WidgetState::NORMAL;
-    m_state = m_selected ? WidgetState::SELECTED : WidgetState::NORMAL;
+    m_state = WidgetState::NORMAL;
+    if (m_checkable && m_checked)
+    {
+        m_state = WidgetState::CHECKED;
+    }
+    else if (m_selectable && m_selected)
+    {
+        m_state = WidgetState::SELECTED;
+    }
     m_core->setHoverWidget(nullptr);
     m_core->setClickWidget(nullptr);
     m_core->redrawScreen();
@@ -172,7 +186,7 @@ void Widget::releaseEvent(float mouseX, float mouseY)
     if (m_checkable)
     {
         m_checked = !m_checked;
-        m_state = m_checked ? WidgetState::NORMAL : WidgetState::CHECKED;
+        m_state = m_checked ? WidgetState::CHECKED : WidgetState::NORMAL;
     }
     clicked(mouseX, mouseY);
     m_core->setClickWidget(nullptr);

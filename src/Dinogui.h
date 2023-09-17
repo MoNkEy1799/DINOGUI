@@ -166,11 +166,11 @@ public:
 	void connect(std::function<void()> function);
 	void setText(const std::string& text);
 	void setCheckable(bool check = true);
+	bool isChecked();
 
 private:
 	std::function<void()> m_clickFunction;
 	Text* m_text;
-	bool m_checked;
 };
 
 class Label : public Widget
@@ -206,7 +206,7 @@ public:
 	void setSize(int width, int height) override;
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override;
+	void clicked(float mouseX, float mouseY) override {};
 
 	void setText(const std::string& text);
 	bool isChecked() const;
@@ -215,7 +215,6 @@ private:
 	Text* m_text;
 	D2D1_POINT_2F m_boxPoint, m_textPoint;
 	D2D1_SIZE_F m_boxSize, m_textSize;
-	bool m_checked;
 
 	std::array<D2D1_POINT_2F, 3> currentCheckbox() const;
 	void calculateBoxAndTextLayout();

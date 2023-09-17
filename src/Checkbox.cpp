@@ -10,7 +10,7 @@
 using namespace DINOGUI;
 
 Checkbox::Checkbox(Core* core, const std::string& text)
-    : Widget(core), m_checked(false), m_boxPoint(m_point), m_textPoint(m_point),
+    : Widget(core), m_boxPoint(m_point), m_textPoint(m_point),
       m_boxSize({ 12.0f, 12.0f }), m_textSize(m_size), m_text(nullptr)
 {
     m_text = new Text(core, text);
@@ -61,12 +61,6 @@ void Checkbox::place(int x, int y)
 {
     basicPlace(x, y);
     calculateBoxAndTextLayout();
-}
-
-void Checkbox::clicked(float mouseX, float mouseY)
-{
-    std::cout << "clicked" << std::endl;
-    m_checked = !m_checked;
 }
 
 void Checkbox::setText(const std::string& text)
