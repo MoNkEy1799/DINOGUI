@@ -38,7 +38,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
     basicDrawBackgroundBorder(rect, renderTarget, brush);
-    m_text->setColor(m_theme->text[(int)m_state]);
+    brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
     m_text->draw(rect, renderTarget, brush);
 
     if (m_text->fontFormatChanged)
@@ -58,7 +58,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
 
     if (m_placeholder && !m_selected && m_charWidths.empty())
     {
-        m_placeholder->setColor(m_theme->addColor[(int)m_state]);
+        brush->SetColor(Color::d2d1(m_theme->addColor[(int)m_state]));
         m_placeholder->draw(rect, renderTarget, brush);
     }
     if (m_drawCursor)
@@ -99,6 +99,19 @@ void Textedit::stopCursorTimer()
 std::string Textedit::getText() const
 {
     return m_text->getText();
+}
+
+Text* Textedit::getTextWidget(const std::string& which)
+{
+    if (which == "main")
+    {
+        return m_text;
+    }
+    else if (which == "placeholder")
+    {
+        return m_placeholder;
+    }
+    return nullptr;
 }
 
 void Textedit::setPlaceholderText(const std::string& text)

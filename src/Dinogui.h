@@ -17,13 +17,13 @@
 #include <algorithm>
 #include <functional>
 #include <utility>
-
-#define DEBUG_PRINT(x, m) std::cout << m << " : " << x << std::endl
-#define DEBUG_PRINTW(x) std::wcout << x << std::endl
+#include <map>
 
 namespace DINOGUI
 {
 
+class GridManager;
+class Core;
 class Widget;
 class Button;
 class Label;
@@ -31,16 +31,34 @@ class Checkbox;
 class Textedit;
 class Image;
 class Canvas;
+class Table;
 class Combobox;
 class Slider;
-enum class WidgetState { NORMAL, HOVER, CLICKED, SELECTED, SELECTED_HOVER, CHECKED, CHECKED_HOVER };
-enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE, COMBOBOX, SLIDER };
+enum class WidgetState;
+enum class WidgetType;
+
+class GridManager
+{
+public:
+	GridManager(Core* core);
+	void addWidget(Widget* widget, int row, int col, int rowSpan = 1, int colSpan = 1);
+
+private:
+	Core* m_core;
+	std::vector<GridEntry<Widget*>> m_widgets;
+	std::array<float, 4> m_margins;
+	std::array<float, 2> m_spacing;
+	int m_rows, m_cols;
+
+	void updateSizes();
+};
 
 class Core : public TemplateWindow<Core>
 {
 public:
 	Core(const std::string& windowName = "DINOGUI", int width = 200, int height = 200, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT);
 	int run();
+	Size<int> getCurrentWindowSize() const;
 
 	LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam);
 
@@ -48,7 +66,7 @@ public:
 	void removeWidget(Widget* widget);
 	void addDisplayWidget(Widget* widget);
 	void removeDisplayWidget(Widget* widget);
-	void redrawScreen() const { InvalidateRect(m_windowHandle, nullptr, false); };
+	void redrawScreen() const;
 
 	ID2D1Factory* getFactory() const { return m_factory; };
 	IDWriteFactory* getWriteFactory() const { return m_writeFactory; };
@@ -87,18 +105,18 @@ private:
 	void processKeys(char key);
 	void processOtherKeys(uint32_t key);
 
-	D2D1_SIZE_U getCurrentWindowSize () const;
 	Widget* getWidgetUnderMouse(float x, float y) const;
 
 	HRESULT	createGraphicsResource();
 	void destroyGraphicsResources();
 };
 
+enum class WidgetState { NORMAL, HOVER, CLICKED, SELECTED, SELECTED_HOVER, CHECKED, CHECKED_HOVER };
+enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE, COMBOBOX, SLIDER };
+
 class Widget
 {
 public:
-	static void DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str = "");
-
 	Widget(Core* core);
 	virtual ~Widget();
 	Widget(const Widget&) = delete;
@@ -108,6 +126,7 @@ public:
 
 	virtual void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) = 0;
 	virtual void place(int x, int y) = 0;
+	void centerPlace(int x, int y);
 	virtual void clicked(float mouseX, float mouseY) = 0;
 	
 	void show();
@@ -116,6 +135,9 @@ public:
 	void drawBackground(bool draw = true);
 	void setTheme(ColorTheme* theme);
 	virtual void setSize(int width, int height);
+	void setMinimumSize(int width, int height);
+	void setMaximumSize(int width, int height);
+	ResizeState getResizeState();
 
 	WidgetType getWidgetType() const;
 	bool contains(float x, float y) const;
@@ -130,21 +152,17 @@ public:
 	
 protected:
 	D2D1_POINT_2F m_point;
-	D2D1_SIZE_F m_size;
+	Size<float> m_size, m_minSize, m_maxSize;
 	Core* m_core;
 	ColorTheme* m_theme;
 	WidgetState m_state;
 	WidgetType m_type;
+	ResizeState m_resizeState;
 	bool m_drawBackground, m_drawBorder;
 	bool m_hoverable, m_clickable, m_holdable, m_selectable, m_checkable;
 	bool m_checked, m_selected;
 
-	D2D1_RECT_F mapToLocal(D2D1_RECT_F rect);
-	D2D1_POINT_2F mapToLocal(D2D1_POINT_2F point);
-	D2D1_RECT_F mapToGlobal(D2D1_RECT_F rect);
-	D2D1_POINT_2F mapToGlobal(D2D1_POINT_2F point);
 	D2D1_RECT_F currentRect() const;
-
 	void basicDrawBackgroundBorder(const D2D1_RECT_F& rect, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 	void basicPlace(int x, int y);
 };
@@ -164,7 +182,7 @@ public:
 	void clicked(float mouseX, float mouseY) override;
 
 	void connect(std::function<void()> function);
-	void setText(const std::string& text);
+	Text* getTextWidget();
 	void setCheckable(bool check = true);
 	bool isChecked();
 
@@ -187,6 +205,7 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
 
+	Text* getTextWidget();
 	void setText(const std::string& text);
 
 private:
@@ -208,13 +227,13 @@ public:
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
 
-	void setText(const std::string& text);
+	Text* getTextWidget();
 	bool isChecked() const;
 
 private:
 	Text* m_text;
 	D2D1_POINT_2F m_boxPoint, m_textPoint;
-	D2D1_SIZE_F m_boxSize, m_textSize;
+	Size<float> m_boxSize, m_textSize;
 
 	std::array<D2D1_POINT_2F, 3> currentCheckbox() const;
 	void calculateBoxAndTextLayout();
@@ -238,6 +257,7 @@ public:
 	void stopCursorTimer();
 
 	std::string getText() const;
+	Text* getTextWidget(const std::string& which = "main");
 	void setPlaceholderText(const std::string& text);
 
 	void keyInput(char key);
@@ -305,11 +325,11 @@ public:
 	void fill(const Color& color, bool autoLock = true);
 	void setPixel(const Color& color, int x, int y, bool autoLock = true);
 	void setPixel(const Color& color, size_t pos, bool autoLock = true);
-	void drawLine(Point p1, Point p2, const Color& color, bool autoLock = true);
-	void drawRectangle(Point p1, Point p2, const Color& color, bool autoLock = true);
-	void drawTriangle(Point p1, Point p2, Point p3, const Color& color, bool autoLock = true);
-	void drawCircle(Point p, int r, const Color& color, bool autoLock = true);
-	void drawEllipse(Point p, int ra, int rb, const Color& color, bool autoLock = true);
+	void drawLine(Point<float> p1, Point<float> p2, const Color& color, bool autoLock = true);
+	void drawRectangle(Point<float> p1, Point<float> p2, const Color& color, bool autoLock = true);
+	void drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color, bool autoLock = true);
+	void drawCircle(Point<float> p, int r, const Color& color, bool autoLock = true);
+	void drawEllipse(Point<float> p, int ra, int rb, const Color& color, bool autoLock = true);
 	void lock();
 	void unlock();
 
@@ -325,15 +345,15 @@ private:
 	void createPixelBuffer();
 	void setColor(const Color& color, size_t bytePos);
 	void checkBounds(int& x, int& y) const;
-	void checkBounds(Point& p) const;
+	void checkBounds(Point<float>& p) const;
 	size_t bytePosFromXY(int x, int y) const;
 	D2D1_RECT_F bufferRect() const;
 
-	void fillBottomTriangle(Point p1, Point p2, Point p3, const Color& color);
-	void fillTopTriangle(Point p1, Point p2, Point p3, const Color& color);
+	void fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
+	void fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
 
 	static void swap(int& a, int& b);
-	static void swap(Point& a, Point& b);
+	static void swap(Point<float>& a, Point<float>& b);
 	static float frac(float a);
 	static float rfrac(float a);
 };
@@ -353,6 +373,8 @@ public:
 	void clicked(float mouseX, float mouseY) override {};
 
 	void setCell(const std::string& text, int row, int col, int rowSpan = 1, int colSpan = 1);
+	std::vector<Text*> getTextWidgets();
+	Text* getTextWidget(int row, int col);
 	void setLineWidth(float lineWidth);
 
 private:
@@ -388,6 +410,8 @@ public:
 	void changeUnfoldDirection(bool upward = true);
 	std::string getCurrentText() const;
 	int getCurrentIndex() const;
+	std::vector<Text*> getTextWidgets();
+	Text* getTextWidget(int index);
 
 private:
 	std::vector<Text*> m_boxText;

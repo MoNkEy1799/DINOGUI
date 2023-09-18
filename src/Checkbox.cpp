@@ -43,7 +43,7 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     renderTarget->FillRectangle(boxRect, brush);
     brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
     renderTarget->DrawRectangle(boxRect, brush);
-    m_text->setColor(m_theme->text[(int)m_state]);
+    brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
     m_text->draw(textRect, renderTarget, brush);
 
     if (m_checked)
@@ -63,9 +63,9 @@ void Checkbox::place(int x, int y)
     calculateBoxAndTextLayout();
 }
 
-void Checkbox::setText(const std::string& text)
+Text* Checkbox::getTextWidget()
 {
-    m_text->setText(text);
+    return m_text;
 }
 
 bool Checkbox::isChecked() const

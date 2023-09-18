@@ -30,7 +30,7 @@ void Button::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
     basicDrawBackgroundBorder(rect, renderTarget, brush);
-    m_text->setColor(m_theme->text[(int)m_state]);
+    brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
     m_text->draw(rect, renderTarget, brush);
 }
 
@@ -52,9 +52,9 @@ void Button::connect(std::function<void()> function)
     m_clickFunction = function;
 }
 
-void Button::setText(const std::string& text)
+Text* Button::getTextWidget()
 {
-    m_text->setText(text);
+    return m_text;
 }
 
 void Button::setCheckable(bool check)

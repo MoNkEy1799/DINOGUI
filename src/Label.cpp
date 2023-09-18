@@ -26,13 +26,18 @@ void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brus
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
     basicDrawBackgroundBorder(rect, renderTarget, brush);
-    m_text->setColor(m_theme->text[(int)m_state]);
+    brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
     m_text->draw(rect, renderTarget, brush);
 }
 
 void Label::place(int x, int y)
 {
     basicPlace(x, y);
+}
+
+Text* Label::getTextWidget()
+{
+    return m_text;
 }
 
 void Label::setText(const std::string& text)

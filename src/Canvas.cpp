@@ -120,7 +120,7 @@ void Canvas::setPixel(const Color& color, size_t pos, bool autoLock)
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::drawLine(Point p1, Point p2, const Color& color, bool autoLock)
+void Canvas::drawLine(Point<float> p1, Point<float> p2, const Color& color, bool autoLock)
 {
     if (autoLock)
     {
@@ -186,7 +186,7 @@ void Canvas::drawLine(Point p1, Point p2, const Color& color, bool autoLock)
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::drawRectangle(Point p1, Point p2, const Color& color, bool autoLock)
+void Canvas::drawRectangle(Point<float> p1, Point<float> p2, const Color& color, bool autoLock)
 {
     if (autoLock)
     {
@@ -236,7 +236,7 @@ void Canvas::drawRectangle(Point p1, Point p2, const Color& color, bool autoLock
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::drawTriangle(Point p1, Point p2, Point p3, const Color& color, bool autoLock)
+void Canvas::drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color, bool autoLock)
 {
     if (autoLock)
     {
@@ -292,7 +292,7 @@ void Canvas::drawTriangle(Point p1, Point p2, Point p3, const Color& color, bool
     }
     else
     {
-        Point p4 = { p1.x + (p2.y - p1.y) / (p3.y - p1.y) * (p3.x - p1.x), p2.y };
+        Point<float> p4 = { p1.x + (p2.y - p1.y) / (p3.y - p1.y) * (p3.x - p1.x), p2.y };
         fillBottomTriangle(p1, p2, p4, color);
         fillTopTriangle(p2, p4, p3, color);
     }
@@ -304,12 +304,12 @@ void Canvas::drawTriangle(Point p1, Point p2, Point p3, const Color& color, bool
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::drawCircle(Point p, int r, const Color& color, bool autoLock)
+void Canvas::drawCircle(Point<float> p, int r, const Color& color, bool autoLock)
 {
     drawEllipse(p, r, r, color, autoLock);
 }
 
-void Canvas::drawEllipse(Point p, int ra, int rb, const Color& color, bool autoLock)
+void Canvas::drawEllipse(Point<float> p, int ra, int rb, const Color& color, bool autoLock)
 {
     if (autoLock)
     {
@@ -412,7 +412,7 @@ void Canvas::checkBounds(int& x, int& y) const
     y = (y > m_bufferHeight) ? m_bufferHeight : y;
 }
 
-void Canvas::checkBounds(Point& p) const
+void Canvas::checkBounds(Point<float>& p) const
 {
     p.x = (p.x < 0.0f) ? 0.0f : p.x;
     p.x = (p.x > m_bufferWidth) ? (float)m_bufferWidth : p.x;
@@ -431,7 +431,7 @@ D2D1_RECT_F Canvas::bufferRect() const
     return { current.left + 1.0f, current.top + 1.0f, current.right, current.bottom };
 }
 
-void Canvas::fillBottomTriangle(Point p1, Point p2, Point p3, const Color& color)
+void Canvas::fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color)
 {
     if (p2.x > p3.x)
     {
@@ -453,7 +453,7 @@ void Canvas::fillBottomTriangle(Point p1, Point p2, Point p3, const Color& color
     }
 }
 
-void Canvas::fillTopTriangle(Point p1, Point p2, Point p3, const Color& color)
+void Canvas::fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color)
 {
     if (p1.x > p2.x)
     {
@@ -482,7 +482,7 @@ void Canvas::swap(int& a, int& b)
     b = temp;
 }
 
-void Canvas::swap(Point& a, Point& b)
+void Canvas::swap(Point<float>& a, Point<float>& b)
 {
     float temp = a.x;
     a.x = b.x;

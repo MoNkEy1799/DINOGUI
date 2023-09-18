@@ -59,6 +59,7 @@ int main()
 	combo->addItem("Two");
 	combo->addItem("Three");
 	combo->addItem("Four");
+	combo->getTextWidget(2)->setColor(DINOCOLOR_RED);
 
 	slider->place(100, 420);
 	slider2->place(90, 200);

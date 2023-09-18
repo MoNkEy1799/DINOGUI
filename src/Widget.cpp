@@ -6,23 +6,15 @@
 
 using namespace DINOGUI;
 
-void Widget::DEBUG_PRINT_COORDS(D2D1_RECT_F rect, const std::string& str)
-{
-    std::cout << "\n" << std::endl;
-    std::cout << "### Coords for " << str << " ###" << std::endl;
-    std::cout << "top-left: " << rect.left << ", " << rect.top << std::endl;
-    std::cout << "bottom-right: " << rect.right << ", " << rect.bottom << std::endl;
-    std::cout << "\n" << std::endl;
-}
-
 Widget::Widget(Core* core)
-    : m_core(core), m_theme(nullptr), m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
-      m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_drawBackground(false), m_drawBorder(false),
-      m_hoverable(false), m_clickable(false), m_holdable(false), m_selectable(false), m_checkable(false),
-      m_checked(false), m_selected(false)
+    : m_core(core), m_theme(nullptr), m_state(WidgetState::NORMAL), m_type(WidgetType::NONE), m_resizeState(),
+      m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_minSize({ 0.0f, 0.0f }), m_maxSize({ 1e6f, 1e6f }),
+      m_drawBackground(false), m_drawBorder(false), m_hoverable(false), m_clickable(false), m_holdable(false),
+      m_selectable(false), m_checkable(false), m_checked(false), m_selected(false)
 {
     m_core->addWidget(this);
     m_theme = new ColorTheme();
+    m_resizeState.size = &m_size;
 }
 
 Widget::~Widget()
@@ -30,6 +22,11 @@ Widget::~Widget()
     m_core->removeWidget(this);
     m_core->removeDisplayWidget(this);
     delete m_theme;
+}
+
+void Widget::centerPlace(int x, int y)
+{
+    place(x - (int)m_size.width, y - (int)m_size.height);
 }
 
 void Widget::setTheme(ColorTheme* theme)
@@ -206,26 +203,6 @@ void Widget::unselectEvent()
     m_selected = false;
     m_core->setSelectWidget(nullptr);
     m_core->redrawScreen();
-}
-
-D2D1_RECT_F Widget::mapToLocal(D2D1_RECT_F rect)
-{
-    return { rect.left - m_point.x, rect.top - m_point.y, rect.right - m_point.x - m_size.width, rect.bottom - m_point.y - m_size.height };
-}
-
-D2D1_POINT_2F Widget::mapToLocal(D2D1_POINT_2F point)
-{
-    return {point.x - m_point.x, point.y - m_point.y};
-}
-
-D2D1_RECT_F Widget::mapToGlobal(D2D1_RECT_F rect)
-{
-    return { rect.left + m_point.x, rect.top + m_point.y, rect.right + m_point.x + m_size.width, rect.bottom + m_point.y + m_size.height };
-}
-
-D2D1_POINT_2F Widget::mapToGlobal(D2D1_POINT_2F point)
-{
-    return { point.x + m_point.x, point.y + m_point.y };
 }
 
 D2D1_RECT_F Widget::currentRect() const

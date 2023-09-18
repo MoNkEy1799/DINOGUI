@@ -5,6 +5,8 @@
 #include <d2d1.h>
 #include <dwrite.h>
 #include <string>
+#include <vector>
+#include <array>
 
 using namespace DINOGUI;
 
@@ -74,13 +76,28 @@ void Table::setCell(const std::string& text, int row, int col, int rowSpan, int 
         }
         m_cols = col + colSpan;
     }
-    GridEntry<Text*>& entry = m_entries[(uint32_t)row * m_cols + col];
+    GridEntry<Text*>& entry = m_entries[(size_t)row * m_cols + col];
     if (text != "")
     {
         entry.entry = new Text(m_core, text);
     }
     entry.rowSpan = (rowSpan < 1) ? 1 : rowSpan;
     entry.colSpan = (colSpan < 1) ? 1 : colSpan;
+}
+
+std::vector<Text*> Table::getTextWidgets()
+{
+    std::vector<Text*> vec;
+    for (GridEntry<Text*> entry : m_entries)
+    {
+        vec.push_back(entry.entry);
+    }
+    return vec;
+}
+
+Text* Table::getTextWidget(int row, int col)
+{
+    return m_entries[(size_t)row * m_rows + col].entry;
 }
 
 void Table::setLineWidth(float lineWidth)
@@ -102,7 +119,7 @@ void Table::drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget
     }
     if (entry.entry)
     {
-        entry.entry->setColor(m_theme->text[(int)m_state]);
+        brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
         entry.entry->draw(cell, renderTarget, brush);
     }
 }

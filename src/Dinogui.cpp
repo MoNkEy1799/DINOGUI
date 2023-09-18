@@ -14,7 +14,7 @@ using namespace DINOGUI;
 
 Text::Text(Core* core, const std::string& text)
 	: m_font(DINOGUI_FONT_DEFAULT), m_color({ 0, 0, 0 }), m_fontFormat(nullptr),
-	  m_core(core), fontFormatChanged(false), m_text(text),
+	  m_core(core), fontFormatChanged(false), m_text(text), m_colorSet(false),
 	  m_hAlign(DWRITE_TEXT_ALIGNMENT_CENTER), m_vAlign(DWRITE_PARAGRAPH_ALIGNMENT_CENTER)
 {
 }
@@ -35,7 +35,10 @@ void Text::draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D
 	rectangle.top += 2.0f;
 	rectangle.right -= 2.0f;
 	rectangle.bottom -= 2.0f;
-	brush->SetColor(Color::d2d1(m_color));
+	if (m_colorSet)
+	{
+		brush->SetColor(Color::d2d1(m_color));
+	}
 	renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, rectangle, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }
 
@@ -53,6 +56,12 @@ void Text::setFont(const Font& font)
 void Text::setColor(const Color& color)
 {
 	m_color = color;
+	m_colorSet = true;
+}
+
+void Text::unsetColor()
+{
+	m_colorSet = false;
 }
 
 void Text::setAlignment(Alignment align)

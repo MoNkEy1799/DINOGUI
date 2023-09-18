@@ -38,6 +38,32 @@ namespace DINOGUI
 
 class Core;
 
+template<typename T>
+struct Point
+{
+	T x, y;
+};
+
+template<typename T>
+struct Size
+{
+	T width, height;
+};
+
+template<typename T>
+struct Rect
+{
+	T left, top, right, bottom;
+};
+
+struct ResizeState
+{
+	const Size<float>* size;
+	const Size<float>* minSize;
+	const Size<float>* maxSize;
+	bool stretchWidth, stretchHeight;
+};
+
 struct Color
 {
 	int r, g, b, a = 255;
@@ -114,6 +140,7 @@ public:
 	void setText(const std::string& text);
 	void setFont(const Font& font);
 	void setColor(const Color& color);
+	void unsetColor();
 	void setAlignment(Alignment align);
 
 	std::string& getText();
@@ -128,6 +155,7 @@ private:
 	DWRITE_TEXT_ALIGNMENT m_hAlign;
 	DWRITE_PARAGRAPH_ALIGNMENT m_vAlign;
 	Color m_color;
+	bool m_colorSet;
 
 	bool createFontFormat();
 };
@@ -187,11 +215,6 @@ struct Event
 	Event(EventType type, float mouseX, float mouseY) : type(type), mouseX(mouseX), mouseY(mouseY) {};
 	EventType type;
 	float mouseX, mouseY;
-};
-
-struct Point
-{
-	float x, y;
 };
 
 template<typename T>

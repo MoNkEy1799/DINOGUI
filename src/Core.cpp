@@ -117,6 +117,11 @@ void Core::removeDisplayWidget(Widget* widget)
     m_displayWidgets.erase(std::remove(m_displayWidgets.begin(), m_displayWidgets.end(), widget), m_displayWidgets.end());
 }
 
+void Core::redrawScreen() const
+{
+    InvalidateRect(m_windowHandle, nullptr, false);
+}
+
 int Core::createFactoryAndDPI()
 {
     if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_factory)))
@@ -164,7 +169,8 @@ void Core::resizeWindow()
 {
     if (m_renderTarget)
     {
-        m_renderTarget->Resize(getCurrentWindowSize());
+        Size<int> windowSize = getCurrentWindowSize();
+        m_renderTarget->Resize({ (uint32_t)windowSize.width, (uint32_t)windowSize.height });
         redrawScreen();
     }
 }
@@ -327,11 +333,11 @@ void Core::processOtherKeys(uint32_t key)
     }
 }
 
-D2D1_SIZE_U Core::getCurrentWindowSize() const
+Size<int> Core::getCurrentWindowSize() const
 {
     RECT rect;
     GetClientRect(m_windowHandle, &rect);
-    return D2D1::SizeU(rect.right, rect.bottom);
+    return { (int)rect.right, (int)rect.bottom };
 }
 
 Widget* Core::getWidgetUnderMouse(float x, float y) const
@@ -359,9 +365,10 @@ HRESULT Core::createGraphicsResource()
 
     if (!m_renderTarget)
     {
+        Size<int> windowSize = getCurrentWindowSize();
         hResult = m_factory->CreateHwndRenderTarget(
             D2D1::RenderTargetProperties(),
-            D2D1::HwndRenderTargetProperties(m_windowHandle, getCurrentWindowSize()),
+            D2D1::HwndRenderTargetProperties(m_windowHandle, { (uint32_t)windowSize.width, (uint32_t)windowSize.height }),
             &m_renderTarget);
 
         if (SUCCEEDED(hResult))
