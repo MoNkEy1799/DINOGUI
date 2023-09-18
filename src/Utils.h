@@ -80,6 +80,7 @@ struct ColorTheme
 	std::array<Color, 7> border2;
 	std::array<Color, 7> text2;
 	std::array<Color, 7> addColor;
+	float width, width2, width3;
 
 	static void createDefault(ColorTheme* theme, WidgetType type, const Color& accentColor = DINOCOLOR_BLUE, bool dark = false);
 	static void createFromFile(ColorTheme* theme, WidgetType type, const std::string& filename);

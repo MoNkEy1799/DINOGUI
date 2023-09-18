@@ -128,6 +128,9 @@ D2D1_COLOR_F Color::d2d1(Color c)
 
 void ColorTheme::createDefault(ColorTheme* theme, WidgetType type, const Color& accentColor, bool dark)
 {
+	theme->width = 1.0f;
+	theme->width2 = 1.0f;
+	theme->width3 = 1.0f;
 	theme->background = {
 			Color{ 225, 225, 225 },
 			Color{ 229, 241, 251 },
@@ -177,6 +180,7 @@ void ColorTheme::createDefault(ColorTheme* theme, WidgetType type, const Color& 
 		break;
 
 	case WidgetType::TABLE:
+		theme->background.fill(DINOCOLOR_WHITE);
 		theme->background2 = theme->background;
 		theme->border2.fill(DINOCOLOR_LIGHTGRAY);
 		theme->text2 = theme->text;

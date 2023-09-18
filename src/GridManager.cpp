@@ -18,7 +18,7 @@ void GridManager::addWidget(Widget* widget, int row, int col, int rowSpan, int c
 {
     if (row + rowSpan > m_rows)
     {
-        for (int i = m_rows - 1; i < row + rowSpan; i++)
+        for (int i = m_rows; i < row + rowSpan; i++)
         {
             for (int j = 0; j < m_cols; j++)
             {

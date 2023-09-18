@@ -220,7 +220,7 @@ void Widget::basicDrawBackgroundBorder(const D2D1_RECT_F& rect, ID2D1HwndRenderT
     if (m_drawBorder)
     {
         brush->SetColor(Color::d2d1(m_theme->border[(int)m_state]));
-        renderTarget->DrawRectangle(rect, brush);
+        renderTarget->DrawRectangle(rect, brush, m_theme->width);
     }
 }
 

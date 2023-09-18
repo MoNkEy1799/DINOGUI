@@ -42,7 +42,7 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     brush->SetColor(Color::d2d1(m_theme->background2[(int)m_state]));
     renderTarget->FillRectangle(boxRect, brush);
     brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
-    renderTarget->DrawRectangle(boxRect, brush);
+    renderTarget->DrawRectangle(boxRect, brush, m_theme->width2);
     brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
     m_text->draw(textRect, renderTarget, brush);
 
@@ -51,8 +51,8 @@ void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
         brush->SetColor(Color::d2d1(m_theme->text2[(int)m_state]));
         std::array<D2D1_POINT_2F, 3> box = currentCheckbox();
-        renderTarget->DrawLine(box[0], box[1], brush);
-        renderTarget->DrawLine(box[1], box[2], brush);
+        renderTarget->DrawLine(box[0], box[1], brush, m_theme->width3);
+        renderTarget->DrawLine(box[1], box[2], brush, m_theme->width3);
         renderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
     }
 }

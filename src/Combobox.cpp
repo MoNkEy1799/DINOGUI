@@ -38,8 +38,8 @@ void Combobox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     textRect = { textRect.left, textRect.top, textRect.right - 16.0f, textRect.bottom };
     std::array<D2D1_POINT_2F, 3> points = getArrowPoints();
     brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
-    renderTarget->DrawLine(DPIHandler::adjusted(points[0]), DPIHandler::adjusted(points[1]), brush);
-    renderTarget->DrawLine(DPIHandler::adjusted(points[1]), DPIHandler::adjusted(points[2]), brush);
+    renderTarget->DrawLine(DPIHandler::adjusted(points[0]), DPIHandler::adjusted(points[1]), brush, m_theme->width2);
+    renderTarget->DrawLine(DPIHandler::adjusted(points[1]), DPIHandler::adjusted(points[2]), brush, m_theme->width2);
     brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
     m_boxText[m_currentIndex]->draw(textRect, renderTarget, brush);
 
@@ -177,7 +177,7 @@ void Combobox::drawDropdown(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColor
     brush->SetColor(Color::d2d1(m_theme->addColor[(int)m_state]));
     renderTarget->FillRectangle(DPIHandler::adjusted(rect), brush);
     brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
-    renderTarget->DrawRectangle(DPIHandler::adjusted(rect), brush);
+    renderTarget->DrawRectangle(DPIHandler::adjusted(rect), brush, m_theme->width);
 
     D2D1_RECT_F boxRect = currentRect();
     for (int i = 0; i < m_boxText.size(); i++)

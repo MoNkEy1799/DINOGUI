@@ -42,7 +42,7 @@ void Slider::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
         rect.right -= 5.0f;
     }
     brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
-    renderTarget->DrawRectangle(DPIHandler::adjusted(rect), brush);
+    renderTarget->DrawRectangle(DPIHandler::adjusted(rect), brush, m_theme->width);
     float x = m_vertical ? 10.0f : 5.0f;
     float y = m_vertical ? 5.0f : 10.0f;
     float midX = m_vertical ? rect.left + ((rect.right - rect.left) / 2.0f) : rect.left;

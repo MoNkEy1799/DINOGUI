@@ -375,16 +375,20 @@ public:
 	void setCell(const std::string& text, int row, int col, int rowSpan = 1, int colSpan = 1);
 	std::vector<Text*> getTextWidgets();
 	Text* getTextWidget(int row, int col);
+	void setRowWeight(int row, float weight);
+	void setColWeight(int col, float weight);
 	void setLineWidth(float lineWidth);
 
 private:
 	int m_rows, m_cols;
-	float m_colWidth, m_rowHeight, m_lineWidth;
+	float m_lineWidth, m_prevBorderWidth;
 	std::vector<GridEntry<Text*>> m_entries;
 	std::vector<int> m_blockedEntries;
+	std::vector<float> m_rowWeights, m_rowHeights, m_colWeights, m_colWidths;
 
 	void drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 	void drawCellLines(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+	void calculateDimensions();
 };
 
 class Combobox : public Widget

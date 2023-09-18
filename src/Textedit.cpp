@@ -66,7 +66,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
         brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
         D2D1_RECT_F cursor = currentCursorLine();
         renderTarget->DrawLine(DPIHandler::adjusted(D2D1_POINT_2F{ cursor.left, cursor.top }),
-            DPIHandler::adjusted(D2D1_POINT_2F{ cursor.right, cursor.bottom }), brush);
+            DPIHandler::adjusted(D2D1_POINT_2F{ cursor.right, cursor.bottom }), brush, m_theme->width2);
     }
 }
 

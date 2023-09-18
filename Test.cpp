@@ -34,17 +34,19 @@ int main()
 	image->place(50, 100);
 	canvas->place(180, 100);
 	table->place(60, 500);
+	table->setLineWidth(4.0f);
 	table->setSize(400, 200);
-	table->setCell("One", 0, 0, 1, 2);
-	table->setCell("Two", 0, 2, 1, 2);
-	table->setCell("Three", 0, 4, 1, 2);
+	table->setCell("One", 3, 0, 1, 2);
+	table->setCell("Two", 3, 2, 1, 2);
+	table->setCell("Three", 3, 4, 1, 2);
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = 0; j < 6; j++)
 		{
-			table->setCell(std::to_string(j), i + 1, j);
+			table->setCell(std::to_string(j), i, j);
 		}
 	}
+	table->setCell("TEST", 1, 2, 1, 2);
 	
 	canvas->fill({ 0, 255, 255 });
 	canvas->drawRectangle({ 1, 1 }, { 40, 40 }, { 0, 255, 0 });
