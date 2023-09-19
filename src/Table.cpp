@@ -22,6 +22,7 @@ Table::Table(Core* core)
     m_drawBackground = true;
     m_drawBorder = true;
     m_size = { 120.0f, 140.0f };
+    m_maxSize = { 1e6f, 1e6f };
 }
 
 Table::~Table()

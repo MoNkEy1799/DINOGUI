@@ -234,8 +234,8 @@ D2D1_RECT_F Textedit::currentCursorLine() const
     D2D1_RECT_F rect = currentRect();
     float yGap = (rect.bottom - rect.top - m_lineHeight) / 2.0f;
     float xGap = std::accumulate(m_charWidths.begin(), m_charWidths.begin() + m_cursorPosition, 0.0f);
-    yGap = std::max(yGap, 0.0f);
-    xGap = std::min(xGap, rect.right - rect.left - 4.0f);
+    yGap = limitRange(yGap, 0.0f, 1e6f);
+    xGap = limitRange(xGap, 0.0f, rect.right - rect.left - 4.0f);
     return { rect.left + xGap + 2.0f, rect.top + yGap,
              rect.left + xGap + 2.0f, rect.top + yGap + m_lineHeight };
 }

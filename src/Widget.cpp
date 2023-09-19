@@ -8,7 +8,7 @@ using namespace DINOGUI;
 
 Widget::Widget(Core* core)
     : m_core(core), m_theme(nullptr), m_state(WidgetState::NORMAL), m_type(WidgetType::NONE), m_resizeState(),
-      m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_minSize({ 0.0f, 0.0f }), m_maxSize({ 1e6f, 1e6f }),
+      m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_minSize({ 0.0f, 0.0f }), m_maxSize({ 1e6f, 20.0f }),
       m_drawBackground(false), m_drawBorder(false), m_hoverable(false), m_clickable(false), m_holdable(false),
       m_selectable(false), m_checkable(false), m_checked(false), m_selected(false)
 {
@@ -34,9 +34,11 @@ void Widget::setTheme(ColorTheme* theme)
 	m_theme = theme;
 }
 
-void Widget::setSize(int width, int height)
+void Widget::resize(int width, int height)
 {
-    m_size = { (float)width, (float)height };
+    float w = limitRange((float)width, m_minSize.width, m_maxSize.width);
+    float h = limitRange((float)height, m_minSize.height, m_maxSize.height);
+    m_size = { w, h };
 }
 
 WidgetType Widget::getWidgetType() const

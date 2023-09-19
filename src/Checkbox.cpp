@@ -27,7 +27,7 @@ Checkbox::~Checkbox()
     delete m_text;
 }
 
-void Checkbox::setSize(int width, int height)
+void Checkbox::resize(int width, int height)
 {
     m_size = { (float)width, (float)height };
     calculateBoxAndTextLayout();

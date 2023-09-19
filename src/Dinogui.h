@@ -58,6 +58,9 @@ class Core : public TemplateWindow<Core>
 public:
 	Core(const std::string& windowName = "DINOGUI", int width = 200, int height = 200, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT);
 	int run();
+	void setFixedWindowSize(int width, int height);
+	void setMinimumWindowSize(int width, int height);
+	void setMaximumWindowSize(int width, int height);
 	Size<int> getCurrentWindowSize() const;
 
 	LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam);
@@ -134,7 +137,8 @@ public:
 	void drawBorder(bool draw = true);
 	void drawBackground(bool draw = true);
 	void setTheme(ColorTheme* theme);
-	virtual void setSize(int width, int height);
+	virtual void resize(int width, int height);
+	void setFixedSize(int width, int height);
 	void setMinimumSize(int width, int height);
 	void setMaximumSize(int width, int height);
 	ResizeState getResizeState();
@@ -222,7 +226,7 @@ public:
 	Checkbox& operator=(const Checkbox&) = delete;
 	Checkbox& operator=(Checkbox&&) = delete;
 
-	void setSize(int width, int height) override;
+	void resize(int width, int height) override;
 	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
 	void place(int x, int y) override;
 	void clicked(float mouseX, float mouseY) override {};
@@ -344,18 +348,19 @@ private:
 
 	void createPixelBuffer();
 	void setColor(const Color& color, size_t bytePos);
-	void checkBounds(int& x, int& y) const;
-	void checkBounds(Point<float>& p) const;
+	bool inBounds(int x, int y) const;
+	void checkBounds(float& x, float& y);
+
 	size_t bytePosFromXY(int x, int y) const;
 	D2D1_RECT_F bufferRect() const;
 
+	float distance(Point<float> p, Point<float> l1, Point<float> l2);
+	float distance(Point<float> p1, Point<float> p2);
 	void fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
 	void fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
 
 	static void swap(int& a, int& b);
 	static void swap(Point<float>& a, Point<float>& b);
-	static float frac(float a);
-	static float rfrac(float a);
 };
 
 class Table : public Widget

@@ -35,7 +35,7 @@ int main()
 	canvas->place(180, 100);
 	table->place(60, 500);
 	table->setLineWidth(4.0f);
-	table->setSize(400, 200);
+	table->resize(400, 200);
 	table->setCell("One", 3, 0, 1, 2);
 	table->setCell("Two", 3, 2, 1, 2);
 	table->setCell("Three", 3, 4, 1, 2);
@@ -46,15 +46,19 @@ int main()
 			table->setCell(std::to_string(j), i, j);
 		}
 	}
-	table->setCell("TEST", 1, 2, 1, 2);
+	//table->setCell("TEST", 1, 2, 1, 2);
+	table->setColWeight(2, 1.4f);
+	table->setRowWeight(1, 3.24f);
+	table->setRowWeight(2, 0.46f);
 	
-	canvas->fill({ 0, 255, 255 });
-	canvas->drawRectangle({ 1, 1 }, { 40, 40 }, { 0, 255, 0 });
-	canvas->drawRectangle({ 21, 21 }, { 60, 60 }, { 255, 0, 0, 100 });
+	canvas->fill({ 255, 255, 255 });
+	canvas->drawRectangle({ -5, -5 }, { 40, 40 }, { 0, 255, 0 });
+	canvas->drawRectangle({ 21, 21 }, { 60, 60 }, { 255, 0, 0 });
 	canvas->drawEllipse({ -20, 100 }, 90, 40, { 0, 0, 255 });
-	canvas->drawCircle({ 240, 240 }, 24, { 255, 0, 0 });
+	canvas->drawCircle({ 280, 280 }, 24, { 0, 0, 0 });
 	canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });
-	canvas->drawTriangle({ 250, 60 }, { 280, 200 }, { 200, 70 }, { 255, 0, 255 });
+	//canvas->antialias(false);
+	canvas->drawTriangle({ 180, 60 }, { 100, 200 }, { 200, 250 }, { 255, 0, 255 });
 
 	combo->place(300, 20);
 	combo->addItem("One");

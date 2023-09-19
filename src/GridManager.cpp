@@ -9,7 +9,7 @@
 using namespace DINOGUI;
 
 GridManager::GridManager(Core* core)
-	: m_margins({{ 6.0f, 6.0f, 6.0f, 6.0f }}), m_spacing({{ 4.0f, 4.0f }}),
+	: m_margins({{ 6.0f, 6.0f, 6.0f, 6.0f }}), m_spacing({{ 6.0f, 6.0f }}),
       m_widgets(), m_rows(0), m_cols(0), m_core(core)
 {
 }
@@ -47,7 +47,6 @@ void GridManager::addWidget(Widget* widget, int row, int col, int rowSpan, int c
 
 void GridManager::updateSizes()
 {
-    Size<int> windowSize = m_core->getCurrentWindowSize();
 
 
 }

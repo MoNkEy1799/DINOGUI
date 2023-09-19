@@ -14,12 +14,13 @@ using namespace DINOGUI;
 Canvas::Canvas(Core* core, int width, int height, const Color& fillColor)
     : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr), m_wicLock(nullptr),
       m_buffer(nullptr), m_bufferWidth(width), m_bufferHeight(height),
-      m_antialias(true), m_thickness(1.2f)
+      m_antialias(true), m_thickness(10.5f)
 {
     m_type = WidgetType::CANVAS;
     ColorTheme::createDefault(m_theme, m_type);
     m_drawBorder = true;
     m_size = { (float)width, (float)height };
+    m_maxSize = { 1e6f, 1e6f };
     createPixelBuffer();
     fill(fillColor);
 }
@@ -54,7 +55,7 @@ void Canvas::place(int x, int y)
 void Canvas::antialias(bool b, float thickness)
 {
     m_antialias = b;
-    m_thickness = thickness;
+    m_thickness = limitRange(thickness, 1.0f, 1e6f);
 }
 
 void Canvas::fill(const Color& color, bool autoLock)
@@ -131,8 +132,6 @@ void Canvas::drawLine(Point<float> p1, Point<float> p2, const Color& color, bool
         return;
     }
 
-    checkBounds(p1);
-    checkBounds(p2);
     int xa = (int)p1.x;
     int ya = (int)p1.y;
     int xb = (int)p2.x;
@@ -163,18 +162,30 @@ void Canvas::drawLine(Point<float> p1, Point<float> p2, const Color& color, bool
     {
         if (steep)
         {
-            col.a = (int)((1.0f - yInter - (int)yInter) * 255);
-            setColor(col, bytePosFromXY((int)yInter, x));
-            col.a = (int)((yInter - (int)yInter) * 255);
-            setColor(col, bytePosFromXY((int)yInter - 1, x));
+            if (inBounds((int)yInter, x))
+            {
+                col.a = (int)((1.0f - yInter - (int)yInter) * 255);
+                setColor(col, bytePosFromXY((int)yInter, x));
+            }
+            if (inBounds((int)yInter - 1, x))
+            {
+                col.a = (int)((yInter - (int)yInter) * 255);
+                setColor(col, bytePosFromXY((int)yInter - 1, x));
+            }
             yInter += grad;
         }
         else
         {
-            col.a = (int)((1.0f - yInter - (int)yInter) * 255);
-            setColor(col, bytePosFromXY(x, (int)yInter));
-            col.a = (int)((yInter - (int)yInter) * 255);
-            setColor(col, bytePosFromXY(x, (int)yInter - 1));
+            if (inBounds(x, (int)yInter))
+            {
+                col.a = (int)((1.0f - yInter - (int)yInter) * 255);
+                setColor(col, bytePosFromXY(x, (int)yInter));
+            }
+            if (inBounds(x, (int)yInter - 1))
+            {
+                col.a = (int)((yInter - (int)yInter) * 255);
+                setColor(col, bytePosFromXY(x, (int)yInter - 1));
+            }
             yInter += grad;
         }
     }
@@ -197,8 +208,8 @@ void Canvas::drawRectangle(Point<float> p1, Point<float> p2, const Color& color,
         return;
     }
 
-    checkBounds(p1);
-    checkBounds(p2);
+    checkBounds(p1.x, p1.y);
+    checkBounds(p2.x, p2.y);
     int xmin, xmax, ymin, ymax;
     if (p1.x < p2.x)
     {
@@ -247,9 +258,6 @@ void Canvas::drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, con
         return;
     }
 
-    checkBounds(p1);
-    checkBounds(p2);
-    checkBounds(p3);
     if (p1.y < p2.y && p1.y < p3.y)
     {
         if (p3.y < p2.y)
@@ -320,26 +328,26 @@ void Canvas::drawEllipse(Point<float> p, int ra, int rb, const Color& color, boo
         return;
     }
 
-    float extra = m_antialias ? 1.0f + m_thickness : 1.0f;
-    int xmin = (int)(p.x - (ra * extra));
-    int xmax = (int)(p.x + (ra * extra));
-    int ymin = (int)(p.y - (rb * extra));
-    int ymax = (int)(p.y + (rb * extra));
+    float extra = m_antialias ? 1.0f + m_thickness / std::min(ra, rb) : 1.0f;
+    float xmin = (p.x - (ra * extra));
+    float xmax = (p.x + (ra * extra));
+    float ymin = (p.y - (rb * extra));
+    float ymax = (p.y + (rb * extra));
     checkBounds(xmin, ymin);
     checkBounds(xmax, ymax);
 
-    for (int xs = xmin; xs < xmax; xs++)
+    for (int xs = (int)xmin; xs < (int)xmax; xs++)
     {
-        for (int ys = ymin; ys < ymax; ys++)
+        for (int ys = (int)ymin; ys < (int)ymax; ys++)
         {
             double ellipse = std::sqrt(std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2));
             Color col = color;
-            col.a = (int)((ellipse < 1.0) * 255);
+            col.a = (int)((ellipse < 1.0) * color.a);
             if (m_antialias)
             {
                 double thickness = m_thickness / std::min(ra, rb);
-                double error = std::min(std::max(0.0, ellipse - 1.0) / thickness, 1.0);
-                col.a = (int)((1.0f - error) * 255);
+                double error = limitRange((ellipse - 1.0) / thickness, 0.0, 1.0);
+                col.a = (int)((1.0f - error) * color.a);
             }
             setColor(col, bytePosFromXY(xs, ys));
         }
@@ -371,7 +379,7 @@ void Canvas::createPixelBuffer()
     uint32_t* buffer = new uint32_t[m_bufferWidth * m_bufferHeight]{ 0 };
     throwIfFailed(m_core->getImageFactory()->CreateBitmapFromMemory(m_bufferWidth, m_bufferHeight, GUID_WICPixelFormat32bppPRGBA,
         m_bufferWidth * 4, m_bufferWidth * m_bufferHeight * 4, (byte*)buffer, &m_wicBitmap));
-    setSize(m_bufferWidth, m_bufferHeight);
+    resize(m_bufferWidth, m_bufferHeight);
     delete[] buffer;
 }
 
@@ -404,20 +412,19 @@ void Canvas::setColor(const Color& color, size_t bytePos)
     m_buffer[bytePos + 3] = (byte)255;
 }
 
-void Canvas::checkBounds(int& x, int& y) const
+bool Canvas::inBounds(int x, int y) const
 {
-    x = (x < 0) ? 0 : x;
-    x = (x > m_bufferWidth) ? m_bufferWidth : x;
-    y = (y < 0) ? 0 : y;
-    y = (y > m_bufferHeight) ? m_bufferHeight : y;
+    if (x < 0 || x >= m_bufferWidth || y < 0 || y >= m_bufferHeight)
+    {
+        return false;
+    }
+    return true;
 }
 
-void Canvas::checkBounds(Point<float>& p) const
+void Canvas::checkBounds(float& x, float& y)
 {
-    p.x = (p.x < 0.0f) ? 0.0f : p.x;
-    p.x = (p.x > m_bufferWidth) ? (float)m_bufferWidth : p.x;
-    p.y = (p.y < 0.0f) ? 0.0f : p.y;
-    p.y = (p.y > m_bufferHeight) ? (float)m_bufferHeight : p.y;
+    x = limitRange(x, 0.0f, (float)(m_bufferWidth - 1));
+    y = limitRange(y, 0.0f, (float)(m_bufferHeight - 1));
 }
 
 size_t Canvas::bytePosFromXY(int x, int y) const
@@ -431,6 +438,17 @@ D2D1_RECT_F Canvas::bufferRect() const
     return { current.left + 1.0f, current.top + 1.0f, current.right, current.bottom };
 }
 
+float Canvas::distance(Point<float> p, Point<float> l1, Point<float> l2)
+{
+    return std::abs((l2.x - l1.x) * (l1.y - p.y) - (l1.x - p.x) * (l2.y - l1.y))
+        / std::sqrt(std::pow(l2.x - l1.x, 2.0f) + std::pow(l2.y - l1.y, 2.0f));
+}
+
+float Canvas::distance(Point<float> p1, Point<float> p2)
+{
+    return std::sqrt(std::pow(p2.x - p1.x, 2.0f) + std::pow(p2.y - p1.y, 2.0f));
+}
+
 void Canvas::fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color)
 {
     if (p2.x > p3.x)
@@ -439,14 +457,47 @@ void Canvas::fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p
     }
     float grad1 = (p2.x - p1.x) / (p2.y - p1.y);
     float grad2 = (p3.x - p1.x) / (p3.y - p1.y);
-    float x1 = p1.x;
-    float x2 = p1.x;
+    float x1, x1tri, x2, x2tri;
+    x1 = x1tri = p1.x;
+    x2 = x2tri = p1.x;
+    float extra = m_antialias ? m_thickness : 0.0f;
+    Color col = color;
 
-    for (int y = (int)p1.y; y <= p2.y; y++)
+    for (int y = (int)(p1.y - extra); y <= p2.y; y++)
     {
-        for (int x = (int)x1; x <= (int)x2; x++)
+        for (int x = (int)(x1 - extra); x <= (int)(x2 + extra); x++)
         {
-            setColor(color, bytePosFromXY(x, y));
+            if (!inBounds(x, y))
+            {
+                continue;
+            }
+            if (y < (int)p1.y)
+            {
+                float dist = distance({ (float)x, (float)y }, p1) / m_thickness;
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
+            }
+            else if ((x > (int)x1tri) && (x <= (int)x2tri))
+            {
+                setColor(color, bytePosFromXY(x, y));
+            }
+            else if ((x <= (int)x1tri))
+            {
+                float dist = distance({ (float)x, (float)y }, p1, p2) / m_thickness;
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
+            }
+            else if (x > (int)x2tri)
+            {
+                float dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
+            }
+        }
+        if (y >= (int)p1.y)
+        {
+            x1tri += grad1;
+            x2tri += grad2;
         }
         x1 += grad1;
         x2 += grad2;
@@ -461,14 +512,47 @@ void Canvas::fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, 
     }
     float grad1 = (p3.x - p1.x) / (p3.y - p1.y);
     float grad2 = (p3.x - p2.x) / (p3.y - p2.y);
-    float x1 = p3.x;
-    float x2 = p3.x;
+    float x1, x1tri, x2, x2tri;
+    x1 = x1tri = p3.x;
+    x2 = x2tri = p3.x;
+    float extra = m_antialias ? m_thickness : 0.0f;
+    Color col = color;
 
-    for (int y = (int)p3.y; y >= p1.y; y--)
+    for (int y = (int)(p3.y + extra); y >= p1.y; y--)
     {
-        for (int x = (int)x1; x <= (int)x2; x++)
+        for (int x = (int)(x1 - extra); x <= (int)(x2 + extra); x++)
         {
-            setColor(color, bytePosFromXY(x, y));
+            if (!inBounds(x, y))
+            {
+                continue;
+            }
+            if (y > (int)p3.y)
+            {
+                float dist = distance({ (float)x, (float)y }, p3) / m_thickness;
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
+            }
+            else if ((x > (int)x1tri) && (x <= (int)x2tri))
+            {
+                setColor(color, bytePosFromXY(x, y));
+            }
+            else if ((x <= (int)x1tri))
+            {
+                float dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
+            }
+            else if (x > (int)x2tri)
+            {
+                float dist = distance({ (float)x, (float)y }, p2, p3) / m_thickness;
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
+            }
+        }
+        if (y <= (int)p3.y)
+        {
+            x1tri -= grad1;
+            x2tri -= grad2;
         }
         x1 -= grad1;
         x2 -= grad2;
@@ -490,14 +574,4 @@ void Canvas::swap(Point<float>& a, Point<float>& b)
     temp = a.y;
     a.y = b.y;
     b.y = temp;
-}
-
-float Canvas::frac(float a)
-{
-    return a - (int)a;
-}
-
-float Canvas::rfrac(float a)
-{
-    return 1 - frac(a);
 }

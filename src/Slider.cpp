@@ -69,14 +69,14 @@ void Slider::clicked(float mouseX, float mouseY)
 {
     float pos = m_vertical ? mouseY - m_point.y : mouseX - m_point.x;
     float param = m_vertical ? m_size.height : m_size.width;
-    pos = std::min(param, std::max(0.0f, pos));
+    pos = limitRange(pos, 0.0f, param);
     m_currentTick = (int)std::round(pos / (param / m_ticks));
 }
 
 void Slider::setMaxTicks(int ticks)
 {
     int maxTicks = m_vertical ? (int)m_size.height - 10 : (int)m_size.width - 10;
-    m_ticks = std::min(ticks, maxTicks);
+    m_ticks = limitRange(ticks, 2, maxTicks);
 }
 
 int Slider::getCurrentTick()
