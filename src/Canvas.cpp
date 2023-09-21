@@ -14,7 +14,7 @@ using namespace DINOGUI;
 Canvas::Canvas(Core* core, int width, int height, const Color& fillColor)
     : Widget(core), m_drawingBitmap(nullptr), m_wicBitmap(nullptr), m_wicLock(nullptr),
       m_buffer(nullptr), m_bufferWidth(width), m_bufferHeight(height),
-      m_antialias(true), m_thickness(10.5f)
+      m_antialias(true), m_thickness(10.5f), m_triangle({ 0 }), m_twoPartTriangle(true)
 {
     m_type = WidgetType::CANVAS;
     ColorTheme::createDefault(m_theme, m_type);
@@ -258,37 +258,8 @@ void Canvas::drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, con
         return;
     }
 
-    if (p1.y < p2.y && p1.y < p3.y)
-    {
-        if (p3.y < p2.y)
-        {
-            swap(p2, p3);
-        }
-    }
-    else if (p2.y < p1.y && p2.y < p3.y)
-    {
-        if (p1.y < p3.y)
-        {
-            swap(p1, p2);
-        }
-        else
-        {
-            swap(p1, p3);
-            swap(p1, p2);
-        }
-    }
-    else
-    {
-        if (p2.y < p1.y)
-        {
-            swap(p1, p3);
-        }
-        else
-        {
-            swap(p1, p3);
-            swap(p2, p3);
-        }
-    }
+    sortPoints(p1, p2, p3);
+    m_triangle = { p1, p2, p3, { (p1.x + p2.x + p3.x) / 3, (p1.y + p2.y + p3.y) / 3 } };
 
     if (p2.y == p3.y)
     {
@@ -296,12 +267,14 @@ void Canvas::drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, con
     }
     else if (p1.y == p2.y)
     {
+        m_twoPartTriangle = false;
         fillTopTriangle(p1, p2, p3, color);
     }
     else
     {
         Point<float> p4 = { p1.x + (p2.y - p1.y) / (p3.y - p1.y) * (p3.x - p1.x), p2.y };
         fillBottomTriangle(p1, p2, p4, color);
+        m_twoPartTriangle = true;
         fillTopTriangle(p2, p4, p3, color);
     }
 
@@ -444,9 +417,75 @@ float Canvas::distance(Point<float> p, Point<float> l1, Point<float> l2)
         / std::sqrt(std::pow(l2.x - l1.x, 2.0f) + std::pow(l2.y - l1.y, 2.0f));
 }
 
-float Canvas::distance(Point<float> p1, Point<float> p2)
+float Canvas::gradient(Point<float> p1, Point<float> p2)
 {
-    return std::sqrt(std::pow(p2.x - p1.x, 2.0f) + std::pow(p2.y - p1.y, 2.0f));
+    return (p1.y - p2.y) / (p1.x - p2.x);
+}
+
+float Canvas::invGradient(Point<float> p1, Point<float> p2)
+{
+    return (p1.x - p2.x) / (p1.y - p2.y);
+}
+
+bool Canvas::equal(Point<float> p1, Point<float> p2)
+{
+    return (p1.x == p2.x) && (p1.y == p2.y);
+}
+
+void Canvas::sortPoints(Point<float>& p1, Point<float>& p2, Point<float>& p3)
+{
+    if (p1.y < p2.y && p1.y < p3.y)
+    {
+        if (p3.y < p2.y)
+        {
+            swap(p2, p3);
+        }
+    }
+    else if (p2.y < p1.y && p2.y < p3.y)
+    {
+        if (p1.y < p3.y)
+        {
+            swap(p1, p2);
+        }
+        else
+        {
+            swap(p1, p3);
+            swap(p1, p2);
+        }
+    }
+    else if (p3.y < p1.y && p3.y < p2.y)
+    {
+        if (p2.y < p1.y)
+        {
+            swap(p1, p3);
+        }
+        else
+        {
+            swap(p1, p3);
+            swap(p2, p3);
+        }
+    }
+    else if (p1.y == p2.y)
+    {
+        if (p1.y > p3.y)
+        {
+            swap(p1, p3);
+        }
+    }
+    else if (p1.y == p3.y)
+    {
+        if (p2.y < p1.y)
+        {
+            swap(p1, p2);
+        }
+    }
+    else if (p2.y == p3.y)
+    {
+        if (p1.y > p2.y)
+        {
+            swap(p1, p3);
+        }
+    }
 }
 
 void Canvas::fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color)
@@ -455,31 +494,77 @@ void Canvas::fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p
     {
         swap(p2, p3);
     }
-    float grad1 = (p2.x - p1.x) / (p2.y - p1.y);
-    float grad2 = (p3.x - p1.x) / (p3.y - p1.y);
+    bool p2inTri = equal(p2, m_triangle[1]);
+    float grad12 = invGradient(p1, p2);
+    float grad13 = invGradient(p1, p3);
+    float bisec1 = invGradient(p1, m_triangle[3]);
+    float bisec2 = gradient(p2, m_triangle[3]);
+    float bisec3 = gradient(p3, m_triangle[3]);
     float x1, x1tri, x2, x2tri;
-    x1 = x1tri = p1.x;
-    x2 = x2tri = p1.x;
-    float extra = m_antialias ? m_thickness : 0.0f;
+    x1tri = x2tri = p1.x;
+    float extraY = m_antialias ? m_thickness * 3 : 0.0f;
+    x1 = x2 = p1.x - extraY * bisec1;
     Color col = color;
+    col.r = 0;
 
-    for (int y = (int)(p1.y - extra); y <= p2.y; y++)
+    for (int y = (int)(p1.y - extraY); y <= p2.y; y++)
     {
-        for (int x = (int)(x1 - extra); x <= (int)(x2 + extra); x++)
+        for (int x = (int)x1; x <= (int)x2; x++)
         {
             if (!inBounds(x, y))
             {
                 continue;
             }
+            /*if (x == (int)x1 || x == (int)x2)
+            {
+                setColor({ 0, 0, 0 }, bytePosFromXY(x, y));
+                continue;
+            }*/
             if (y < (int)p1.y)
             {
-                float dist = distance({ (float)x, (float)y }, p1) / m_thickness;
+                float dist;
+                if (x <= (p1.x - (p1.y - y) * bisec1))
+                {
+                    dist = distance({ (float)x, (float)y }, p1, p2) / m_thickness;
+                }
+                else
+                {
+                    dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
+                }
                 col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
                 setColor(col, bytePosFromXY(x, y));
             }
             else if ((x > (int)x1tri) && (x <= (int)x2tri))
             {
                 setColor(color, bytePosFromXY(x, y));
+            }
+            else if (x < (int)p2.x && p2inTri)
+            {
+                float dist;
+                if (y <= (p2.y - (p2.x - x) * bisec2))
+                {
+                    dist = distance({ (float)x, (float)y }, p1, p2) / m_thickness;
+                }
+                else
+                {
+                    dist = distance({ (float)x, (float)y }, p2, m_triangle[2]) / m_thickness;
+                }
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
+            }
+            else if (x > (int)p3.x && !p2inTri)
+            {
+                float dist;
+                if (y <= (p3.y - (x - p3.x) * bisec3))
+                {
+                    dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
+                }
+                else
+                {
+                    dist = distance({ (float)x, (float)y }, p3, m_triangle[2]) / m_thickness;
+                }
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
             }
             else if ((x <= (int)x1tri))
             {
@@ -496,11 +581,11 @@ void Canvas::fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p
         }
         if (y >= (int)p1.y)
         {
-            x1tri += grad1;
-            x2tri += grad2;
+            x1tri += grad12;
+            x2tri += grad13;
         }
-        x1 += grad1;
-        x2 += grad2;
+        x1 += grad12;
+        x2 += grad13;
     }
 }
 
@@ -510,31 +595,78 @@ void Canvas::fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, 
     {
         swap(p1, p2);
     }
-    float grad1 = (p3.x - p1.x) / (p3.y - p1.y);
-    float grad2 = (p3.x - p2.x) / (p3.y - p2.y);
+    bool p1inTri = equal(p1, m_triangle[1]);
+    float grad13 = invGradient(p1, p3);
+    float grad23 = invGradient(p2, p3);
+    float bisec1 = gradient(p1, m_triangle[3]);
+    float bisec2 = gradient(p2, m_triangle[3]);
+    float bisec3 = invGradient(p3, m_triangle[3]);
     float x1, x1tri, x2, x2tri;
-    x1 = x1tri = p3.x;
-    x2 = x2tri = p3.x;
-    float extra = m_antialias ? m_thickness : 0.0f;
+    x1tri = x2tri = p3.x;
+    float extraY = m_antialias ? m_thickness * 3 : 0.0f;
+    x1 = x2 = p3.x + extraY * bisec3;
+    float end = m_twoPartTriangle ? 1.0f : 0.0f;
     Color col = color;
+    col.r = 0;
 
-    for (int y = (int)(p3.y + extra); y >= p1.y; y--)
+    for (int y = (int)(p3.y + extraY); y >= p1.y + end; y--)
     {
-        for (int x = (int)(x1 - extra); x <= (int)(x2 + extra); x++)
+        for (int x = (int)x1; x <= (int)x2; x++)
         {
             if (!inBounds(x, y))
             {
                 continue;
             }
+            /*if (x == (int)x1 || x == (int)x2)
+            {
+                setColor({ 0, 0, 0 }, bytePosFromXY(x, y));
+                continue;
+            }*/
             if (y > (int)p3.y)
             {
-                float dist = distance({ (float)x, (float)y }, p3) / m_thickness;
+                float dist;
+                if (x < (p3.x + (y - p3.y) * bisec3))
+                {
+                    dist = distance({ (float)x, (float)y }, p3, p1) / m_thickness;
+                }
+                else
+                {
+                    dist = distance({ (float)x, (float)y }, p3, p2) / m_thickness;
+                }
                 col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
                 setColor(col, bytePosFromXY(x, y));
             }
             else if ((x > (int)x1tri) && (x <= (int)x2tri))
             {
                 setColor(color, bytePosFromXY(x, y));
+            }
+            else if (x < (int)p1.x && p1inTri)
+            {
+                float dist;
+                if (y <= (p1.y - (p1.x - x) * bisec1))
+                {
+                    dist = distance({ (float)x, (float)y }, p1, m_triangle[0]) / m_thickness;
+                }
+                else
+                {
+                    dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
+                }
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
+            }
+            else if (x > (int)p2.x && !p1inTri)
+            {
+                float dist;
+                if (y <= (p2.y - (x - p2.x) * bisec2))
+                {
+                    dist = distance({ (float)x, (float)y }, p2, m_triangle[0]) / m_thickness;
+                }
+                else
+                {
+                    dist = distance({ (float)x, (float)y }, p2, p3) / m_thickness;
+                }
+                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                setColor(col, bytePosFromXY(x, y));
             }
             else if ((x <= (int)x1tri))
             {
@@ -551,11 +683,11 @@ void Canvas::fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, 
         }
         if (y <= (int)p3.y)
         {
-            x1tri -= grad1;
-            x2tri -= grad2;
+            x1tri -= grad13;
+            x2tri -= grad23;
         }
-        x1 -= grad1;
-        x2 -= grad2;
+        x1 -= grad13;
+        x2 -= grad23;
     }
 }
 

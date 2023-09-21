@@ -52,13 +52,13 @@ int main()
 	table->setRowWeight(2, 0.46f);
 	
 	canvas->fill({ 255, 255, 255 });
-	canvas->drawRectangle({ -5, -5 }, { 40, 40 }, { 0, 255, 0 });
+	/*canvas->drawRectangle({-5, -5}, {40, 40}, {0, 255, 0});
 	canvas->drawRectangle({ 21, 21 }, { 60, 60 }, { 255, 0, 0 });
 	canvas->drawEllipse({ -20, 100 }, 90, 40, { 0, 0, 255 });
 	canvas->drawCircle({ 280, 280 }, 24, { 0, 0, 0 });
-	canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });
-	//canvas->antialias(false);
-	canvas->drawTriangle({ 180, 60 }, { 100, 200 }, { 200, 250 }, { 255, 0, 255 });
+	//canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });*/
+	canvas->antialias(false);
+	canvas->drawTriangle({ 60, 200 }, { 160, 100 }, { 180, 100 }, { 255, 0, 255 });
 
 	combo->place(300, 20);
 	combo->addItem("One");

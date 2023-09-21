@@ -343,8 +343,9 @@ private:
 	IWICBitmapLock* m_wicLock;
 	byte* m_buffer;
 	int m_bufferWidth, m_bufferHeight;
-	bool m_antialias;
+	bool m_antialias, m_twoPartTriangle;
 	float m_thickness;
+	std::array<Point<float>, 4> m_triangle;
 
 	void createPixelBuffer();
 	void setColor(const Color& color, size_t bytePos);
@@ -355,7 +356,10 @@ private:
 	D2D1_RECT_F bufferRect() const;
 
 	float distance(Point<float> p, Point<float> l1, Point<float> l2);
-	float distance(Point<float> p1, Point<float> p2);
+	float gradient(Point<float> p1, Point<float> p2);
+	float invGradient(Point<float> p1, Point<float> p2);
+	bool equal(Point<float> p1, Point<float> p2);
+	void sortPoints(Point<float>& p1, Point<float>& p2, Point<float>& p3);
 	void fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
 	void fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
 
