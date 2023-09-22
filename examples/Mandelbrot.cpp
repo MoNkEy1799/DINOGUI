@@ -26,7 +26,6 @@ int runMandelbrot()
 	DINOGUI::Core* core = new DINOGUI::Core("Mandelbrot", 900, 600);
 	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, scale * 3, scale * 2);
 	canvas->place(0, 0);
-	canvas->unlock();
 
 	for (int x = 0; x < scale * 3; x++)
 	{
@@ -40,7 +39,6 @@ int runMandelbrot()
 		}
 	}
 
-	canvas->lock();
 	core->run();
 
 	return 0;

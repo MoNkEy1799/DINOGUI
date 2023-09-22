@@ -37,6 +37,7 @@ void Canvas::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* bru
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
     basicDrawBackgroundBorder(rect, renderTarget, brush);
 
+    lockBuffer();
     if (!m_drawingBitmap && m_wicBitmap)
     {
         throwIfFailed(renderTarget->CreateBitmapFromWicBitmap(m_wicBitmap, nullptr, &m_drawingBitmap), "Failed to create Bitmap");
@@ -58,15 +59,11 @@ void Canvas::antialias(bool b, float thickness)
     m_thickness = limitRange(thickness, 1.0f, 1e6f);
 }
 
-void Canvas::fill(const Color& color, bool autoLock)
+void Canvas::fill(const Color& color)
 {
-    if (autoLock)
+    if (!m_buffer)
     {
-        unlock();
-    }
-    else if (!m_buffer)
-    {
-        return;
+        unlockBuffer();
     }
 
     for (size_t pos = 0; pos < (size_t)m_bufferWidth * m_bufferHeight; pos++)
@@ -74,62 +71,44 @@ void Canvas::fill(const Color& color, bool autoLock)
         setColor({ color.r, color.g, color.b, 255 }, pos * 4);
     }
 
-    if (autoLock)
-    {
-        lock();
-    }
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::setPixel(const Color& color, int x, int y, bool autoLock)
+void Canvas::setPixel(const Color& color, int x, int y)
 {
-    if (autoLock)
+    if (!m_buffer)
     {
-        unlock();
-    }
-    else if (!m_buffer)
-    {
-        return;
+        unlockBuffer();
     }
 
-    setColor(color, bytePosFromXY(x, y));
-
-    if (autoLock)
+    if (inBounds(x, y))
     {
-        lock();
+        setColor(color, bytePosFromXY(x, y));
     }
+
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::setPixel(const Color& color, size_t pos, bool autoLock)
+void Canvas::setPixel(const Color& color, size_t pos)
 {
-    if (autoLock)
+    if (!m_buffer)
     {
-        unlock();
-    }
-    else if (!m_buffer)
-    {
-        return;
+        unlockBuffer();
     }
 
-    setColor(color, pos * 4);
-
-    if (autoLock)
+    if (pos < (size_t)m_bufferWidth * m_bufferHeight)
     {
-        lock();
+        setColor(color, pos * 4);
     }
+
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::drawLine(Point<float> p1, Point<float> p2, const Color& color, bool autoLock)
+void Canvas::drawLine(Point<float> p1, Point<float> p2, const Color& color)
 {
-    if (autoLock)
+    if (!m_buffer)
     {
-        unlock();
-    }
-    else if (!m_buffer)
-    {
-        return;
+        unlockBuffer();
     }
 
     int xa = (int)p1.x;
@@ -190,22 +169,14 @@ void Canvas::drawLine(Point<float> p1, Point<float> p2, const Color& color, bool
         }
     }
 
-    if (autoLock)
-    {
-        lock();
-    }
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::drawRectangle(Point<float> p1, Point<float> p2, const Color& color, bool autoLock)
+void Canvas::drawRectangle(Point<float> p1, Point<float> p2, const Color& color)
 {
-    if (autoLock)
+    if (!m_buffer)
     {
-        unlock();
-    }
-    else if (!m_buffer)
-    {
-        return;
+        unlockBuffer();
     }
 
     checkBounds(p1.x, p1.y);
@@ -240,26 +211,33 @@ void Canvas::drawRectangle(Point<float> p1, Point<float> p2, const Color& color,
         }
     }
 
-    if (autoLock)
-    {
-        lock();
-    }
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color, bool autoLock)
+void Canvas::drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color)
 {
-    if (autoLock)
+    if (!m_buffer)
     {
-        unlock();
-    }
-    else if (!m_buffer)
-    {
-        return;
+        unlockBuffer();
     }
 
-    sortPoints(p1, p2, p3);
-    m_triangle = { p1, p2, p3, { (p1.x + p2.x + p3.x) / 3, (p1.y + p2.y + p3.y) / 3 } };
+    if (p1.y > p2.y)
+    {
+        swap(p1, p2);
+    }
+    if (p1.y > p3.y)
+    {
+        swap(p1, p3);
+    }
+    if (p2.y > p3.y)
+    {
+        swap(p2, p3);
+    }
+    float a = length(p2, p3);
+    float b = length(p1, p3);
+    float c = length(p1, p2);
+    m_triangle = { p1, p2, p3, { (p1.x * a + p2.x * b + p3.x * c) / (a + b + c),
+        (p1.y * a + p2.y * b + p3.y * c) / (a + b + c)}};
 
     if (p2.y == p3.y)
     {
@@ -273,32 +251,24 @@ void Canvas::drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, con
     else
     {
         Point<float> p4 = { p1.x + (p2.y - p1.y) / (p3.y - p1.y) * (p3.x - p1.x), p2.y };
-        fillBottomTriangle(p1, p2, p4, color);
+        fillBottomTriangle(p1, p4, p2, color);
         m_twoPartTriangle = true;
         fillTopTriangle(p2, p4, p3, color);
     }
 
-    if (autoLock)
-    {
-        lock();
-    }
     safeReleaseInterface(&m_drawingBitmap);
 }
 
-void Canvas::drawCircle(Point<float> p, int r, const Color& color, bool autoLock)
+void Canvas::drawCircle(Point<float> p, int r, const Color& color)
 {
-    drawEllipse(p, r, r, color, autoLock);
+    drawEllipse(p, r, r, color);
 }
 
-void Canvas::drawEllipse(Point<float> p, int ra, int rb, const Color& color, bool autoLock)
+void Canvas::drawEllipse(Point<float> p, int ra, int rb, const Color& color)
 {
-    if (autoLock)
+    if (!m_buffer)
     {
-        unlock();
-    }
-    else if (!m_buffer)
-    {
-        return;
+        unlockBuffer();
     }
 
     float extra = m_antialias ? 1.0f + m_thickness / std::min(ra, rb) : 1.0f;
@@ -313,7 +283,7 @@ void Canvas::drawEllipse(Point<float> p, int ra, int rb, const Color& color, boo
     {
         for (int ys = (int)ymin; ys < (int)ymax; ys++)
         {
-            double ellipse = std::sqrt(std::pow(xs - p.x, 2) / std::pow(ra, 2) + std::pow(ys - p.y, 2) / std::pow(rb, 2));
+            double ellipse = std::sqrt((xs - p.x) * (xs - p.x) / ra * ra + (ys - p.y) * (ys - p.y) / rb * rb);
             Color col = color;
             col.a = (int)((ellipse < 1.0) * color.a);
             if (m_antialias)
@@ -326,25 +296,7 @@ void Canvas::drawEllipse(Point<float> p, int ra, int rb, const Color& color, boo
         }
     }
 
-    if (autoLock)
-    {
-        lock();
-    }
     safeReleaseInterface(&m_drawingBitmap);
-}
-
-void Canvas::lock()
-{
-    m_buffer = nullptr;
-    safeReleaseInterface(&m_wicLock);
-}
-
-void Canvas::unlock()
-{
-    WICRect wicRect = { 0, 0, m_bufferWidth, m_bufferHeight };
-    uint32_t bufferSize;
-    m_wicBitmap->Lock(&wicRect, WICBitmapLockWrite, &m_wicLock);
-    m_wicLock->GetDataPointer(&bufferSize, &m_buffer);
 }
 
 void Canvas::createPixelBuffer()
@@ -354,6 +306,20 @@ void Canvas::createPixelBuffer()
         m_bufferWidth * 4, m_bufferWidth * m_bufferHeight * 4, (byte*)buffer, &m_wicBitmap));
     resize(m_bufferWidth, m_bufferHeight);
     delete[] buffer;
+}
+
+void Canvas::lockBuffer()
+{
+    m_buffer = nullptr;
+    safeReleaseInterface(&m_wicLock);
+}
+
+void Canvas::unlockBuffer()
+{
+    WICRect wicRect = { 0, 0, m_bufferWidth, m_bufferHeight };
+    uint32_t bufferSize;
+    m_wicBitmap->Lock(&wicRect, WICBitmapLockWrite, &m_wicLock);
+    m_wicLock->GetDataPointer(&bufferSize, &m_buffer);
 }
 
 void Canvas::setColor(const Color& color, size_t bytePos)
@@ -411,10 +377,26 @@ D2D1_RECT_F Canvas::bufferRect() const
     return { current.left + 1.0f, current.top + 1.0f, current.right, current.bottom };
 }
 
+float Canvas::length(Point<float> p1, Point<float> p2)
+{
+    return std::sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+}
+
 float Canvas::distance(Point<float> p, Point<float> l1, Point<float> l2)
 {
     return std::abs((l2.x - l1.x) * (l1.y - p.y) - (l1.x - p.x) * (l2.y - l1.y))
-        / std::sqrt(std::pow(l2.x - l1.x, 2.0f) + std::pow(l2.y - l1.y, 2.0f));
+        / std::sqrt((l2.x - l1.x) * (l2.x - l1.x) + (l2.y - l1.y) * (l2.y - l1.y));
+}
+
+Point<float> Canvas::lineIntersect(float a, float c, float b, float d)
+{
+    float x = (d - c) / (a - b);
+    return { x, a * x + c };
+}
+
+Point<float> Canvas::midPoint(Point<float> p1, Point<float> p2)
+{
+    return { (p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f };
 }
 
 float Canvas::gradient(Point<float> p1, Point<float> p2)
@@ -427,83 +409,22 @@ float Canvas::invGradient(Point<float> p1, Point<float> p2)
     return (p1.x - p2.x) / (p1.y - p2.y);
 }
 
-bool Canvas::equal(Point<float> p1, Point<float> p2)
-{
-    return (p1.x == p2.x) && (p1.y == p2.y);
-}
-
-void Canvas::sortPoints(Point<float>& p1, Point<float>& p2, Point<float>& p3)
-{
-    if (p1.y < p2.y && p1.y < p3.y)
-    {
-        if (p3.y < p2.y)
-        {
-            swap(p2, p3);
-        }
-    }
-    else if (p2.y < p1.y && p2.y < p3.y)
-    {
-        if (p1.y < p3.y)
-        {
-            swap(p1, p2);
-        }
-        else
-        {
-            swap(p1, p3);
-            swap(p1, p2);
-        }
-    }
-    else if (p3.y < p1.y && p3.y < p2.y)
-    {
-        if (p2.y < p1.y)
-        {
-            swap(p1, p3);
-        }
-        else
-        {
-            swap(p1, p3);
-            swap(p2, p3);
-        }
-    }
-    else if (p1.y == p2.y)
-    {
-        if (p1.y > p3.y)
-        {
-            swap(p1, p3);
-        }
-    }
-    else if (p1.y == p3.y)
-    {
-        if (p2.y < p1.y)
-        {
-            swap(p1, p2);
-        }
-    }
-    else if (p2.y == p3.y)
-    {
-        if (p1.y > p2.y)
-        {
-            swap(p1, p3);
-        }
-    }
-}
-
 void Canvas::fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color)
 {
+    bool p3Tri = true;
     if (p2.x > p3.x)
     {
         swap(p2, p3);
+        p3Tri = false;
     }
-    bool p2inTri = equal(p2, m_triangle[1]);
-    float grad12 = invGradient(p1, p2);
-    float grad13 = invGradient(p1, p3);
-    float bisec1 = invGradient(p1, m_triangle[3]);
-    float bisec2 = gradient(p2, m_triangle[3]);
-    float bisec3 = gradient(p3, m_triangle[3]);
+    float igrad12 = invGradient(p1, p2);
+    float igrad13 = invGradient(p1, p3);
+    float bisec = gradient(p3Tri ? p3 : p2, m_triangle[3]);
+    float ibisec1 = invGradient(p1, m_triangle[3]);
     float x1, x1tri, x2, x2tri;
     x1tri = x2tri = p1.x;
-    float extraY = m_antialias ? m_thickness * 3 : 0.0f;
-    x1 = x2 = p1.x - extraY * bisec1;
+    float extraY = m_antialias * m_thickness * 100;
+    x1 = x2 = p1.x - extraY * ibisec1;
     Color col = color;
     col.r = 0;
 
@@ -511,184 +432,203 @@ void Canvas::fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p
     {
         for (int x = (int)x1; x <= (int)x2; x++)
         {
+            // don't draw out of bounds
             if (!inBounds(x, y))
             {
                 continue;
             }
-            /*if (x == (int)x1 || x == (int)x2)
+            if (x == (int)x1 || x == (int)x2)
             {
                 setColor({ 0, 0, 0 }, bytePosFromXY(x, y));
                 continue;
-            }*/
+            }
+            // draw antialiased top vertex
             if (y < (int)p1.y)
             {
-                float dist;
-                if (x <= (p1.x - (p1.y - y) * bisec1))
-                {
-                    dist = distance({ (float)x, (float)y }, p1, p2) / m_thickness;
-                }
-                else
-                {
-                    dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
-                }
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
-                setColor(col, bytePosFromXY(x, y));
+                drawAAVertex(x, y, p1, p2, p3, ibisec1, col, color);
             }
-            else if ((x > (int)x1tri) && (x <= (int)x2tri))
+            // draw inside of triangle
+            else if ((x >= (int)x1tri) && (x <= (int)x2tri))
             {
                 setColor(color, bytePosFromXY(x, y));
             }
-            else if (x < (int)p2.x && p2inTri)
+            // draw antialiased left edge
+            else if (x < (int)x1tri)
             {
                 float dist;
-                if (y <= (p2.y - (p2.x - x) * bisec2))
+                // draw antialiased vertex at p2 if p2 is a vertex of the triangle
+                if (!p3Tri && (x < (int)p2.x))
+                {
+                    if (y <= (p2.y + (x - p2.x) * bisec))
+                    {
+                        dist = distance({ (float)x, (float)y }, p1, p2) / m_thickness;
+                    }
+                    else
+                    {
+                        dist = distance({ (float)x, (float)y }, p2, m_triangle[2]) / m_thickness;
+                    }
+                }
+                // draw normal left edge
+                else
                 {
                     dist = distance({ (float)x, (float)y }, p1, p2) / m_thickness;
                 }
-                else
-                {
-                    dist = distance({ (float)x, (float)y }, p2, m_triangle[2]) / m_thickness;
-                }
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                col.a = (int)((1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a);
                 setColor(col, bytePosFromXY(x, y));
             }
-            else if (x > (int)p3.x && !p2inTri)
+            // draw antialiased right edge
+            else if (x > (int)x2tri)
             {
                 float dist;
-                if (y <= (p3.y - (x - p3.x) * bisec3))
+                // draw antialiased vertex at p3 if p3 is a vertex of the triangle
+                if (p3Tri && (x > (int)p3.x))
+                {
+                    if (y <= (p3.y + (x - p3.x) * bisec))
+                    {
+                        dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
+                    }
+                    else
+                    {
+                        dist = distance({ (float)x, (float)y }, p3, m_triangle[2]) / m_thickness;
+                    }
+                }
+                // draw normal right edge
+                else
                 {
                     dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
                 }
-                else
-                {
-                    dist = distance({ (float)x, (float)y }, p3, m_triangle[2]) / m_thickness;
-                }
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
-                setColor(col, bytePosFromXY(x, y));
-            }
-            else if ((x <= (int)x1tri))
-            {
-                float dist = distance({ (float)x, (float)y }, p1, p2) / m_thickness;
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
-                setColor(col, bytePosFromXY(x, y));
-            }
-            else if (x > (int)x2tri)
-            {
-                float dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                col.a = (int)((1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a);
                 setColor(col, bytePosFromXY(x, y));
             }
         }
         if (y >= (int)p1.y)
         {
-            x1tri += grad12;
-            x2tri += grad13;
+            x1tri += igrad12;
+            x2tri += igrad13;
         }
-        x1 += grad12;
-        x2 += grad13;
+        x1 += igrad12;
+        x2 += igrad13;
     }
 }
 
 void Canvas::fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color)
 {
+    bool p1Tri = true;
     if (p1.x > p2.x)
     {
         swap(p1, p2);
+        p1Tri = false;
     }
-    bool p1inTri = equal(p1, m_triangle[1]);
-    float grad13 = invGradient(p1, p3);
-    float grad23 = invGradient(p2, p3);
-    float bisec1 = gradient(p1, m_triangle[3]);
-    float bisec2 = gradient(p2, m_triangle[3]);
-    float bisec3 = invGradient(p3, m_triangle[3]);
+    float igrad13 = invGradient(p1, p3);
+    float igrad23 = invGradient(p2, p3);
+    float bisec = gradient(p1Tri ? p1 : p2, m_triangle[3]);
+    float ibisec3 = invGradient(p3, m_triangle[3]);
+    float isep = invGradient(midPoint(p1Tri ? p1 : p2, p3), m_triangle[3]);
     float x1, x1tri, x2, x2tri;
     x1tri = x2tri = p3.x;
-    float extraY = m_antialias ? m_thickness * 3 : 0.0f;
-    x1 = x2 = p3.x + extraY * bisec3;
-    float end = m_twoPartTriangle ? 1.0f : 0.0f;
+    float extraY = m_antialias * m_thickness * 2;
+    x1 = x2 = p3.x + extraY * ibisec3;
+    float end = (float)m_twoPartTriangle;
     Color col = color;
-    col.r = 0;
+    col.b = 0;
 
     for (int y = (int)(p3.y + extraY); y >= p1.y + end; y--)
     {
         for (int x = (int)x1; x <= (int)x2; x++)
         {
+            // don't draw out of bounds
             if (!inBounds(x, y))
             {
                 continue;
             }
-            /*if (x == (int)x1 || x == (int)x2)
+            if (x == (int)x1 || x == (int)x2)
             {
                 setColor({ 0, 0, 0 }, bytePosFromXY(x, y));
                 continue;
-            }*/
-            if (y > (int)p3.y)
+            }
+            // draw antialiased bottom vertex
+            else if (y > (int)p3.y)
+            {
+                drawAAVertex(x, y, p3, p1, p2, ibisec3, col, color);
+            }
+            // draw antialiased left edges
+            else if ((x < (int)x1tri))
             {
                 float dist;
-                if (x < (p3.x + (y - p3.y) * bisec3))
+                // draw antialiased vertex at p1 if p1 is a vertex of the triangle
+                if (p1Tri && (x < (int)p1.x))
                 {
-                    dist = distance({ (float)x, (float)y }, p3, p1) / m_thickness;
+                    if (y <= (p1.y + (x - p1.x) * bisec))
+                    {
+                        dist = distance({ (float)x, (float)y }, p1, m_triangle[0]) / m_thickness;
+                    }
+                    else
+                    {
+                        dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
+                    }
                 }
-                else
-                {
-                    dist = distance({ (float)x, (float)y }, p3, p2) / m_thickness;
-                }
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
-                setColor(col, bytePosFromXY(x, y));
-            }
-            else if ((x > (int)x1tri) && (x <= (int)x2tri))
-            {
-                setColor(color, bytePosFromXY(x, y));
-            }
-            else if (x < (int)p1.x && p1inTri)
-            {
-                float dist;
-                if (y <= (p1.y - (p1.x - x) * bisec1))
-                {
-                    dist = distance({ (float)x, (float)y }, p1, m_triangle[0]) / m_thickness;
-                }
+                // draw normal left edges
                 else
                 {
                     dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
                 }
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                col.a = (int)((1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a);
                 setColor(col, bytePosFromXY(x, y));
             }
-            else if (x > (int)p2.x && !p1inTri)
+            // draw antialiased right edges
+            else if (x > (int)x2tri)
             {
                 float dist;
-                if (y <= (p2.y - (x - p2.x) * bisec2))
+                // draw antialiased vertex at p2 if p2 is a vertex of the triangle
+                if (!p1Tri && (x > (int)p2.x))
                 {
-                    dist = distance({ (float)x, (float)y }, p2, m_triangle[0]) / m_thickness;
+                    if (y <= (p2.y + (x - p2.x) * bisec))
+                    {
+                        dist = distance({ (float)x, (float)y }, p2, m_triangle[0]) / m_thickness;
+                    }
+                    else
+                    {
+                        dist = distance({ (float)x, (float)y }, p2, p3) / m_thickness;
+                    }
                 }
+                // draw normal right edges
                 else
                 {
                     dist = distance({ (float)x, (float)y }, p2, p3) / m_thickness;
                 }
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
+                col.a = (int)((1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a);
                 setColor(col, bytePosFromXY(x, y));
             }
-            else if ((x <= (int)x1tri))
+            // draw inside of triangle
+            else if ((x >= (int)x1tri) && (x <= (int)x2tri))
             {
-                float dist = distance({ (float)x, (float)y }, p1, p3) / m_thickness;
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
-                setColor(col, bytePosFromXY(x, y));
-            }
-            else if (x > (int)x2tri)
-            {
-                float dist = distance({ (float)x, (float)y }, p2, p3) / m_thickness;
-                col.a = (1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a;
-                setColor(col, bytePosFromXY(x, y));
+                setColor(color, bytePosFromXY(x, y));
             }
         }
         if (y <= (int)p3.y)
         {
-            x1tri -= grad13;
-            x2tri -= grad23;
+            x1tri -= igrad13;
+            x2tri -= igrad23;
         }
-        x1 -= grad13;
-        x2 -= grad23;
+        x1 -= igrad13;
+        x2 -= igrad23;
     }
+}
+
+void Canvas::drawAAVertex(int x, int y, Point<float> p, Point<float> q, Point<float> r,
+                          float slope, Color col, Color color)
+{
+    float dist;
+    if (x < (p.x + (y - p.y) * slope))
+    {
+        dist = distance({ (float)x, (float)y }, p, q) / m_thickness;
+    }
+    else
+    {
+        dist = distance({ (float)x, (float)y }, p, r) / m_thickness;
+    }
+    col.a = (int)((1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a);
+    setColor(col, bytePosFromXY(x, y));
 }
 
 void Canvas::swap(int& a, int& b)

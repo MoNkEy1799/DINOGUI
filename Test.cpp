@@ -2,10 +2,16 @@
 
 void testClickFunc(DINOGUI::Widget* wid)
 {
-	std::cout << "Button clicked" << std::endl;
 	DINOGUI::Random r;
 	r.seed();
-	((DINOGUI::Canvas*)wid)->drawCircle({ 0, 300 }, 24, { r.randInt(0, 255), r.randInt(0, 255), r.randInt(0, 255) });
+	DINOGUI::Point<float> p1 = { (float)r.randInt(0, 300), (float)r.randInt(0, 300) };
+	DINOGUI::Point<float> p2 = { (float)r.randInt(0, 300), (float)r.randInt(0, 300) };
+	DINOGUI::Point<float> p3 = { (float)r.randInt(0, 300), (float)r.randInt(0, 300) };
+	((DINOGUI::Canvas*)wid)->fill({ 255, 255, 255 });
+	((DINOGUI::Canvas*)wid)->drawTriangle(p1, p2, p3, {255, 0, 255});
+	std::cout << "{ " << p1.x << ", " << p1.y << " }" << std::endl;
+	std::cout << "{ " << p2.x << ", " << p2.y << " }" << std::endl;
+	std::cout << "{ " << p3.x << ", " << p3.y << " }" << std::endl;
 }
 
 int main()
@@ -57,8 +63,11 @@ int main()
 	canvas->drawEllipse({ -20, 100 }, 90, 40, { 0, 0, 255 });
 	canvas->drawCircle({ 280, 280 }, 24, { 0, 0, 0 });
 	//canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });*/
-	canvas->antialias(false);
-	canvas->drawTriangle({ 60, 200 }, { 160, 100 }, { 180, 100 }, { 255, 0, 255 });
+	//canvas->antialias(false);
+	DINOGUI::Point<float> p1 = { 42, 285 };
+	DINOGUI::Point<float> p2 = { 179, 123 };
+	DINOGUI::Point<float> p3 = { 51, 288 };
+	canvas->drawTriangle(p1, p2, p3, { 255, 0, 255 });
 
 	combo->place(300, 20);
 	combo->addItem("One");

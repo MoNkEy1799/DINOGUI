@@ -326,16 +326,14 @@ public:
 	void clicked(float mouseX, float mouseY) override {};
 
 	void antialias(bool b, float thickness = 2.0f);
-	void fill(const Color& color, bool autoLock = true);
-	void setPixel(const Color& color, int x, int y, bool autoLock = true);
-	void setPixel(const Color& color, size_t pos, bool autoLock = true);
-	void drawLine(Point<float> p1, Point<float> p2, const Color& color, bool autoLock = true);
-	void drawRectangle(Point<float> p1, Point<float> p2, const Color& color, bool autoLock = true);
-	void drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color, bool autoLock = true);
-	void drawCircle(Point<float> p, int r, const Color& color, bool autoLock = true);
-	void drawEllipse(Point<float> p, int ra, int rb, const Color& color, bool autoLock = true);
-	void lock();
-	void unlock();
+	void fill(const Color& color);
+	void setPixel(const Color& color, int x, int y);
+	void setPixel(const Color& color, size_t pos);
+	void drawLine(Point<float> p1, Point<float> p2, const Color& color);
+	void drawRectangle(Point<float> p1, Point<float> p2, const Color& color);
+	void drawTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
+	void drawCircle(Point<float> p, int r, const Color& color);
+	void drawEllipse(Point<float> p, int ra, int rb, const Color& color);
 
 private:
 	ID2D1Bitmap* m_drawingBitmap;
@@ -348,6 +346,8 @@ private:
 	std::array<Point<float>, 4> m_triangle;
 
 	void createPixelBuffer();
+	void lockBuffer();
+	void unlockBuffer();
 	void setColor(const Color& color, size_t bytePos);
 	bool inBounds(int x, int y) const;
 	void checkBounds(float& x, float& y);
@@ -355,13 +355,16 @@ private:
 	size_t bytePosFromXY(int x, int y) const;
 	D2D1_RECT_F bufferRect() const;
 
-	float distance(Point<float> p, Point<float> l1, Point<float> l2);
-	float gradient(Point<float> p1, Point<float> p2);
-	float invGradient(Point<float> p1, Point<float> p2);
-	bool equal(Point<float> p1, Point<float> p2);
-	void sortPoints(Point<float>& p1, Point<float>& p2, Point<float>& p3);
 	void fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
 	void fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
+	void drawAAVertex(int x, int y, Point<float> p, Point<float> q, Point<float> r,
+					  float slope, Color col, Color color);
+	float length(Point<float> p1, Point<float> p2);
+	float distance(Point<float> p, Point<float> l1, Point<float> l2);
+	Point<float> lineIntersect(float a, float c, float b, float d);
+	Point<float> midPoint(Point<float> p1, Point<float> p2);
+	float gradient(Point<float> p1, Point<float> p2);
+	float invGradient(Point<float> p1, Point<float> p2);
 
 	static void swap(int& a, int& b);
 	static void swap(Point<float>& a, Point<float>& b);
