@@ -1,17 +1,23 @@
 #include "src/Dinogui.h"
 
-void testClickFunc(DINOGUI::Widget* wid)
+void testClickFunc(DINOGUI::Widget* wid, std::array<DINOGUI::Point<float>, 3>& points)
 {
 	DINOGUI::Random r;
 	r.seed();
 	DINOGUI::Point<float> p1 = { (float)r.randInt(0, 300), (float)r.randInt(0, 300) };
 	DINOGUI::Point<float> p2 = { (float)r.randInt(0, 300), (float)r.randInt(0, 300) };
 	DINOGUI::Point<float> p3 = { (float)r.randInt(0, 300), (float)r.randInt(0, 300) };
+	points = { p1, p2, p3 };
 	((DINOGUI::Canvas*)wid)->fill({ 255, 255, 255 });
-	((DINOGUI::Canvas*)wid)->drawTriangle(p1, p2, p3, {255, 0, 255});
-	std::cout << "{ " << p1.x << ", " << p1.y << " }" << std::endl;
-	std::cout << "{ " << p2.x << ", " << p2.y << " }" << std::endl;
-	std::cout << "{ " << p3.x << ", " << p3.y << " }" << std::endl;
+	((DINOGUI::Canvas*)wid)->drawTriangle(p1, p2, p3, { 0, 0, 255 });
+}
+
+void func(DINOGUI::Widget* wid, std::array<DINOGUI::Point<float>, 3>& points, bool& a)
+{
+	a = !a;
+	((DINOGUI::Canvas*)wid)->antialias(a);
+	((DINOGUI::Canvas*)wid)->fill({ 255, 255, 255 });
+	((DINOGUI::Canvas*)wid)->drawTriangle(points[0], points[1], points[2], { 0, 0, 255 });
 }
 
 int main()
@@ -64,10 +70,6 @@ int main()
 	canvas->drawCircle({ 280, 280 }, 24, { 0, 0, 0 });
 	//canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });*/
 	//canvas->antialias(false);
-	DINOGUI::Point<float> p1 = { 42, 285 };
-	DINOGUI::Point<float> p2 = { 179, 123 };
-	DINOGUI::Point<float> p3 = { 51, 288 };
-	canvas->drawTriangle(p1, p2, p3, { 255, 0, 255 });
 
 	combo->place(300, 20);
 	combo->addItem("One");
@@ -80,8 +82,11 @@ int main()
 	slider2->place(90, 200);
 	slider2->setMaxTicks(10);
 
-	button->connect([canvas] { testClickFunc(canvas); });
+	std::array<DINOGUI::Point<float>, 3> points = { 0 };
+	bool antialias = true;
+	button->connect([canvas, &points]() { testClickFunc(canvas, points); });
 	button2->setCheckable();
+	button3->connect([canvas, &points, &antialias]() { func(canvas, points, antialias); });
 
 	core->run();
 	return 0;

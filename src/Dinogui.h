@@ -344,6 +344,7 @@ private:
 	bool m_antialias, m_twoPartTriangle;
 	float m_thickness;
 	std::array<Point<float>, 4> m_triangle;
+	std::array<float, 3> m_bisectors;
 
 	void createPixelBuffer();
 	void lockBuffer();
@@ -357,8 +358,6 @@ private:
 
 	void fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
 	void fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
-	void drawAAVertex(int x, int y, Point<float> p, Point<float> q, Point<float> r,
-					  float slope, Color col, Color color);
 	float length(Point<float> p1, Point<float> p2);
 	float distance(Point<float> p, Point<float> l1, Point<float> l2);
 	Point<float> lineIntersect(float a, float c, float b, float d);
