@@ -17,6 +17,7 @@ Image::Image(Core* core, const std::string& filename)
     m_type = WidgetType::IMAGE;
     ColorTheme::createDefault(m_theme, m_type);
     m_drawBorder = true;
+    m_drawBackground = true;
     m_size = { 200.0f, 200.0f };
     m_maxSize = { 1e6f, 1e6f };
     if (!filename.empty())

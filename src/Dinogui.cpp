@@ -155,7 +155,6 @@ void ColorTheme::createDefault(ColorTheme* theme, WidgetType type, const Color& 
 	case WidgetType::NONE:
 	case WidgetType::BUTTON:
 	case WidgetType::LABEL:
-	case WidgetType::IMAGE:
 	case WidgetType::CANVAS:
 		theme->background2 = theme->background;
 		theme->border2 = theme->border;
@@ -179,6 +178,7 @@ void ColorTheme::createDefault(ColorTheme* theme, WidgetType type, const Color& 
 		theme->addColor.fill(DINOCOLOR_LIGHTGRAY);
 		break;
 
+	case WidgetType::IMAGE:
 	case WidgetType::TABLE:
 		theme->background.fill(DINOCOLOR_WHITE);
 		theme->background2 = theme->background;

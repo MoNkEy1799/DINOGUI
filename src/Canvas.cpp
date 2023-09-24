@@ -111,61 +111,62 @@ void Canvas::drawLine(Point<float> p1, Point<float> p2, const Color& color)
         unlockBuffer();
     }
 
-    int xa = (int)p1.x;
-    int ya = (int)p1.y;
-    int xb = (int)p2.x;
-    int yb = (int)p2.y;
-    bool steep = std::abs(yb - ya) > std::abs(xb - xa);
+    if (p1.y > p2.y)
+    {
+        swap(p1, p2);
+    }
+    bool steep = std::abs(p2.y - p1.y) > std::abs(p2.x - p1.x);
+    Color col = color;
     if (steep)
     {
-        swap(xa, ya);
-        swap(xb, yb);
-    }
-    if (xa > xb)
-    {
-        swap(xa, xb);
-        swap(ya, yb);
-    }
+        float igrad = invGradient(p1, p2);
+        float xbound = m_antialias * m_thickness * 10;
+        float xline = p1.x;
 
-    float dx = (float)xb - xa;
-    float dy = (float)yb - ya;
-    float grad = dy / dx;
-    float yInter = (float)ya;
-    if (dx == 0.0f)
-    {
-        grad = 1.0f;
-    }
-
-    Color col = color;
-    for (int x = xa; x < xb; x++)
-    {
-        if (steep)
+        for (int y = (int)(p1.y); y <= (int)(p2.y); y++)
         {
-            if (inBounds((int)yInter, x))
+            for (int x = (int)(xline - xbound); x <= (int)(xline + xbound); x++)
             {
-                col.a = (int)((1.0f - yInter - (int)yInter) * 255);
-                setColor(col, bytePosFromXY((int)yInter, x));
+                if (!inBounds(x, y))
+                {
+                    continue;
+                }
+                else
+                {
+                    float dist = m_antialias * distance({ (float)x, (float)y }, p1, p2) / m_thickness * 2.0f;
+                    col.a = (int)((1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a);
+                    setColor(col, bytePosFromXY(x, y));
+                }
             }
-            if (inBounds((int)yInter - 1, x))
-            {
-                col.a = (int)((yInter - (int)yInter) * 255);
-                setColor(col, bytePosFromXY((int)yInter - 1, x));
-            }
-            yInter += grad;
+            xline += igrad;
         }
-        else
+    }
+    else
+    {
+        if (p1.x > p2.x)
         {
-            if (inBounds(x, (int)yInter))
+            swap(p1, p2);
+        }
+        float grad = gradient(p1, p2);
+        float ybound = m_antialias * m_thickness * 10;
+        float yline = p1.y;
+
+        for (int x = (int)(p1.x); x <= (int)(p2.x); x++)
+        {
+            for (int y = (int)(yline - ybound); y <= (int)(yline + ybound); y++)
             {
-                col.a = (int)((1.0f - yInter - (int)yInter) * 255);
-                setColor(col, bytePosFromXY(x, (int)yInter));
+                if (!inBounds(x, y))
+                {
+                    continue;
+                }
+                else
+                {
+                    float dist = m_antialias * distance({ (float)x, (float)y }, p1, p2) / m_thickness * 2.0f;
+                    col.a = (int)((1.0f - limitRange(dist, 0.0f, 1.0f)) * color.a);
+                    setColor(col, bytePosFromXY(x, y));
+                }
             }
-            if (inBounds(x, (int)yInter - 1))
-            {
-                col.a = (int)((yInter - (int)yInter) * 255);
-                setColor(col, bytePosFromXY(x, (int)yInter - 1));
-            }
-            yInter += grad;
+            yline += grad;
         }
     }
 
@@ -281,18 +282,18 @@ void Canvas::drawEllipse(Point<float> p, int ra, int rb, const Color& color)
     float ymax = (p.y + (rb * extra));
     checkBounds(xmin, ymin);
     checkBounds(xmax, ymax);
+    Color col = color;
 
     for (int xs = (int)xmin; xs < (int)xmax; xs++)
     {
         for (int ys = (int)ymin; ys < (int)ymax; ys++)
         {
-            double ellipse = std::sqrt((xs - p.x) * (xs - p.x) / ra * ra + (ys - p.y) * (ys - p.y) / rb * rb);
-            Color col = color;
-            col.a = (int)((ellipse < 1.0) * color.a);
+            float ellipse = std::sqrt((xs - p.x) * (xs - p.x) / (ra * ra) + (ys - p.y) * (ys - p.y) / (rb * rb));
+            col.a = (int)((ellipse < 1.0f) * color.a);
             if (m_antialias)
             {
-                double thickness = m_thickness / std::min(ra, rb);
-                double error = limitRange((ellipse - 1.0) / thickness, 0.0, 1.0);
+                float thickness = m_thickness / std::min(ra, rb);
+                float error = limitRange((ellipse - 1.0f) / thickness, 0.0f, 1.0f);
                 col.a = (int)((1.0f - error) * color.a);
             }
             setColor(col, bytePosFromXY(xs, ys));

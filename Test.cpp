@@ -64,12 +64,12 @@ int main()
 	table->setRowWeight(2, 0.46f);
 	
 	canvas->fill({ 255, 255, 255 });
-	/*canvas->drawRectangle({-5, -5}, {40, 40}, {0, 255, 0});
+	canvas->drawRectangle({-5, -5}, {40, 40}, {0, 255, 0});
 	canvas->drawRectangle({ 21, 21 }, { 60, 60 }, { 255, 0, 0 });
 	canvas->drawEllipse({ -20, 100 }, 90, 40, { 0, 0, 255 });
-	canvas->drawCircle({ 280, 280 }, 24, { 0, 0, 0 });
-	//canvas->drawLine({ 30, 250 }, { 110, 100 }, { 0, 0, 0 });*/
-	//canvas->antialias(false);
+	canvas->drawCircle({ 280, 280 }, 44, { 0, 0, 0 });
+	canvas->drawLine({ 40, 250 }, { 180, 270 }, { 200, 200, 0 });
+	canvas->drawTriangle({ 210, 30 }, { 140, 230 }, { 270, 260 }, { 255, 50, 100, 150 });
 
 	combo->place(300, 20);
 	combo->addItem("One");
