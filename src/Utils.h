@@ -58,9 +58,10 @@ struct Rect
 
 struct ResizeState
 {
-	const Size<float>* size;
-	const Size<float>* minSize;
-	const Size<float>* maxSize;
+	ResizeState(const Size<float>& size, const Size<float>& minSize, const Size<float>& maxSize);
+	const Size<float>& size;
+	const Size<float>& minSize;
+	const Size<float>& maxSize;
 	bool stretchWidth, stretchHeight;
 };
 

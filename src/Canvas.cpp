@@ -364,7 +364,7 @@ bool Canvas::inBounds(int x, int y) const
     return true;
 }
 
-void Canvas::checkBounds(float& x, float& y)
+void Canvas::checkBounds(float& x, float& y) const
 {
     x = limitRange(x, 0.0f, (float)(m_bufferWidth - 1));
     y = limitRange(y, 0.0f, (float)(m_bufferHeight - 1));

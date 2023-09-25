@@ -22,7 +22,9 @@
 namespace DINOGUI
 {
 
-class GridManager;
+class LayoutObject;
+enum class LayoutObjectType { WIDGET, CONTAINER };
+class Container;
 class Core;
 class Widget;
 class Button;
@@ -37,15 +39,23 @@ class Slider;
 enum class WidgetState;
 enum class WidgetType;
 
-class GridManager
+class LayoutObject
 {
 public:
-	GridManager(Core* core);
+	LayoutObject(LayoutObjectType type) : layoutType(type) {};
+	const LayoutObjectType layoutType;
+};
+
+class Container : public LayoutObject
+{
+public:
+	Container(Core* core);
 	void addWidget(Widget* widget, int row, int col, int rowSpan = 1, int colSpan = 1);
+	void addContainer(Container* container, int row, int col, int rowSpan = 1, int colSpan = 1);
 
 private:
 	Core* m_core;
-	std::vector<GridEntry<Widget*>> m_widgets;
+	std::vector<GridEntry<LayoutObject*>> m_objects;
 	std::array<float, 4> m_margins;
 	std::array<float, 2> m_spacing;
 	int m_rows, m_cols;
@@ -92,8 +102,9 @@ private:
 	Widget* m_hoverWidget;
 	Widget* m_clickWidget;
 	Widget* m_selectWidget;
+	Size<int> m_size, m_minSize, m_maxSize;
 	std::string m_windowName;
-	int m_width, m_height, m_xPos, m_yPos;
+	int m_xPos, m_yPos;
 	bool m_changeCursor;
 	int DEBUG_DrawCalls = 0;
 
@@ -117,7 +128,7 @@ private:
 enum class WidgetState { NORMAL, HOVER, CLICKED, SELECTED, SELECTED_HOVER, CHECKED, CHECKED_HOVER };
 enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE, COMBOBOX, SLIDER };
 
-class Widget
+class Widget : public LayoutObject
 {
 public:
 	Widget(Core* core);
@@ -350,21 +361,20 @@ private:
 	void lockBuffer();
 	void unlockBuffer();
 	void setColor(const Color& color, size_t bytePos);
-	bool inBounds(int x, int y) const;
-	void checkBounds(float& x, float& y);
-
-	size_t bytePosFromXY(int x, int y) const;
-	D2D1_RECT_F bufferRect() const;
-
 	void fillBottomTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
 	void fillTopTriangle(Point<float> p1, Point<float> p2, Point<float> p3, const Color& color);
-	float length(Point<float> p1, Point<float> p2);
-	float distance(Point<float> p, Point<float> l1, Point<float> l2);
-	Point<float> lineIntersect(float a, float c, float b, float d);
-	Point<float> midPoint(Point<float> p1, Point<float> p2);
-	float gradient(Point<float> p1, Point<float> p2);
-	float invGradient(Point<float> p1, Point<float> p2);
-
+	
+	bool inBounds(int x, int y) const;
+	void checkBounds(float& x, float& y) const;
+	size_t bytePosFromXY(int x, int y) const;
+	D2D1_RECT_F bufferRect() const;
+	
+	static float length(Point<float> p1, Point<float> p2);
+	static float distance(Point<float> p, Point<float> l1, Point<float> l2);
+	static Point<float> lineIntersect(float a, float c, float b, float d);
+	static Point<float> midPoint(Point<float> p1, Point<float> p2);
+	static float gradient(Point<float> p1, Point<float> p2);
+	static float invGradient(Point<float> p1, Point<float> p2);
 	static void swap(int& a, int& b);
 	static void swap(Point<float>& a, Point<float>& b);
 };

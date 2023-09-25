@@ -7,18 +7,20 @@
 #include <dwrite.h>
 #include <dwmapi.h>
 #include <string>
+#include <limits>
 
 using namespace DINOGUI;
 
 Core::Core(const std::string& windowName, int width, int height, int x, int y)
-    : m_factory(nullptr), m_writeFactory(nullptr), m_imageFactory(nullptr), m_renderTarget(nullptr), m_colorBrush(nullptr),
-      m_width(width), m_height(height), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
-      m_windowName(windowName), m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectWidget(nullptr), m_changeCursor(true)
+    : m_factory(nullptr), m_writeFactory(nullptr), m_imageFactory(nullptr), m_renderTarget(nullptr),
+      m_colorBrush(nullptr), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
+      m_windowName(windowName), m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectWidget(nullptr),
+      m_changeCursor(true), m_minSize({ 0, 0 }), m_size({ width, height }), m_maxSize({ 100000, 100000 })
 {
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
 
-    throwIfFailed(createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, m_width, m_height, m_xPos, m_yPos), "Failed to create window");
+    throwIfFailed(createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, m_size.width, m_size.height, m_xPos, m_yPos), "Failed to create window");
 }
 
 int Core::run()
@@ -331,6 +333,21 @@ void Core::processOtherKeys(uint32_t key)
     {
         dynamic_cast<Textedit*>(m_selectWidget)->otherKeys(key);
     }
+}
+
+void Core::setFixedWindowSize(int width, int height)
+{
+    m_resizeState.
+}
+
+void Core::setMinimumWindowSize(int width, int height)
+{
+
+}
+
+void Core::setMaximumWindowSize(int width, int height)
+{
+
 }
 
 Size<int> Core::getCurrentWindowSize() const
