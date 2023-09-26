@@ -14,6 +14,14 @@ Container::Container(Core* core)
 {
 }
 
+Container::~Container()
+{
+    for (Container* container : m_containers)
+    {
+        delete container;
+    }
+}
+
 void Container::addWidget(Widget* widget, int row, int col, int rowSpan, int colSpan)
 {
     if (row + rowSpan > m_rows)
@@ -42,7 +50,7 @@ void Container::addWidget(Widget* widget, int row, int col, int rowSpan, int col
     entry.entry = widget;
     entry.rowSpan = (rowSpan < 1) ? 1 : rowSpan;
     entry.colSpan = (colSpan < 1) ? 1 : colSpan;
-    updateSizes();
+    updatePositionAndSizes();
 }
 
 void Container::addContainer(Container* container, int row, int col, int rowSpan, int colSpan)
@@ -73,10 +81,10 @@ void Container::addContainer(Container* container, int row, int col, int rowSpan
     entry.entry = container;
     entry.rowSpan = (rowSpan < 1) ? 1 : rowSpan;
     entry.colSpan = (colSpan < 1) ? 1 : colSpan;
-    updateSizes();
+    updatePositionAndSizes();
 }
 
-void Container::updateSizes()
+void Container::updatePositionAndSizes()
 {
     for (int row = 0; row < m_rows; row++)
     {

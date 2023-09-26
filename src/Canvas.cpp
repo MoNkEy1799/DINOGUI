@@ -306,7 +306,7 @@ void Canvas::drawEllipse(Point<float> p, int ra, int rb, const Color& color)
 void Canvas::createPixelBuffer()
 {
     uint32_t* buffer = new uint32_t[m_bufferWidth * m_bufferHeight]{ 0 };
-    throwIfFailed(m_core->getImageFactory()->CreateBitmapFromMemory(m_bufferWidth, m_bufferHeight, GUID_WICPixelFormat32bppPRGBA,
+    throwIfFailed(getImageFactory(m_core)->CreateBitmapFromMemory(m_bufferWidth, m_bufferHeight, GUID_WICPixelFormat32bppPRGBA,
         m_bufferWidth * 4, m_bufferWidth * m_bufferHeight * 4, (byte*)buffer, &m_wicBitmap));
     resize(m_bufferWidth, m_bufferHeight);
     delete[] buffer;

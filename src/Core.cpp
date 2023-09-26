@@ -95,32 +95,6 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
     return 1;
 }
 
-void Core::addWidget(Widget* widget)
-{ 
-    if (std::find(m_widgets.begin(), m_widgets.end(), widget) == m_widgets.end())
-    {
-        m_widgets.push_back(widget);
-    }
-}
-
-void Core::removeWidget(Widget* widget)
-{
-    m_widgets.erase(std::remove(m_widgets.begin(), m_widgets.end(), widget), m_widgets.end());
-}
-
-void Core::addDisplayWidget(Widget* widget)
-{
-    if (std::find(m_displayWidgets.begin(), m_displayWidgets.end(), widget) == m_displayWidgets.end())
-    {
-        m_displayWidgets.push_back(widget);
-    }
-}
-
-void Core::removeDisplayWidget(Widget* widget)
-{
-    m_displayWidgets.erase(std::remove(m_displayWidgets.begin(), m_displayWidgets.end(), widget), m_displayWidgets.end());
-}
-
 void Core::redrawScreen() const
 {
     InvalidateRect(m_windowHandle, nullptr, false);
@@ -403,4 +377,73 @@ void Core::destroyGraphicsResources()
 {
     safeReleaseInterface(&m_renderTarget);
     safeReleaseInterface(&m_colorBrush);
+}
+
+ID2D1Factory* CoreInterface::getFactory(Core* core)
+{
+    return core->m_factory;
+}
+
+IDWriteFactory* CoreInterface::getWriteFactory(Core* core)
+{
+    return core->m_writeFactory;
+}
+
+IWICImagingFactory* CoreInterface::getImageFactory(Core* core)
+{ 
+    return core->m_imageFactory;
+}
+
+void CoreInterface::addWidget(Core* core, Widget* widget)
+{
+    if (std::find(core->m_widgets.begin(), core->m_widgets.end(), widget) == core->m_widgets.end())
+    {
+        core->m_widgets.push_back(widget);
+    }
+}
+
+void CoreInterface::removeWidget(Core* core, Widget* widget)
+{
+    core->m_widgets.erase(std::remove(core->m_widgets.begin(), core->m_widgets.end(), widget), core->m_widgets.end());
+}
+
+void CoreInterface::addDisplayWidget(Core* core, Widget* widget)
+{
+    if (std::find(core->m_displayWidgets.begin(), core->m_displayWidgets.end(), widget) == core->m_displayWidgets.end())
+    {
+        core->m_displayWidgets.push_back(widget);
+    }
+}
+
+void CoreInterface::removeDisplayWidget(Core* core, Widget* widget)
+{
+    core->m_displayWidgets.erase(std::remove(core->m_displayWidgets.begin(), core->m_displayWidgets.end(), widget), core->m_displayWidgets.end());
+}
+
+void CoreInterface::addContainer(Core* core, Container* container)
+{
+    if (std::find(core->m_containers.begin(), core->m_containers.end(), container) == core->m_containers.end())
+    {
+        core->m_containers.push_back(container);
+    }
+}
+
+void CoreInterface::removeContainer(Core* core, Container* container)
+{
+    core->m_containers.erase(std::remove(core->m_containers.begin(), core->m_containers.end(), container), core->m_containers.end());
+}
+
+void CoreInterface::setHoverWidget(Core* core, Widget* widget)
+{
+    core->m_hoverWidget = widget;
+}
+
+void CoreInterface::setClickWidget(Core* core, Widget* widget)
+{
+    core->m_clickWidget = widget;
+}
+
+void CoreInterface::setSelectWidget(Core* core, Widget* widget)
+{
+    core->m_selectWidget = widget;
 }

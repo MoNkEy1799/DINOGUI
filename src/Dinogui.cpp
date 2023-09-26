@@ -103,7 +103,7 @@ IDWriteTextFormat* Text::getFontFormat()
 
 bool Text::createFontFormat()
 {
-	HRESULT hResult = m_core->getWriteFactory()->CreateTextFormat(
+	HRESULT hResult = getWriteFactory(m_core)->CreateTextFormat(
 		toWideString(m_font.family).c_str(), NULL, (DWRITE_FONT_WEIGHT)m_font.weight,
 		DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, m_font.size, L"en-us", &m_fontFormat);
 

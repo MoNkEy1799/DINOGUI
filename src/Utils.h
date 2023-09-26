@@ -131,7 +131,7 @@ static const std::array<int, 5> DWrite_Alignment_Map =
 	DWRITE_TEXT_ALIGNMENT_CENTER
 };
 
-class Text
+class Text : private CoreInterface
 {
 public:
 	Text(Core* core, const std::string& text);
@@ -249,7 +249,7 @@ template<class CLASS_TYPE>
 class TemplateWindow
 {
 public:
-	TemplateWindow() : m_windowHandle(nullptr) { }
+	TemplateWindow() : m_windowHandle(nullptr) {}
 
 	static LRESULT CALLBACK WindowProc(HWND windowHandle, UINT messageCode, WPARAM wParam, LPARAM lParam)
 	{
@@ -293,8 +293,6 @@ public:
 
 		return (m_windowHandle ? true : false);
 	}
-
-	HWND getWindowHandle() { return m_windowHandle; };
 
 protected:
 	virtual LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam) = 0;

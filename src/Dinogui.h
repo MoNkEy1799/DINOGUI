@@ -42,25 +42,37 @@ enum class WidgetType;
 class LayoutObject
 {
 public:
-	LayoutObject(LayoutObjectType type) : layoutType(type) {};
 	const LayoutObjectType layoutType;
+
+private:
+	friend class Container;
+	friend class Widget;
+
+	LayoutObject(LayoutObjectType type) : layoutType(type) {};
 };
 
 class Container : public LayoutObject
 {
 public:
 	Container(Core* core);
+	~Container();
+	Container(const Container&) = delete;
+	Container(Container&&) = delete;
+	Container& operator=(const Container&) = delete;
+	Container& operator=(Container&&) = delete;
+
 	void addWidget(Widget* widget, int row, int col, int rowSpan = 1, int colSpan = 1);
 	void addContainer(Container* container, int row, int col, int rowSpan = 1, int colSpan = 1);
 
 private:
 	Core* m_core;
 	std::vector<GridEntry<LayoutObject*>> m_objects;
+	std::vector<Container*> m_containers;
 	std::array<float, 4> m_margins;
 	std::array<float, 2> m_spacing;
 	int m_rows, m_cols;
 
-	void updateSizes();
+	void updatePositionAndSizes();
 };
 
 class Core : public TemplateWindow<Core>
@@ -72,24 +84,14 @@ public:
 	void setMinimumWindowSize(int width, int height);
 	void setMaximumWindowSize(int width, int height);
 	Size<int> getCurrentWindowSize() const;
+	void redrawScreen() const;
+
+private:
+	friend class TemplateWindow;
+	friend class CoreInterface;
 
 	LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam);
 
-	void addWidget(Widget* widget);
-	void removeWidget(Widget* widget);
-	void addDisplayWidget(Widget* widget);
-	void removeDisplayWidget(Widget* widget);
-	void redrawScreen() const;
-
-	ID2D1Factory* getFactory() const { return m_factory; };
-	IDWriteFactory* getWriteFactory() const { return m_writeFactory; };
-	IWICImagingFactory* getImageFactory() const { return m_imageFactory; };
-
-	void setHoverWidget(Widget* widget) { m_hoverWidget = widget; };
-	void setClickWidget(Widget* widget) { m_clickWidget = widget; };
-	void setSelectWidget(Widget* widget) { m_selectWidget = widget; };
-
-private:
 	ID2D1Factory* m_factory;
 	IDWriteFactory* m_writeFactory;
 	IWICImagingFactory* m_imageFactory;
@@ -99,6 +101,7 @@ private:
 
 	std::vector<Widget*> m_widgets;
 	std::vector<Widget*> m_displayWidgets;
+	std::vector<Container*> m_containers;
 	Widget* m_hoverWidget;
 	Widget* m_clickWidget;
 	Widget* m_selectWidget;
@@ -125,10 +128,34 @@ private:
 	void destroyGraphicsResources();
 };
 
+class CoreInterface
+{
+private:
+	friend class Widget;
+	friend class Text;
+	friend class Timer;
+
+	CoreInterface() {}
+	static ID2D1Factory* getFactory(Core* core) { return core->m_factory; };
+	static IDWriteFactory* getWriteFactory(Core* core) { return core->m_writeFactory; };
+	static IWICImagingFactory* getImageFactory(Core* core) { return core->m_imageFactory; };
+
+	static void addWidget(Core* core, Widget* widget);
+	static void removeWidget(Core* core, Widget* widget);
+	static void addDisplayWidget(Core* core, Widget* widget);
+	static void removeDisplayWidget(Core* core, Widget* widget);
+	static void addContainer(Core* core, Container* container);
+	static void removeContainer(Core* core, Container* container);
+
+	static void setHoverWidget(Core* core, Widget* widget) { core->m_hoverWidget = widget; };
+	static void setClickWidget(Core* core, Widget* widget) { core->m_clickWidget = widget; };
+	static void setSelectWidget(Core* core, Widget* widget) { core->m_selectWidget = widget; };
+};
+
 enum class WidgetState { NORMAL, HOVER, CLICKED, SELECTED, SELECTED_HOVER, CHECKED, CHECKED_HOVER };
 enum class WidgetType { NONE, BUTTON, LABEL, CHECKBOX, TEXTEDIT, IMAGE, CANVAS, TABLE, COMBOBOX, SLIDER };
 
-class Widget : public LayoutObject
+class Widget : public LayoutObject, protected CoreInterface
 {
 public:
 	Widget(Core* core);

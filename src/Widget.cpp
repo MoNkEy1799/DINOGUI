@@ -75,7 +75,6 @@ bool Widget::contains(float x, float y) const
 
 void Widget::show()
 {
-    m_core->removeDisplayWidget(this);
     m_core->addDisplayWidget(this);
     m_core->redrawScreen();
 }
