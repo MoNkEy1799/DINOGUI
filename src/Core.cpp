@@ -9,13 +9,15 @@
 #include <string>
 #include <limits>
 
+constexpr int MAX_WIN = 100000;
+
 using namespace DINOGUI;
 
 Core::Core(const std::string& windowName, int width, int height, int x, int y)
     : m_factory(nullptr), m_writeFactory(nullptr), m_imageFactory(nullptr), m_renderTarget(nullptr),
       m_colorBrush(nullptr), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
       m_windowName(windowName), m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectWidget(nullptr),
-      m_changeCursor(true), m_minSize({ 0, 0 }), m_size({ width, height }), m_maxSize({ 100000, 100000 })
+      m_changeCursor(true), m_minSize({ 0, 0 }), m_size({ width, height }), m_maxSize({ MAX_WIN, MAX_WIN })
 {
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
@@ -337,17 +339,18 @@ void Core::processOtherKeys(uint32_t key)
 
 void Core::setFixedWindowSize(int width, int height)
 {
-    m_resizeState.
+    m_minSize = { limitRange(width, 0, MAX_WIN), limitRange(height, 0, MAX_WIN) };
+    m_maxSize = { limitRange(width, 0, MAX_WIN), limitRange(height, 0, MAX_WIN) };
 }
 
 void Core::setMinimumWindowSize(int width, int height)
 {
-
+    m_minSize = { limitRange(width, 0, m_maxSize.width), limitRange(height, 0, m_maxSize.height) };
 }
 
 void Core::setMaximumWindowSize(int width, int height)
 {
-
+    m_maxSize = { limitRange(width, m_minSize.width, MAX_WIN), limitRange(height, m_minSize.height, MAX_WIN) };
 }
 
 Size<int> Core::getCurrentWindowSize() const

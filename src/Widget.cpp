@@ -8,13 +8,12 @@ using namespace DINOGUI;
 
 Widget::Widget(Core* core)
     : LayoutObject(LayoutObjectType::WIDGET), m_core(core), m_theme(nullptr), m_state(WidgetState::NORMAL), m_type(WidgetType::NONE),
-      m_resizeState(), m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_minSize({ 0.0f, 0.0f }), m_maxSize({ 1e6f, 20.0f }),
+      m_point({ 0.0f, 0.0f }), m_size({ 60.0f, 20.0f }), m_minSize({ 0.0f, 0.0f }), m_maxSize({ 1e6f, 20.0f }),
       m_drawBackground(false), m_drawBorder(false), m_hoverable(false), m_clickable(false), m_holdable(false),
-      m_selectable(false), m_checkable(false), m_checked(false), m_selected(false)
+      m_selectable(false), m_checkable(false), m_checked(false), m_selected(false), m_resizeState(m_size, m_minSize, m_maxSize)
 {
     m_core->addWidget(this);
     m_theme = new ColorTheme();
-    m_resizeState.size = &m_size;
 }
 
 Widget::~Widget()
@@ -39,6 +38,27 @@ void Widget::resize(int width, int height)
     float w = limitRange((float)width, m_minSize.width, m_maxSize.width);
     float h = limitRange((float)height, m_minSize.height, m_maxSize.height);
     m_size = { w, h };
+}
+
+void Widget::setFixedSize(int width, int height)
+{
+    m_minSize = { limitRange((float)width, 0.0f, 1e6f), limitRange((float)height, 0.0f, 1e6f) };
+    m_maxSize = { limitRange((float)width, 0.0f, 1e6f), limitRange((float)height, 0.0f, 1e6f) };
+}
+
+void Widget::setMinimumSize(int width, int height)
+{
+    m_minSize = { limitRange((float)width, 0.0f, m_maxSize.width), limitRange((float)height, 0.0f, m_maxSize.height) };
+}
+
+void Widget::setMaximumSize(int width, int height)
+{
+    m_maxSize = { limitRange((float)width, m_minSize.width, 1e6f), limitRange((float)height, m_minSize.height, 1e6f) };
+}
+
+ResizeState Widget::getResizeState()
+{
+    return m_resizeState;
 }
 
 WidgetType Widget::getWidgetType() const

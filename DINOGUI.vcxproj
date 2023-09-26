@@ -134,7 +134,7 @@
   <ItemGroup>
     <ClCompile Include="examples\Mandelbrot.cpp" />
     <ClCompile Include="src\Combobox.cpp" />
-    <ClCompile Include="src\GridManager.cpp" />
+    <ClCompile Include="src\Container.cpp" />
     <ClCompile Include="src\Slider.cpp" />
     <ClCompile Include="src\Table.cpp" />
     <ClCompile Include="Test.cpp" />

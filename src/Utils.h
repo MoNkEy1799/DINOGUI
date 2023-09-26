@@ -62,7 +62,6 @@ struct ResizeState
 	const Size<float>& size;
 	const Size<float>& minSize;
 	const Size<float>& maxSize;
-	bool stretchWidth, stretchHeight;
 };
 
 struct Color
