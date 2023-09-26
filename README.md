@@ -33,6 +33,7 @@ Currently implemented/ planned:
  - Textedit (unfinished)
  - Image
  - Canvas
+ - Table
  - Combobox
  - Slider
  - Toplevel Window (planned)
