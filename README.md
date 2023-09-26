@@ -1,12 +1,12 @@
 # DINOGUI 🦕
-Trying to make a GUI library in C++ using Win32 API and Direct2D/ DirectWrite.
-All GUI elements are implemented by myself and are not simply calls to the default Windows ClassNames (i.e. CreateWindow(L"BUTTON", ...)).
+A simple to use GUI toolkit in C++ using the Win32 API and Direct2D/ DirectWrite.
+All GUI elements are implemented from scratch and are not simply calls to the default Windows ClassNames (i.e. CreateWindow(L"BUTTON", ...)). The GUI is event driven to minimize draw calls and save resources. All widgets can (and should) be created on the heap and are automatically deleted with distruction of the parent window. A Python version that accesses a .dll is also planned.
 
-The GUI is event driven to minimize draw calls and save resources. A Python version is that accesses a .dll is also planned.
+It is heavily inspired by Qt & Tkinter whith a focus on simplicity (Tkinter) and quality of life (Qt) for fast and simple GUI based programs.
 
 ## Quickstart
 
-To get started, first create a `DINOGUI::Core` widget which is the base window for all other widgets. Then create other widgets on the heap and `place` them (memory is automatically freed upon deletion of the window). Lastly start the event loop by calling the `run` methode.
+To get started, first create a `DINOGUI::Core` which is the base window & main application for all other widgets and windows. Then, create other widgets and `place` or `grid` them in the window. Lastly start the event loop by calling the `run` methode.
 
 ```cpp
 #include <Dinogui.h>
