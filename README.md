@@ -6,10 +6,10 @@ It is heavily inspired by Qt & Tkinter whith a focus on simplicity (Tkinter) and
 
 ## Quickstart
 
-To get started, first create a `DINOGUI::Core` which is the base window & main application for all other widgets and windows. Then, create other widgets and `place` or `grid` them in the window. Lastly start the event loop by calling the `run` methode.
+To get started, first create a `DINOGUI::Core` which is the base window & main application for all other widgets and windows. Then, create other widgets (preferably on the heap) and `place` or `grid` them in the window. Lastly start the event loop by calling the `run` methode. Afterwards delete the core and therefore automatically clean up all other widgets (or stack-allocate the core).
 
 ```cpp
-#include <Dinogui.h>
+#include "Dinogui.h"
 
 int main()
 {
@@ -19,6 +19,7 @@ int main()
     button->place(200, 200);
     
     core->run();
+    delete core;
     
     return 0;
 }
