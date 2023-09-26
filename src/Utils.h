@@ -1,4 +1,5 @@
 #pragma once
+#include "Dinogui.h"
 
 #include <Windows.h>
 #include <d2d1.h>
@@ -129,36 +130,6 @@ static const std::array<int, 5> DWrite_Alignment_Map =
 	DWRITE_PARAGRAPH_ALIGNMENT_NEAR,
 	DWRITE_PARAGRAPH_ALIGNMENT_FAR,
 	DWRITE_TEXT_ALIGNMENT_CENTER
-};
-
-class Text : private CoreInterface
-{
-public:
-	Text(Core* core, const std::string& text);
-	~Text();
-
-	void draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
-	void setText(const std::string& text);
-	void setFont(const Font& font);
-	void setColor(const Color& color);
-	void unsetColor();
-	void setAlignment(Alignment align);
-
-	std::string& getText();
-	IDWriteTextFormat* getFontFormat();
-	bool fontFormatChanged;
-
-private:
-	IDWriteTextFormat* m_fontFormat;
-	Core* m_core;
-	std::string m_text;
-	Font m_font;
-	DWRITE_TEXT_ALIGNMENT m_hAlign;
-	DWRITE_PARAGRAPH_ALIGNMENT m_vAlign;
-	Color m_color;
-	bool m_colorSet;
-
-	bool createFontFormat();
 };
 
 class DPIHandler
@@ -295,7 +266,7 @@ public:
 	}
 
 protected:
-	virtual LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam) = 0;
+	//virtual LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam) = 0;
 
 	HWND m_windowHandle;
 };

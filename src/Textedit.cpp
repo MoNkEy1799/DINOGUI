@@ -25,7 +25,7 @@ Textedit::Textedit(Core* core)
     m_hoverable = true;
     m_selectable = true;
     m_size = { 120.0f, 20.0f };
-    m_cursorTimer = new Timer(m_core->getWindowHandle(), 500, [this] { switchCursor(); });
+    m_cursorTimer = new Timer(getWindowHandle(m_core), 500, [this] { switchCursor(); });
 }
 
 Textedit::~Textedit()
@@ -179,7 +179,7 @@ float Textedit::calculateCharDimension(char character)
 {
     IDWriteTextLayout* layout;
     const wchar_t c = (wchar_t)character;
-    m_core->getWriteFactory()->CreateTextLayout(&c, 1, m_text->getFontFormat(), 1.0f, 1.0f, &layout);
+    getWriteFactory(m_core)->CreateTextLayout(&c, 1, m_text->getFontFormat(), 1.0f, 1.0f, &layout);
     DWRITE_TEXT_METRICS metrics;
     layout->GetMetrics(&metrics);
     safeReleaseInterface(&layout);

@@ -13,12 +13,18 @@ constexpr int MAX_WIN = 100000;
 
 using namespace DINOGUI;
 
+int Core::m_instanceCounter = 0;
+
 Core::Core(const std::string& windowName, int width, int height, int x, int y)
     : m_factory(nullptr), m_writeFactory(nullptr), m_imageFactory(nullptr), m_renderTarget(nullptr),
       m_colorBrush(nullptr), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
       m_windowName(windowName), m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectWidget(nullptr),
       m_changeCursor(true), m_minSize({ 0, 0 }), m_size({ width, height }), m_maxSize({ MAX_WIN, MAX_WIN })
 {
+    if (++m_instanceCounter > 1)
+    {
+        throwIfFailed(true, "Cannot create more than one instance of DINOGUI::Core");
+    }
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
 
@@ -379,6 +385,11 @@ void Core::destroyGraphicsResources()
     safeReleaseInterface(&m_colorBrush);
 }
 
+HWND CoreInterface::getWindowHandle(Core* core)
+{
+    return core->m_windowHandle;
+}
+
 ID2D1Factory* CoreInterface::getFactory(Core* core)
 {
     return core->m_factory;
@@ -431,6 +442,16 @@ void CoreInterface::addContainer(Core* core, Container* container)
 void CoreInterface::removeContainer(Core* core, Container* container)
 {
     core->m_containers.erase(std::remove(core->m_containers.begin(), core->m_containers.end(), container), core->m_containers.end());
+}
+
+void CoreInterface::addTimer(Core* core, Timer* container)
+{
+
+}
+
+void CoreInterface::removeTimer(Core* core, Timer* container)
+{
+
 }
 
 void CoreInterface::setHoverWidget(Core* core, Widget* widget)

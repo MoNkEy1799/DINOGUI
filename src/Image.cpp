@@ -62,13 +62,13 @@ void Image::loadImageFromFile(const std::string& filename)
     IWICBitmapFrameDecode* frameDecode = nullptr;
     IWICFormatConverter* converter = nullptr;
 
-    throwIfFailed(m_core->getImageFactory()->CreateDecoderFromFilename(toWideString(filename).c_str(), nullptr,
+    throwIfFailed(getImageFactory(m_core)->CreateDecoderFromFilename(toWideString(filename).c_str(), nullptr,
         GENERIC_READ, WICDecodeMetadataCacheOnDemand, &decoder), "Failed to load file");
     throwIfFailed(decoder->GetFrame(0, &frameDecode), "Failed to get frame");
-    throwIfFailed(m_core->getImageFactory()->CreateFormatConverter(&converter), "Failed to create converter");
+    throwIfFailed(getImageFactory(m_core)->CreateFormatConverter(&converter), "Failed to create converter");
     throwIfFailed(converter->Initialize(frameDecode, GUID_WICPixelFormat32bppPRGBA, WICBitmapDitherTypeNone,
         nullptr, 0.0, WICBitmapPaletteTypeCustom), "Failed to initialize converter");
-    throwIfFailed(m_core->getImageFactory()->CreateBitmapFromSource(converter, WICBitmapCacheOnDemand, &m_wicBitmap));
+    throwIfFailed(getImageFactory(m_core)->CreateBitmapFromSource(converter, WICBitmapCacheOnDemand, &m_wicBitmap));
     m_wicBitmap->GetSize(&m_imageWidth, &m_imageHeight);
     m_size = { (float)m_imageWidth, (float)m_imageHeight };
 

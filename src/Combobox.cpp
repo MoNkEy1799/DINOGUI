@@ -59,7 +59,7 @@ void Combobox::clicked(float mouseX, float mouseY)
     if (m_dropdown)
     {
         m_selected = false;
-        m_core->setSelectWidget(nullptr);
+        setSelectWidget(m_core, nullptr);
         if (m_hoverIndex != -1)
         {
             m_currentIndex = m_hoverIndex;

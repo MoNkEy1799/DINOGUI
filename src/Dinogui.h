@@ -44,11 +44,8 @@ class LayoutObject
 public:
 	const LayoutObjectType layoutType;
 
-private:
-	friend class Container;
-	friend class Widget;
-
-	LayoutObject(LayoutObjectType type) : layoutType(type) {};
+protected:
+	LayoutObject(LayoutObjectType type) : layoutType(type) {}
 };
 
 class Container : public LayoutObject
@@ -90,6 +87,7 @@ private:
 	friend class TemplateWindow;
 	friend class CoreInterface;
 
+	static int m_instanceCounter;
 	LRESULT HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam);
 
 	ID2D1Factory* m_factory;
@@ -102,6 +100,7 @@ private:
 	std::vector<Widget*> m_widgets;
 	std::vector<Widget*> m_displayWidgets;
 	std::vector<Container*> m_containers;
+	std::vector<Timer*> m_timers;
 	Widget* m_hoverWidget;
 	Widget* m_clickWidget;
 	Widget* m_selectWidget;
@@ -130,15 +129,13 @@ private:
 
 class CoreInterface
 {
-private:
-	friend class Widget;
-	friend class Text;
-	friend class Timer;
-
+protected:
 	CoreInterface() {}
-	static ID2D1Factory* getFactory(Core* core) { return core->m_factory; };
-	static IDWriteFactory* getWriteFactory(Core* core) { return core->m_writeFactory; };
-	static IWICImagingFactory* getImageFactory(Core* core) { return core->m_imageFactory; };
+
+	static HWND getWindowHandle(Core* core);
+	static ID2D1Factory* getFactory(Core* core);
+	static IDWriteFactory* getWriteFactory(Core* core);
+	static IWICImagingFactory* getImageFactory(Core* core);
 
 	static void addWidget(Core* core, Widget* widget);
 	static void removeWidget(Core* core, Widget* widget);
@@ -146,10 +143,42 @@ private:
 	static void removeDisplayWidget(Core* core, Widget* widget);
 	static void addContainer(Core* core, Container* container);
 	static void removeContainer(Core* core, Container* container);
+	static void addTimer(Core* core, Timer* container);
+	static void removeTimer(Core* core, Timer* container);
 
-	static void setHoverWidget(Core* core, Widget* widget) { core->m_hoverWidget = widget; };
-	static void setClickWidget(Core* core, Widget* widget) { core->m_clickWidget = widget; };
-	static void setSelectWidget(Core* core, Widget* widget) { core->m_selectWidget = widget; };
+	static void setHoverWidget(Core* core, Widget* widget);
+	static void setClickWidget(Core* core, Widget* widget);
+	static void setSelectWidget(Core* core, Widget* widget);
+};
+
+class Text : protected CoreInterface
+{
+public:
+	Text(Core* core, const std::string& text);
+	~Text();
+
+	void draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+	void setText(const std::string& text);
+	void setFont(const Font& font);
+	void setColor(const Color& color);
+	void unsetColor();
+	void setAlignment(Alignment align);
+
+	std::string& getText();
+	IDWriteTextFormat* getFontFormat();
+	bool fontFormatChanged;
+
+private:
+	IDWriteTextFormat* m_fontFormat;
+	Core* m_core;
+	std::string m_text;
+	Font m_font;
+	DWRITE_TEXT_ALIGNMENT m_hAlign;
+	DWRITE_PARAGRAPH_ALIGNMENT m_vAlign;
+	Color m_color;
+	bool m_colorSet;
+
+	bool createFontFormat();
 };
 
 enum class WidgetState { NORMAL, HOVER, CLICKED, SELECTED, SELECTED_HOVER, CHECKED, CHECKED_HOVER };
@@ -193,12 +222,12 @@ public:
 	void unselectEvent();
 	
 protected:
-	D2D1_POINT_2F m_point;
-	Size<float> m_size, m_minSize, m_maxSize;
 	Core* m_core;
 	ColorTheme* m_theme;
 	WidgetState m_state;
 	WidgetType m_type;
+	D2D1_POINT_2F m_point;
+	Size<float> m_size, m_minSize, m_maxSize;
 	ResizeState m_resizeState;
 	bool m_drawBackground, m_drawBorder;
 	bool m_hoverable, m_clickable, m_holdable, m_selectable, m_checkable;
