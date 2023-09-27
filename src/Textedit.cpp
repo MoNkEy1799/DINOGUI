@@ -25,7 +25,7 @@ Textedit::Textedit(Core* core)
     m_hoverable = true;
     m_selectable = true;
     m_size = { 120.0f, 20.0f };
-    m_cursorTimer = new Timer(getWindowHandle(m_core), 500, [this] { switchCursor(); });
+    m_cursorTimer = new Timer(m_core, 500, [this] { switchCursor(); });
 }
 
 Textedit::~Textedit()

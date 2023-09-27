@@ -142,6 +142,14 @@ void Core::destroyWindow()
     {
         delete m_widgets.back();
     }
+    while (!m_containers.empty())
+    {
+        delete m_containers.back();
+    }
+    while (!m_timers.empty())
+    {
+        delete m_timers.back();
+    }
     destroyGraphicsResources();
     safeReleaseInterface(&m_factory);
     safeReleaseInterface(&m_writeFactory);
@@ -407,51 +415,42 @@ IWICImagingFactory* CoreInterface::getImageFactory(Core* core)
 
 void CoreInterface::addWidget(Core* core, Widget* widget)
 {
-    if (std::find(core->m_widgets.begin(), core->m_widgets.end(), widget) == core->m_widgets.end())
-    {
-        core->m_widgets.push_back(widget);
-    }
+    addToVector(core->m_widgets, widget);
 }
 
 void CoreInterface::removeWidget(Core* core, Widget* widget)
 {
-    core->m_widgets.erase(std::remove(core->m_widgets.begin(), core->m_widgets.end(), widget), core->m_widgets.end());
+    removeFromVector(core->m_widgets, widget);
 }
 
 void CoreInterface::addDisplayWidget(Core* core, Widget* widget)
 {
-    if (std::find(core->m_displayWidgets.begin(), core->m_displayWidgets.end(), widget) == core->m_displayWidgets.end())
-    {
-        core->m_displayWidgets.push_back(widget);
-    }
+    addToVector(core->m_displayWidgets, widget);
 }
 
 void CoreInterface::removeDisplayWidget(Core* core, Widget* widget)
 {
-    core->m_displayWidgets.erase(std::remove(core->m_displayWidgets.begin(), core->m_displayWidgets.end(), widget), core->m_displayWidgets.end());
+    removeFromVector(core->m_displayWidgets, widget);
 }
 
 void CoreInterface::addContainer(Core* core, Container* container)
 {
-    if (std::find(core->m_containers.begin(), core->m_containers.end(), container) == core->m_containers.end())
-    {
-        core->m_containers.push_back(container);
-    }
+    addToVector(core->m_containers, container);
 }
 
 void CoreInterface::removeContainer(Core* core, Container* container)
 {
-    core->m_containers.erase(std::remove(core->m_containers.begin(), core->m_containers.end(), container), core->m_containers.end());
+    removeFromVector(core->m_containers, container);
 }
 
-void CoreInterface::addTimer(Core* core, Timer* container)
+void CoreInterface::addTimer(Core* core, Timer* timer)
 {
-
+    addToVector(core->m_timers, timer);
 }
 
-void CoreInterface::removeTimer(Core* core, Timer* container)
+void CoreInterface::removeTimer(Core* core, Timer* timer)
 {
-
+    removeFromVector(core->m_timers, timer);
 }
 
 void CoreInterface::setHoverWidget(Core* core, Widget* widget)

@@ -23,9 +23,11 @@ namespace DINOGUI
 {
 
 class LayoutObject;
-enum class LayoutObjectType { WIDGET, CONTAINER };
 class Container;
 class Core;
+class CoreInterface;
+class Text;
+class Timer;
 class Widget;
 class Button;
 class Label;
@@ -36,8 +38,11 @@ class Canvas;
 class Table;
 class Combobox;
 class Slider;
+enum class LayoutObjectType;
 enum class WidgetState;
 enum class WidgetType;
+
+enum class LayoutObjectType { WIDGET, CONTAINER };
 
 class LayoutObject
 {
@@ -137,14 +142,28 @@ protected:
 	static IDWriteFactory* getWriteFactory(Core* core);
 	static IWICImagingFactory* getImageFactory(Core* core);
 
+	template<typename T>
+	static void addToVector(std::vector<T>& vec, T object)
+	{
+		if (std::find(vec.begin(), vec.end(), object) == vec.end())
+		{
+			vec.push_back(object);
+		}
+	}
+	template<typename T>
+	static void removeFromVector(std::vector<T>& vec, T object)
+	{
+		vec.erase(std::remove(vec.begin(), vec.end(), object), vec.end());
+	}
+
 	static void addWidget(Core* core, Widget* widget);
 	static void removeWidget(Core* core, Widget* widget);
 	static void addDisplayWidget(Core* core, Widget* widget);
 	static void removeDisplayWidget(Core* core, Widget* widget);
 	static void addContainer(Core* core, Container* container);
 	static void removeContainer(Core* core, Container* container);
-	static void addTimer(Core* core, Timer* container);
-	static void removeTimer(Core* core, Timer* container);
+	static void addTimer(Core* core, Timer* timer);
+	static void removeTimer(Core* core, Timer* timer);
 
 	static void setHoverWidget(Core* core, Widget* widget);
 	static void setClickWidget(Core* core, Widget* widget);
@@ -179,6 +198,31 @@ private:
 	bool m_colorSet;
 
 	bool createFontFormat();
+};
+
+class Timer : protected CoreInterface
+{
+public:
+	Timer(Core* core, uint32_t timeout = 1000, std::function<void()> callback = nullptr);
+	~Timer();
+	Timer(const Timer&) = delete;
+	Timer(Timer&&) = delete;
+	Timer& operator=(const Timer&) = delete;
+	Timer& operator=(Timer&&) = delete;
+
+	void start();
+	void stop();
+	void restart();
+	bool isActive();
+
+	uint32_t timeoutDelay;
+	std::function<void()> callback;
+
+private:
+	static void timerFunction(HWND, uint32_t, uint64_t classPtr, DWORD);
+
+	Core* m_core;
+	bool m_active;
 };
 
 enum class WidgetState { NORMAL, HOVER, CLICKED, SELECTED, SELECTED_HOVER, CHECKED, CHECKED_HOVER };

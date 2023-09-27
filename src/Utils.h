@@ -147,25 +147,6 @@ private:
 	static float adjust(float f, float dir = 0.5f);
 };
 
-class Timer
-{
-public:
-	Timer(HWND windowHandle, uint32_t timeout = 1000, std::function<void()> callback = nullptr);
-	void start();
-	void stop();
-	void restart();
-	bool isActive();
-
-	uint32_t timeoutDelay;
-	std::function<void()> callback;
-
-private:
-	static void timerFunction(HWND, uint32_t, uint64_t classPtr, DWORD);
-	
-	bool m_active;
-	HWND m_windowHandle;
-};
-
 class Random
 {
 public:
