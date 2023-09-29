@@ -22,10 +22,10 @@
 namespace DINOGUI
 {
 
-class LayoutObject;
-class Container;
 class Core;
 class CoreInterface;
+class LayoutObject;
+class Container;
 class Text;
 class Timer;
 class Widget;
@@ -42,45 +42,10 @@ enum class LayoutObjectType;
 enum class WidgetState;
 enum class WidgetType;
 
-enum class LayoutObjectType { WIDGET, CONTAINER };
-
-class LayoutObject
-{
-public:
-	const LayoutObjectType layoutType;
-
-protected:
-	LayoutObject(LayoutObjectType type) : layoutType(type) {}
-};
-
-class Container : public LayoutObject
-{
-public:
-	Container(Core* core);
-	~Container();
-	Container(const Container&) = delete;
-	Container(Container&&) = delete;
-	Container& operator=(const Container&) = delete;
-	Container& operator=(Container&&) = delete;
-
-	void addWidget(Widget* widget, int row, int col, int rowSpan = 1, int colSpan = 1);
-	void addContainer(Container* container, int row, int col, int rowSpan = 1, int colSpan = 1);
-
-private:
-	Core* m_core;
-	std::vector<GridEntry<LayoutObject*>> m_objects;
-	std::vector<Container*> m_containers;
-	std::array<float, 4> m_margins;
-	std::array<float, 2> m_spacing;
-	int m_rows, m_cols;
-
-	void updatePositionAndSizes();
-};
-
 class Core : public TemplateWindow<Core>
 {
 public:
-	Core(const std::string& windowName = "DINOGUI", int width = 200, int height = 200, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT);
+	Core(const std::string& windowName = "DINOGUI", int width = 250, int height = 150, int x = CW_USEDEFAULT, int y = CW_USEDEFAULT);
 	int run();
 	void setFixedWindowSize(int width, int height);
 	void setMinimumWindowSize(int width, int height);
@@ -170,6 +135,43 @@ protected:
 	static void setSelectWidget(Core* core, Widget* widget);
 };
 
+enum class LayoutObjectType { WIDGET, CONTAINER };
+
+class LayoutObject
+{
+public:
+	const LayoutObjectType layoutType;
+
+protected:
+	LayoutObject(LayoutObjectType type) : layoutType(type) {}
+};
+
+class Container : public LayoutObject, protected CoreInterface
+{
+public:
+	Container(Core* core);
+	~Container();
+	Container(const Container&) = delete;
+	Container(Container&&) = delete;
+	Container& operator=(const Container&) = delete;
+	Container& operator=(Container&&) = delete;
+
+	void addWidget(Widget* widget, int row, int col, int rowSpan = 1, int colSpan = 1);
+	void addContainer(Container* container, int row, int col, int rowSpan = 1, int colSpan = 1);
+
+private:
+	Core* m_core;
+	std::vector<GridEntry<LayoutObject*>> m_objects;
+	std::array<float, 4> m_margins;
+	std::array<float, 2> m_spacing;
+	Size<int> m_size;
+	int m_rows, m_cols;
+
+	void updatePositionAndSizes();
+	static bool compareHeight(const GridEntry<LayoutObject*>& e1, const GridEntry<LayoutObject*>& e2);
+	static bool compareWidth(const GridEntry<LayoutObject*>& e1, const GridEntry<LayoutObject*>& e2);
+};
+
 class Text : protected CoreInterface
 {
 public:
@@ -222,6 +224,7 @@ private:
 	static void timerFunction(HWND, uint32_t, uint64_t classPtr, DWORD);
 
 	Core* m_core;
+	HWND m_windowHandle;
 	bool m_active;
 };
 

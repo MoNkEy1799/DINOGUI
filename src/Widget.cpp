@@ -12,14 +12,14 @@ Widget::Widget(Core* core)
       m_drawBackground(false), m_drawBorder(false), m_hoverable(false), m_clickable(false), m_holdable(false),
       m_selectable(false), m_checkable(false), m_checked(false), m_selected(false), m_resizeState(m_size, m_minSize, m_maxSize)
 {
-    addWidget(m_core, this);
+    CoreInterface::addWidget(m_core, this);
     m_theme = new ColorTheme();
 }
 
 Widget::~Widget()
 {
-    removeWidget(m_core, this);
-    removeDisplayWidget(m_core, this);
+    CoreInterface::removeWidget(m_core, this);
+    CoreInterface::removeDisplayWidget(m_core, this);
     delete m_theme;
 }
 
@@ -75,13 +75,13 @@ bool Widget::contains(float x, float y) const
 
 void Widget::show()
 {
-    addDisplayWidget(m_core, this);
+    CoreInterface::addDisplayWidget(m_core, this);
     m_core->redrawScreen();
 }
 
 void Widget::hide()
 {
-    removeDisplayWidget(m_core, this);
+    CoreInterface::removeDisplayWidget(m_core, this);
     m_core->redrawScreen();
 }
 
@@ -140,7 +140,7 @@ void Widget::enterEvent()
         {
             m_state = WidgetState::SELECTED_HOVER;
         }
-        setHoverWidget(m_core, this);
+        CoreInterface::setHoverWidget(m_core, this);
         m_core->redrawScreen();
     }
 }
@@ -156,8 +156,8 @@ void Widget::leaveEvent()
     {
         m_state = WidgetState::SELECTED;
     }
-    setHoverWidget(m_core, nullptr);
-    setClickWidget(m_core, nullptr);
+    CoreInterface::setHoverWidget(m_core, nullptr);
+    CoreInterface::setClickWidget(m_core, nullptr);
     m_core->redrawScreen();
 }
 
@@ -166,14 +166,14 @@ void Widget::clickEvent(float mouseX, float mouseY)
     if (m_clickable || m_checkable)
     {
         m_state = WidgetState::CLICKED;
-        setClickWidget(m_core, this);
+        CoreInterface::setClickWidget(m_core, this);
         m_core->redrawScreen();
     }
     else if (m_selectable)
     {
         m_state = WidgetState::SELECTED_HOVER;
         m_selected = true;
-        setSelectWidget(m_core, this);
+        CoreInterface::setSelectWidget(m_core, this);
         clicked(mouseX, mouseY);
         m_core->redrawScreen();
     }
@@ -198,7 +198,7 @@ void Widget::releaseEvent(float mouseX, float mouseY)
     if (m_hoverable)
     {
         m_state = WidgetState::HOVER;
-        setHoverWidget(m_core, this);
+        CoreInterface::setHoverWidget(m_core, this);
         m_core->redrawScreen();
     }
     if (m_checkable)
@@ -207,7 +207,7 @@ void Widget::releaseEvent(float mouseX, float mouseY)
         m_state = m_checked ? WidgetState::CHECKED : WidgetState::NORMAL;
     }
     clicked(mouseX, mouseY);
-    setClickWidget(m_core, nullptr);
+    CoreInterface::setClickWidget(m_core, nullptr);
 }
 
 void Widget::unselectEvent()
@@ -222,7 +222,7 @@ void Widget::unselectEvent()
     }
     m_state = WidgetState::NORMAL;
     m_selected = false;
-    setSelectWidget(m_core, nullptr);
+    CoreInterface::setSelectWidget(m_core, nullptr);
     m_core->redrawScreen();
 }
 

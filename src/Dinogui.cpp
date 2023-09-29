@@ -260,14 +260,15 @@ float DPIHandler::adjust(float f, float dir)
 }
 
 Timer::Timer(Core* core, uint32_t timeout, std::function<void()> callback)
-	: timeoutDelay(timeout), callback(callback), m_active(false), m_core(core)
+	: timeoutDelay(timeout), callback(callback), m_active(false), m_core(core), m_windowHandle(nullptr)
 {
-	addTimer(core, this);
+	CoreInterface::addTimer(core, this);
+	m_windowHandle = CoreInterface::getWindowHandle(m_core);
 }
 
 Timer::~Timer()
 {
-	removeTimer(m_core, this);
+	CoreInterface::removeTimer(m_core, this);
 }
 
 void Timer::start()
@@ -276,13 +277,13 @@ void Timer::start()
 	{
 		return;
 	}
-	SetTimer(getWindowHandle(m_core), (uint64_t)this, timeoutDelay, Timer::timerFunction);
+	SetTimer(m_windowHandle, (uint64_t)this, timeoutDelay, Timer::timerFunction);
 	m_active = true;
 }
 
 void Timer::stop()
 {
-	KillTimer(getWindowHandle(m_core), (uint64_t)this);
+	KillTimer(m_windowHandle, (uint64_t)this);
 	m_active = false;
 }
 

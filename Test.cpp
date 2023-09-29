@@ -58,7 +58,6 @@ int main()
 			table->setCell(std::to_string(j), i, j);
 		}
 	}
-	//table->setCell("TEST", 1, 2, 1, 2);
 	table->setColWeight(2, 1.4f);
 	table->setRowWeight(1, 3.24f);
 	table->setRowWeight(2, 0.46f);

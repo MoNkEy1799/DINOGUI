@@ -12,14 +12,12 @@ Container::Container(Core* core)
 	: LayoutObject(LayoutObjectType::CONTAINER), m_margins({{ 6.0f, 6.0f, 6.0f, 6.0f }}),
       m_spacing({{ 6.0f, 6.0f }}), m_objects(), m_rows(0), m_cols(0), m_core(core)
 {
+    CoreInterface::addContainer(m_core, this);
 }
 
 Container::~Container()
 {
-    for (Container* container : m_containers)
-    {
-        delete container;
-    }
+    CoreInterface::removeContainer(m_core, this);
 }
 
 void Container::addWidget(Widget* widget, int row, int col, int rowSpan, int colSpan)
@@ -88,10 +86,54 @@ void Container::updatePositionAndSizes()
 {
     for (int row = 0; row < m_rows; row++)
     {
-        auto comp = [](const GridEntry<LayoutObject*>& e1, const GridEntry<LayoutObject*>& e2)
-        {
-            return true;
-        };
-        auto max = std::max_element(m_objects.begin(), m_objects.end(), comp);
+        auto max = std::max_element(m_objects.begin(), m_objects.end(), compareWidth);
     }
+}
+
+bool Container::compareWidth(const GridEntry<LayoutObject*>& e1, const GridEntry<LayoutObject*>& e2)
+{
+    int width1, width2;
+    LayoutObject* o1 = e1.entry;
+    LayoutObject* o2 = e2.entry;
+    if (e1.entry->layoutType == LayoutObjectType::WIDGET)
+    {
+        width1 = ((Widget*)o1)->getResizeState().minSize.width;
+    }
+    else
+    {
+        width1 = ((Container*)o1)->m_size.width;
+    }
+    if (e2.entry->layoutType == LayoutObjectType::WIDGET)
+    {
+        width2 = ((Widget*)o1)->getResizeState().minSize.width;
+    }
+    else
+    {
+        width2 = ((Container*)o1)->m_size.width;
+    }
+    return width1 < width2;
+}
+
+bool Container::compareHeight(const GridEntry<LayoutObject*>& e1, const GridEntry<LayoutObject*>& e2)
+{
+    int height1, height2;
+    LayoutObject* o1 = e1.entry;
+    LayoutObject* o2 = e2.entry;
+    if (e1.entry->layoutType == LayoutObjectType::WIDGET)
+    {
+        height1 = ((Widget*)o1)->getResizeState().minSize.width;
+    }
+    else
+    {
+        height1 = ((Container*)o1)->m_size.width;
+    }
+    if (e2.entry->layoutType == LayoutObjectType::WIDGET)
+    {
+        height2 = ((Widget*)o1)->getResizeState().minSize.width;
+    }
+    else
+    {
+        height2 = ((Container*)o1)->m_size.width;
+    }
+    return height1 < height2;
 }
