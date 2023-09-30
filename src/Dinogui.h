@@ -50,7 +50,7 @@ public:
 	void setFixedWindowSize(int width, int height);
 	void setMinimumWindowSize(int width, int height);
 	void setMaximumWindowSize(int width, int height);
-	Size<int> getCurrentWindowSize() const;
+	ResizeState<int> resizeState;
 	void redrawScreen() const;
 
 private:
@@ -164,12 +164,12 @@ private:
 	std::vector<GridEntry<LayoutObject*>> m_objects;
 	std::array<float, 4> m_margins;
 	std::array<float, 2> m_spacing;
-	Size<int> m_size;
+	std::vector<float> m_colWidths, m_rowHeights;
+	Size<float> m_size;
 	int m_rows, m_cols;
 
+	void extendVector(Size<float> minSize, int row, int col, int rowSpan, int colSpan);
 	void updatePositionAndSizes();
-	static bool compareHeight(const GridEntry<LayoutObject*>& e1, const GridEntry<LayoutObject*>& e2);
-	static bool compareWidth(const GridEntry<LayoutObject*>& e1, const GridEntry<LayoutObject*>& e2);
 };
 
 class Text : protected CoreInterface
@@ -255,7 +255,7 @@ public:
 	void setFixedSize(int width, int height);
 	void setMinimumSize(int width, int height);
 	void setMaximumSize(int width, int height);
-	ResizeState getResizeState();
+	ResizeState<float> resizeState;
 
 	WidgetType getWidgetType() const;
 	bool contains(float x, float y) const;
@@ -275,7 +275,6 @@ protected:
 	WidgetType m_type;
 	D2D1_POINT_2F m_point;
 	Size<float> m_size, m_minSize, m_maxSize;
-	ResizeState m_resizeState;
 	bool m_drawBackground, m_drawBorder;
 	bool m_hoverable, m_clickable, m_holdable, m_selectable, m_checkable;
 	bool m_checked, m_selected;

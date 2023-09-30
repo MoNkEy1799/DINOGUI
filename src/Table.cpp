@@ -35,7 +35,6 @@ Table::~Table()
 
 void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
 {
-    std::cout << m_rowWeights.size() << m_colWeights.size() << std::endl;
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
     basicDrawBackgroundBorder(rect, renderTarget, brush);
 

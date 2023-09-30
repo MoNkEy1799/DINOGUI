@@ -19,7 +19,8 @@ Core::Core(const std::string& windowName, int width, int height, int x, int y)
     : m_factory(nullptr), m_writeFactory(nullptr), m_imageFactory(nullptr), m_renderTarget(nullptr),
       m_colorBrush(nullptr), m_xPos(x), m_yPos(y), m_mousePosition({ 0.0f, 0.0f }),
       m_windowName(windowName), m_hoverWidget(nullptr), m_clickWidget(nullptr), m_selectWidget(nullptr),
-      m_changeCursor(true), m_minSize({ 0, 0 }), m_size({ width, height }), m_maxSize({ MAX_WIN, MAX_WIN })
+      m_changeCursor(true), m_minSize({ 0, 0 }), m_size({ width, height }), m_maxSize({ MAX_WIN, MAX_WIN }),
+      resizeState(m_size, m_minSize, m_maxSize)
 {
     if (++m_instanceCounter > 1)
     {
@@ -161,8 +162,7 @@ void Core::resizeWindow()
 {
     if (m_renderTarget)
     {
-        Size<int> windowSize = getCurrentWindowSize();
-        m_renderTarget->Resize({ (uint32_t)windowSize.width, (uint32_t)windowSize.height });
+        m_renderTarget->Resize({ (uint32_t)m_size.width, (uint32_t)m_size.height });
         redrawScreen();
     }
 }
@@ -341,13 +341,6 @@ void Core::setMaximumWindowSize(int width, int height)
     m_maxSize = { limitRange(width, m_minSize.width, MAX_WIN), limitRange(height, m_minSize.height, MAX_WIN) };
 }
 
-Size<int> Core::getCurrentWindowSize() const
-{
-    RECT rect;
-    GetClientRect(m_windowHandle, &rect);
-    return { (int)rect.right, (int)rect.bottom };
-}
-
 Widget* Core::getWidgetUnderMouse(float x, float y) const
 {
     if (m_selectWidget && m_selectWidget->getWidgetType() == WidgetType::COMBOBOX)
@@ -373,10 +366,9 @@ HRESULT Core::createGraphicsResource()
 
     if (!m_renderTarget)
     {
-        Size<int> windowSize = getCurrentWindowSize();
         hResult = m_factory->CreateHwndRenderTarget(
             D2D1::RenderTargetProperties(),
-            D2D1::HwndRenderTargetProperties(m_windowHandle, { (uint32_t)windowSize.width, (uint32_t)windowSize.height }),
+            D2D1::HwndRenderTargetProperties(m_windowHandle, { (uint32_t)m_size.width, (uint32_t)m_size.height }),
             &m_renderTarget);
 
         if (SUCCEEDED(hResult))

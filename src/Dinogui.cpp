@@ -12,11 +12,6 @@
 
 using namespace DINOGUI;
 
-ResizeState::ResizeState(const Size<float>& size, const Size<float>& minSize, const Size<float>& maxSize)
-	: size(size), minSize(minSize), maxSize(maxSize)
-{
-}
-
 Text::Text(Core* core, const std::string& text)
 	: m_font(DINOGUI_FONT_DEFAULT), m_color({ 0, 0, 0 }), m_fontFormat(nullptr),
 	  m_core(core), fontFormatChanged(false), m_text(text), m_colorSet(false),

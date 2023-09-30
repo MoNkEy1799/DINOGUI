@@ -57,12 +57,14 @@ struct Rect
 	T left, top, right, bottom;
 };
 
+template<typename T>
 struct ResizeState
 {
-	ResizeState(const Size<float>& size, const Size<float>& minSize, const Size<float>& maxSize);
-	const Size<float>& size;
-	const Size<float>& minSize;
-	const Size<float>& maxSize;
+	ResizeState(const Size<T>& size, const Size<T>& minSize, const Size<T>& maxSize)
+		: size(size), minSize(minSize), maxSize(maxSize) {}
+	const Size<T>& size;
+	const Size<T>& minSize;
+	const Size<T>& maxSize;
 };
 
 struct Color
