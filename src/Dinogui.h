@@ -92,7 +92,7 @@ private:
 	void processOtherKeys(uint32_t key);
 
 	Widget* getWidgetUnderMouse(float x, float y) const;
-
+	Size<int> getCurrentWindowSize() const;
 	HRESULT	createGraphicsResource();
 	void destroyGraphicsResources();
 };
@@ -164,12 +164,13 @@ private:
 	std::vector<GridEntry<LayoutObject*>> m_objects;
 	std::array<float, 4> m_margins;
 	std::array<float, 2> m_spacing;
-	std::vector<float> m_colWidths, m_rowHeights;
+	std::vector<float> m_minWidths, m_curWidths, m_minHeights, m_curHeights;
 	Size<float> m_size;
 	int m_rows, m_cols;
 
-	void extendVector(Size<float> minSize, int row, int col, int rowSpan, int colSpan);
+	void extendVector(Size<float> minSize, Size<float> curSize, int row, int col, int rowSpan, int colSpan);
 	void updatePositionAndSizes();
+	Size<float> getSize(LayoutObject* object);
 };
 
 class Text : protected CoreInterface
@@ -245,28 +246,21 @@ public:
 	virtual void place(int x, int y) = 0;
 	void centerPlace(int x, int y);
 	virtual void clicked(float mouseX, float mouseY) = 0;
+	virtual void resize(int width, int height);
 	
 	void show();
 	void hide();
 	void drawBorder(bool draw = true);
 	void drawBackground(bool draw = true);
 	void setTheme(ColorTheme* theme);
-	virtual void resize(int width, int height);
 	void setFixedSize(int width, int height);
 	void setMinimumSize(int width, int height);
 	void setMaximumSize(int width, int height);
 	ResizeState<float> resizeState;
 
+	void receiveEvent(Event* event);
 	WidgetType getWidgetType() const;
 	bool contains(float x, float y) const;
-
-	void receiveEvent(Event* event);
-	void enterEvent();
-	void leaveEvent();
-	void clickEvent(float mouseX, float mouseY);
-	void holdEvent(float mouseX, float mouseY);
-	void releaseEvent(float mouseX, float mouseY);
-	void unselectEvent();
 	
 protected:
 	Core* m_core;
@@ -282,6 +276,14 @@ protected:
 	D2D1_RECT_F currentRect() const;
 	void basicDrawBackgroundBorder(const D2D1_RECT_F& rect, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
 	void basicPlace(int x, int y);
+
+private:
+	void enterEvent();
+	void leaveEvent();
+	void clickEvent(float mouseX, float mouseY);
+	void holdEvent(float mouseX, float mouseY);
+	void releaseEvent(float mouseX, float mouseY);
+	void unselectEvent();
 };
 
 class Button : public Widget
@@ -427,7 +429,7 @@ private:
 class Canvas : public Widget
 {
 public:
-	Canvas(Core* core, int width = 100, int height = 100, const Color& fillColor = { 255, 255, 255 });
+	Canvas(Core* core, int width, int height, const Color& fillColor = { 255, 255, 255 });
 	~Canvas();
 	Canvas(const Canvas&) = delete;
 	Canvas(Canvas&&) = delete;

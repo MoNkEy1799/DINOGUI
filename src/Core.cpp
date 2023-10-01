@@ -162,7 +162,8 @@ void Core::resizeWindow()
 {
     if (m_renderTarget)
     {
-        m_renderTarget->Resize({ (uint32_t)m_size.width, (uint32_t)m_size.height });
+        Size<int> size = getCurrentWindowSize();
+        m_renderTarget->Resize({ (uint32_t)size.width, (uint32_t)size.height });
         redrawScreen();
     }
 }
@@ -360,15 +361,24 @@ Widget* Core::getWidgetUnderMouse(float x, float y) const
     return nullptr;
 }
 
+Size<int> Core::getCurrentWindowSize() const
+{
+    RECT rect;
+    GetClientRect(m_windowHandle, &rect);
+    return { (int)rect.right, (int)rect.bottom };
+}
+
+
 HRESULT Core::createGraphicsResource()
 {
     HRESULT hResult = S_OK;
 
     if (!m_renderTarget)
     {
+        Size<int> size = getCurrentWindowSize();
         hResult = m_factory->CreateHwndRenderTarget(
             D2D1::RenderTargetProperties(),
-            D2D1::HwndRenderTargetProperties(m_windowHandle, { (uint32_t)m_size.width, (uint32_t)m_size.height }),
+            D2D1::HwndRenderTargetProperties(m_windowHandle, { (uint32_t)size.width, (uint32_t)size.height }),
             &m_renderTarget);
 
         if (SUCCEEDED(hResult))

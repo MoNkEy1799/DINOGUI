@@ -21,7 +21,6 @@ Table::Table(Core* core)
     ColorTheme::createDefault(m_theme, m_type);
     m_drawBackground = true;
     m_drawBorder = true;
-    m_size = { 120.0f, 140.0f };
     m_maxSize = { 1e6f, 1e6f };
 }
 
@@ -94,6 +93,7 @@ void Table::setCell(const std::string& text, int row, int col, int rowSpan, int 
     entry.rowSpan = (rowSpan < 1) ? 1 : rowSpan;
     entry.colSpan = (colSpan < 1) ? 1 : colSpan;
     calculateDimensions();
+    resize(60 * m_cols, 20 * m_rows);
 }
 
 std::vector<Text*> Table::getTextWidgets()

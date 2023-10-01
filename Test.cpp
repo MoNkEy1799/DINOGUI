@@ -47,7 +47,6 @@ int main()
 	canvas->place(180, 100);
 	table->place(60, 500);
 	table->setLineWidth(4.0f);
-	table->resize(400, 200);
 	table->setCell("One", 3, 0, 1, 2);
 	table->setCell("Two", 3, 2, 1, 2);
 	table->setCell("Three", 3, 4, 1, 2);
@@ -58,10 +57,6 @@ int main()
 			table->setCell(std::to_string(j), i, j);
 		}
 	}
-	table->setColWeight(2, 1.4f);
-	table->setRowWeight(1, 3.24f);
-	table->setRowWeight(2, 0.46f);
-	
 	canvas->fill({ 255, 255, 255 });
 	canvas->drawRectangle({-5, -5}, {40, 40}, {0, 255, 0});
 	canvas->drawRectangle({ 21, 21 }, { 60, 60 }, { 255, 0, 0 });

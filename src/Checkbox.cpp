@@ -20,6 +20,7 @@ Checkbox::Checkbox(Core* core, const std::string& text)
     m_hoverable = true;
     m_checkable = true;
     m_size = { 80.0f, 20.0f };
+    m_minSize = { 16.0f, 16.0f };
 }
 
 Checkbox::~Checkbox()

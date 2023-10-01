@@ -16,7 +16,8 @@ Slider::Slider(Core* core, bool vertical)
     m_hoverable = true;
     m_clickable = true;
     m_holdable = true;
-    m_size = { 200.0f, 20.0f };
+    m_size = { 160.0f, 20.0f };
+    m_maxSize = { 1e6f, 1e6f };
     m_ticks = (int)m_size.width;
     if (vertical)
     {

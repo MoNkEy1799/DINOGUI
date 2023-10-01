@@ -18,7 +18,7 @@ Image::Image(Core* core, const std::string& filename)
     ColorTheme::createDefault(m_theme, m_type);
     m_drawBorder = true;
     m_drawBackground = true;
-    m_size = { 200.0f, 200.0f };
+    m_size = { 50.0f, 50.0f };
     m_maxSize = { 1e6f, 1e6f };
     if (!filename.empty())
     {
@@ -70,7 +70,7 @@ void Image::loadImageFromFile(const std::string& filename)
         nullptr, 0.0, WICBitmapPaletteTypeCustom), "Failed to initialize converter");
     throwIfFailed(getImageFactory(m_core)->CreateBitmapFromSource(converter, WICBitmapCacheOnDemand, &m_wicBitmap));
     m_wicBitmap->GetSize(&m_imageWidth, &m_imageHeight);
-    m_size = { (float)m_imageWidth, (float)m_imageHeight };
+    resize(m_imageWidth, m_imageHeight);
 
     safeReleaseInterface(&decoder);
     safeReleaseInterface(&frameDecode);
