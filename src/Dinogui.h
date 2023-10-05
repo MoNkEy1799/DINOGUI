@@ -80,7 +80,7 @@ private:
 	bool m_changeCursor;
 	int DEBUG_DrawCalls = 0;
 
-	int createFactoryAndDPI();
+	int createFactories();
 	void destroyWindow();
 	void resizeWindow();
 	void paintWidgets();
@@ -90,6 +90,7 @@ private:
 	void leftRelease(int posX, int posY, DWORD flags);
 	void processKeys(char key);
 	void processOtherKeys(uint32_t key);
+	Size<int> adjustedWindowSize(int width, int height);
 
 	Widget* getWidgetUnderMouse(float x, float y) const;
 	Size<int> getCurrentWindowSize() const;
@@ -162,6 +163,7 @@ public:
 private:
 	Core* m_core;
 	std::vector<GridEntry<LayoutObject*>> m_objects;
+	std::vector<LayoutObject*> m_sortWidth, m_sortHeight;
 	std::array<float, 4> m_margins;
 	std::array<float, 2> m_spacing;
 	std::vector<float> m_minWidths, m_curWidths, m_minHeights, m_curHeights;
@@ -170,7 +172,10 @@ private:
 
 	void extendVector(Size<float> minSize, Size<float> curSize, int row, int col, int rowSpan, int colSpan);
 	void updatePositionAndSizes();
-	Size<float> getSize(LayoutObject* object);
+	static Size<float> getCurSize(LayoutObject* object);
+	static Size<float> getMinSize(LayoutObject* object);
+	static bool compareWidth(LayoutObject* o1, LayoutObject* o2);
+	static bool compareHeight(LayoutObject* o1, LayoutObject* o2);
 };
 
 class Text : protected CoreInterface

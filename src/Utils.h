@@ -242,7 +242,6 @@ public:
 		windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
 		RegisterClass(&windowClass);
-
 		m_windowHandle = CreateWindowEx(0, L"DINOGUI_CORE_WINDOW", windowName, windowStyle, x, y, width, height, 0, 0, GetModuleHandle(0), this);
 
 		return (m_windowHandle ? true : false);

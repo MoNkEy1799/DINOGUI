@@ -22,7 +22,7 @@ void func(DINOGUI::Widget* wid, std::array<DINOGUI::Point<float>, 3>& points, bo
 
 int main()
 {
-	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 800, 1000);
+	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 800, 800);
 	DINOGUI::Button* button = new DINOGUI::Button(core, "Button");
 	DINOGUI::Button* button2 = new DINOGUI::Button(core, "Button2");
 	DINOGUI::Button* button3 = new DINOGUI::Button(core, "Button3");

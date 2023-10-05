@@ -26,6 +26,8 @@ void Container::addWidget(Widget* widget, int row, int col, int rowSpan, int col
     Size<float> minSize = widget->resizeState.minSize;
     Size<float> curSize = widget->resizeState.size;
     extendVector(minSize, curSize, row, col, rowSpan, colSpan);
+    m_sortWidth.push_back(widget);
+    m_sortHeight.push_back(widget);
     GridEntry<LayoutObject*>& entry = m_objects[(size_t)row * m_cols + col];
     entry.entry = widget;
     entry.rowSpan = std::max(1, rowSpan);
@@ -37,6 +39,8 @@ void Container::addContainer(Container* container, int row, int col, int rowSpan
 {
     Size<float> size = container->m_size;
     extendVector(size, size, row, col, rowSpan, colSpan);
+    m_sortWidth.push_back(container);
+    m_sortHeight.push_back(container);
     GridEntry<LayoutObject*>& entry = m_objects[(size_t)row * m_cols + col];
     entry.entry = container;
     entry.rowSpan = std::max(1, rowSpan);
@@ -91,17 +95,19 @@ void Container::updatePositionAndSizes()
     float sumHeight = std::accumulate(m_curHeights.begin(), m_curHeights.end(), 0.0f);
     float shrinkWidth = (sumWidth + m_margins[0] + m_margins[2] + (m_cols - 1) * m_spacing[0]) - winSize.width;
     float shrinkHeight = (sumWidth + m_margins[1] + m_margins[3] + (m_rows - 1) * m_spacing[1]) - winSize.height;
-    
+    std::sort(m_sortWidth.begin(), m_sortWidth.end(), compareWidth);
+    std::sort(m_sortHeight.begin(), m_sortHeight.end(), compareHeight);
+
     for (int i = 0; i < m_rows; i++)
     {
         for (int j = 0; j < m_cols; j++)
         {
-            Size<float> size = getSize(m_objects[i * m_cols + j].entry);
+            Size<float> size = getCurSize(m_objects[i * m_cols + j].entry);
         }
     }
 }
 
-Size<float> Container::getSize(LayoutObject* object)
+Size<float> Container::getCurSize(LayoutObject* object)
 {
     switch (object->layoutType)
     {
@@ -112,4 +118,27 @@ Size<float> Container::getSize(LayoutObject* object)
         return ((Container*)object)->m_size;
     }
     return { 0.0f, 0.0f };
+}
+
+Size<float> Container::getMinSize(LayoutObject* object)
+{
+    switch (object->layoutType)
+    {
+    case LayoutObjectType::WIDGET:
+        return ((Widget*)object)->resizeState.minSize;
+
+    case LayoutObjectType::CONTAINER:
+        return ((Container*)object)->m_size;
+    }
+    return { 0.0f, 0.0f };
+}
+
+bool Container::compareWidth(LayoutObject* o1, LayoutObject* o2)
+{
+    return getCurSize(o1).width < getCurSize(o2).width;
+}
+
+bool Container::compareHeight(LayoutObject* o1, LayoutObject* o2)
+{
+    return getCurSize(o1).height < getCurSize(o2).height;
 }

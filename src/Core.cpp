@@ -29,7 +29,9 @@ Core::Core(const std::string& windowName, int width, int height, int x, int y)
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     std::wstring temp(m_windowName.begin(), m_windowName.end());
 
-    throwIfFailed(createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, m_size.width, m_size.height, m_xPos, m_yPos), "Failed to create window");
+    Size<int> adjusted = adjustedWindowSize(width, height);
+    throwIfFailed(createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, adjusted.width, adjusted.height,
+        m_xPos, m_yPos), "Failed to create window");
 }
 
 int Core::run()
@@ -51,7 +53,7 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
     switch (messageCode)
     {
     case WM_CREATE:
-        return createFactoryAndDPI();
+        return createFactories();
 
     case WM_DESTROY:
         destroyWindow();
@@ -107,7 +109,7 @@ void Core::redrawScreen() const
     InvalidateRect(m_windowHandle, nullptr, false);
 }
 
-int Core::createFactoryAndDPI()
+int Core::createFactories()
 {
     if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_factory)))
     {
@@ -128,12 +130,8 @@ int Core::createFactoryAndDPI()
     {
         return -1;
     }
-
     DPIHandler::Initialize(m_windowHandle);
-    /*if (!SetWindowPos(m_windowHandle, HWND_TOP, 0, 0, m_width * DPIHandler::getScale(), m_height * DPIHandler::getScale(), SWP_NOMOVE))
-    {
-        return -1;
-    }*/
+
     return 0;
 }
 
@@ -324,6 +322,15 @@ void Core::processOtherKeys(uint32_t key)
     {
         dynamic_cast<Textedit*>(m_selectWidget)->otherKeys(key);
     }
+}
+
+Size<int> Core::adjustedWindowSize(int width, int height)
+{
+    RECT windowRect = { 0, 0, width, height };
+    AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, false);
+    long adjustedWidth = windowRect.right - windowRect.left;
+    long adjustedHeight = windowRect.bottom - windowRect.top;
+    return { windowRect.right - windowRect.left, windowRect.bottom - windowRect.top };
 }
 
 void Core::setFixedWindowSize(int width, int height)
