@@ -52,6 +52,7 @@ public:
 	void setMaximumWindowSize(int width, int height);
 	ResizeState<int> resizeState;
 	void redrawScreen() const;
+	void Debug();
 
 private:
 	friend class TemplateWindow;
