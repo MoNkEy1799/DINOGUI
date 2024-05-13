@@ -22,14 +22,6 @@
 #define DINOCOLOR_GREEN DINOGUI::Color{ 0, 255, 0}
 #define DINOCOLOR_BLUE DINOGUI::Color{ 0, 0, 255 }
 
-
-#define DINOGUI_THEME_DARK \
-{ \
-	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 76, 76, 76 }, DINOGUI::Color{ 25, 25, 25 }, \
-	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 253, 102, 102 }, DINOGUI::Color{ 25, 25, 25 }, \
-	DINOCOLOR_LIGHTGRAY, DINOGUI::Color{ 76, 76, 76 }, DINOGUI::Color{ 25, 25, 25 }, \
-}
-
 #define DINOGUI_FONT_DEFAULT DINOGUI::Font{ 12.0f, "Segoe UI", DINOGUI::FontWeight::NORMAL, DINOGUI::FontStyle::NORMAL }
 
 #define DINOGUI_ALL_MOUSE_BUTTONS MK_LBUTTON + MK_MBUTTON + MK_RBUTTON + MK_XBUTTON1 + MK_XBUTTON2
@@ -179,7 +171,7 @@ struct GridEntry
 	int rowSpan, colSpan;
 };
 
-std::wstring toWideString(const std::string& string);
+std::wstring toWideString(const std::string& string, int begin = 0, int end = -1);
 void throwIfFailed(HRESULT result, const std::string& message = "");
 void throwIfFailed(bool result, const std::string& message = "");
 

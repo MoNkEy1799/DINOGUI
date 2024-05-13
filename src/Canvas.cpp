@@ -32,10 +32,11 @@ Canvas::~Canvas()
     safeReleaseInterface(&m_wicLock);
 }
 
-void Canvas::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Canvas::draw()
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
-    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    basicDrawBackgroundBorder(rect);
+    ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
 
     lockBuffer();
     if (!m_drawingBitmap && m_wicBitmap)

@@ -32,10 +32,11 @@ Image::~Image()
     safeReleaseInterface(&m_wicBitmap);
 }
 
-void Image::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Image::draw()
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
-    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    basicDrawBackgroundBorder(rect);
+    ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
     
     if (!m_drawingBitmap && m_wicBitmap)
     {

@@ -22,12 +22,12 @@ Label::~Label()
     delete m_text;
 }
 
-void Label::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Label::draw()
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
-    basicDrawBackgroundBorder(rect, renderTarget, brush);
-    brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
-    m_text->draw(rect, renderTarget, brush);
+    basicDrawBackgroundBorder(rect);
+    getColorBrush(m_core)->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
+    m_text->draw(rect);
 }
 
 void Label::place(int x, int y)

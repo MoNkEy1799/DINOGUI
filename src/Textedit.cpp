@@ -12,7 +12,7 @@ using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
     : Widget(core), m_drawCursor(false), m_cursorTimer(nullptr), m_trailing(false),
-      m_cursorPosition(0), m_lineHeight(0.0f), m_text(nullptr), m_placeholder(nullptr)
+      m_cursorPosition(0), m_selectionCursor(0), m_lineHeight(0.0f), m_text(nullptr), m_placeholder(nullptr)
 {
     m_text = new Text(core, "");
     m_text->setAlignment(Alignment::LEFT);
@@ -24,6 +24,7 @@ Textedit::Textedit(Core* core)
     m_drawBorder = true;
     m_hoverable = true;
     m_selectable = true;
+    m_holdable = true;
     m_size = { 100.0f, 20.0f };
     m_cursorTimer = new Timer(m_core, 500, [this] { switchCursor(); });
 }
@@ -34,19 +35,35 @@ Textedit::~Textedit()
     delete m_cursorTimer;
 }
 
-void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Textedit::draw()
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
-    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    basicDrawBackgroundBorder(rect);
+    ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
+    ID2D1SolidColorBrush* brush = getColorBrush(m_core);
+
+    std::pair<uint32_t, uint32_t> cursor = cursorOrder();
+    if (cursor.first != cursor.second)
+    {
+        D2D1_RECT_F select = DPIHandler::adjusted(selectionRect());
+        brush->SetColor(Color::d2d1(m_theme->background2[(int)m_state]));
+        renderTarget->FillRectangle(select, brush);
+    }
     brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
-    m_text->draw(rect, renderTarget, brush);
+    m_text->draw(rect);
+    if (cursor.first != cursor.second)
+    {
+        brush->SetColor(Color::d2d1(m_theme->text2[(int)m_state]));
+        rect.left += addCharWidths(0, cursor.first);
+        m_text->draw(rect, cursor.first, cursor.second);
+    }
 
     if (m_text->fontFormatChanged)
     {
         m_text->fontFormatChanged = false;
         calculateCharDimension('A');
         std::string& text = m_text->getText();
-        if (text.empty())
+        if (!text.empty())
         {
             m_charWidths.clear();
             for (char c : text)
@@ -59,7 +76,7 @@ void Textedit::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     if (m_placeholder && !m_selected && m_charWidths.empty())
     {
         brush->SetColor(Color::d2d1(m_theme->addColor[(int)m_state]));
-        m_placeholder->draw(rect, renderTarget, brush);
+        m_placeholder->draw(rect);
     }
     if (m_drawCursor)
     {
@@ -75,7 +92,7 @@ void Textedit::place(int x, int y)
     basicPlace(x, y);
 }
 
-void Textedit::clicked(float mouseX, float mouseY)
+void Textedit::clicked(float mouseX, float mouseY, bool hold)
 {
     if (!m_cursorTimer->isActive())
     {
@@ -87,6 +104,12 @@ void Textedit::clicked(float mouseX, float mouseY)
     {
         restartCursorTimer();
     }
+    if (hold)
+    {
+        m_cursorPosition = newCursorPos;
+        return;
+    }
+    m_selectionCursor = newCursorPos;
     m_cursorPosition = newCursorPos;
 }
 
@@ -129,49 +152,90 @@ void Textedit::keyInput(char key)
     std::string& text = m_text->getText();
     if (key == VK_BACK)
     {
-        if (text.empty() || m_cursorPosition == 0)
+        if (text.empty())
         {
             return;
         }
-        text.erase(m_cursorPosition - 1, 1);
-        m_charWidths.erase(m_charWidths.begin() + m_cursorPosition - 1);
-        updateCursorPosition(false);
+        if ((m_cursorPosition == m_selectionCursor) && m_cursorPosition != 0)
+        {
+            text.erase(m_cursorPosition - 1, 1);
+            m_charWidths.erase(m_charWidths.begin() + m_cursorPosition - 1);
+            updateCursorPosition(false);
+            return;
+        }
+        std::pair<uint32_t, uint32_t> cursor = cursorOrder();
+        text.erase(cursor.first, cursor.second - cursor.first);
+        m_cursorPosition = cursor.first;
+        m_selectionCursor = cursor.first;
     }
     else
     {
+        std::pair<uint32_t, uint32_t> cursor = cursorOrder();
+        if (cursor.first != cursor.second)
+        {
+            text.erase(cursor.first, cursor.second - cursor.first);
+            m_cursorPosition = cursor.first;
+            m_selectionCursor = cursor.first;
+        }
         text.insert(m_cursorPosition, 1, key);
         m_charWidths.insert(m_charWidths.begin() + m_cursorPosition, calculateCharDimension(key));
         updateCursorPosition(true);
     }
 
     D2D1_RECT_F rect = currentRect();
-    if (std::accumulate(m_charWidths.begin(), m_charWidths.begin(), 0.0) > rect.right - rect.left - 2.0f)
+    if (addCharWidths(0, m_cursorPosition) > (rect.right - rect.left - 2.0f))
     {
-
+        m_trailing = true;
     }
     m_core->redrawScreen();
 }
 
-void Textedit::otherKeys(uint32_t key)
+void Textedit::otherKeys(uint32_t key, const std::vector<uint32_t>& pressed)
 {
     std::string& text = m_text->getText();
     if (key == VK_LEFT)
     {
-        updateCursorPosition(false);
+        if (m_cursorPosition != m_selectionCursor)
+        {
+            std::pair<uint32_t, uint32_t> cursor = cursorOrder();
+            m_cursorPosition = cursor.first;
+            m_selectionCursor = cursor.first;
+        }
+        else
+        {
+            updateCursorPosition(false);
+        }
     }
     else if (key == VK_RIGHT)
     {
-        updateCursorPosition(true);
+        if (m_cursorPosition != m_selectionCursor)
+        {
+            std::pair<uint32_t, uint32_t> cursor = cursorOrder();
+            m_cursorPosition = cursor.second;
+            m_selectionCursor = cursor.second;
+        }
+        else
+        {
+            updateCursorPosition(true);
+        }
     }
     else if (key == VK_DELETE)
     {
-        if (text.empty() || m_cursorPosition == (uint32_t)text.size())
+        if (text.empty())
         {
             return;
         }
-        text.erase(m_cursorPosition, 1);
-        m_charWidths.erase(m_charWidths.begin() + m_cursorPosition);
-        restartCursorTimer();
+        if ((m_cursorPosition == m_selectionCursor) && m_cursorPosition != (uint32_t)text.length())
+        {
+            text.erase(m_cursorPosition, 1);
+            m_charWidths.erase(m_charWidths.begin() + m_cursorPosition);
+            restartCursorTimer();
+            return;
+        }
+        std::pair<uint32_t, uint32_t> cursor = cursorOrder();
+        text.erase(cursor.first, cursor.second - cursor.first);
+        m_cursorPosition = cursor.first;
+        m_selectionCursor = cursor.first;
     }
 }
 
@@ -183,11 +247,7 @@ float Textedit::calculateCharDimension(char character)
     DWRITE_TEXT_METRICS metrics;
     layout->GetMetrics(&metrics);
     safeReleaseInterface(&layout);
-
-    if (m_lineHeight < metrics.height)
-    {
-        m_lineHeight = metrics.height;
-    }
+    m_lineHeight = metrics.height;
     return metrics.widthIncludingTrailingWhitespace;
 }
 
@@ -201,7 +261,7 @@ uint32_t Textedit::getCursorPosition(float x) const
 
     float width = currentRect().left + 2.0f;
     size_t pos = 0;
-    while (pos < text.size())
+    while (pos < text.length())
     {
         if (x <= width + m_charWidths[pos] / 2)
         {
@@ -211,33 +271,63 @@ uint32_t Textedit::getCursorPosition(float x) const
         pos++;
     }
 
-    return (uint32_t)text.size();
+    return (uint32_t)text.length();
+}
+
+float Textedit::addCharWidths(uint32_t start, uint32_t end) const
+{
+    return std::accumulate(m_charWidths.begin() + start, m_charWidths.begin() + end, 0.0f);
 }
 
 void Textedit::updateCursorPosition(bool increase)
 {
-    std::string& text = m_text->getText();
-    if (increase && m_cursorPosition < (uint32_t)text.size())
+    if (increase && m_cursorPosition < (uint32_t)m_text->getText().length())
     {
         m_cursorPosition++;
+        m_selectionCursor++;
         restartCursorTimer();
     }
     else if (!increase && m_cursorPosition > 0)
     {
         m_cursorPosition--;
+        m_selectionCursor--;
         restartCursorTimer();
     }
+}
+
+std::pair<uint32_t, uint32_t> Textedit::cursorOrder() const
+{
+    uint32_t first = m_cursorPosition;
+    uint32_t second = m_selectionCursor;
+    if (m_selectionCursor < m_cursorPosition)
+    {
+        first = m_selectionCursor;
+        second = m_cursorPosition;
+    }
+    return { first, second };
 }
 
 D2D1_RECT_F Textedit::currentCursorLine() const
 {
     D2D1_RECT_F rect = currentRect();
     float yGap = (rect.bottom - rect.top - m_lineHeight) / 2.0f;
-    float xGap = std::accumulate(m_charWidths.begin(), m_charWidths.begin() + m_cursorPosition, 0.0f);
+    float xGap = addCharWidths(0, m_cursorPosition);
     yGap = limitRange(yGap, 0.0f, 1e6f);
     xGap = limitRange(xGap, 0.0f, rect.right - rect.left - 4.0f);
     return { rect.left + xGap + 2.0f, rect.top + yGap,
-             rect.left + xGap + 2.0f, rect.top + yGap + m_lineHeight };
+             rect.left + xGap + 2.0f, rect.bottom - yGap };
+}
+
+D2D1_RECT_F Textedit::selectionRect() const
+{
+    std::pair<uint32_t, uint32_t> cursor = cursorOrder();
+    D2D1_RECT_F rect = currentRect();
+    float yGap = (rect.bottom - rect.top - m_lineHeight) / 2.0f;
+    float xGap = addCharWidths(0, cursor.first);
+    float width = addCharWidths(cursor.first, cursor.second);
+    yGap = limitRange(yGap, 0.0f, 1e6f);
+    xGap = limitRange(xGap, 0.0f, rect.right - rect.left - 4.0f);
+    return { rect.left + xGap + 2.0f, rect.top + yGap, rect.left + xGap + width + 3.0f, rect.bottom - yGap + 1.0f };
 }
 
 void Textedit::switchCursor()

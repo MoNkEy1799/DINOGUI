@@ -22,27 +22,27 @@ void func(DINOGUI::Widget* wid, std::array<DINOGUI::Point<float>, 3>& points, bo
 
 int main()
 {
-	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 0, 0);
-	DINOGUI::Button* button = new DINOGUI::Button(core, "Button", [] { std::cout << "nice" << std::endl; });
+	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 400, 200);
+	//DINOGUI::Button* button = new DINOGUI::Button(core, "Button", [] { std::cout << "nice" << std::endl; });
 	/*DINOGUI::Button* button2 = new DINOGUI::Button(core, "Button2");
 	DINOGUI::Button* button3 = new DINOGUI::Button(core, "Button3");
 	DINOGUI::Label* label = new DINOGUI::Label(core, "Label");
-	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(core, "Checkbox");
+	DINOGUI::Checkbox* checkbox = new DINOGUI::Checkbox(core, "Checkbox");*/
 	DINOGUI::Textedit* textedit = new DINOGUI::Textedit(core);
-	DINOGUI::Image* image = new DINOGUI::Image(core, "Dino.png");
+	/*DINOGUI::Image* image = new DINOGUI::Image(core, "Dino.png");
 	DINOGUI::Canvas* canvas = new DINOGUI::Canvas(core, 300, 300);
 	DINOGUI::Table* table = new DINOGUI::Table(core);
 	DINOGUI::Combobox* combo = new DINOGUI::Combobox(core, "Combo");
 	DINOGUI::Slider* slider = new DINOGUI::Slider(core);
 	DINOGUI::Slider* slider2 = new DINOGUI::Slider(core, true);*/
 
-	button->place(100, 0);
+	//button->place(100, 0);
 	/*button2->place(110, 70);
 	button3->place(50, 70);
 	label->place(120, 50);
-	checkbox->place(190, 50);
-	textedit->place(300, 50);
-	textedit->setPlaceholderText("Edit now");
+	checkbox->place(190, 50);*/
+	textedit->place(30, 30);
+	/*textedit->setPlaceholderText("Edit now");
 	image->place(50, 100);
 	canvas->place(180, 100);
 	table->place(60, 500);

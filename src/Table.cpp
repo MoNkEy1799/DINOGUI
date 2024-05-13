@@ -32,10 +32,12 @@ Table::~Table()
     }
 }
 
-void Table::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Table::draw()
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
-    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    basicDrawBackgroundBorder(rect);
+    ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
+    ID2D1SolidColorBrush* brush = getColorBrush(m_core);
 
     if (m_prevBorderWidth != m_theme->width)
     {
@@ -159,7 +161,7 @@ void Table::drawTextInCell(int row, int col, ID2D1HwndRenderTarget* renderTarget
     if (entry.entry)
     {
         brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
-        entry.entry->draw(cell, renderTarget, brush);
+        entry.entry->draw(cell);
     }
 }
 

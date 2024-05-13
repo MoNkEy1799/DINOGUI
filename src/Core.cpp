@@ -32,10 +32,9 @@ Core::Core(const std::string& windowName, int width, int height, int x, int y)
         throwIfFailed(true, "Cannot create more than one instance of DINOGUI::Core");
     }
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-    std::wstring temp(m_windowName.begin(), m_windowName.end());
 
     Size<int> adjusted = adjustedWindowSize(width, height);
-    throwIfFailed(createWindow(temp.c_str(), WS_OVERLAPPEDWINDOW, adjusted.width, adjusted.height,
+    throwIfFailed(createWindow(toWideString(windowName).c_str(), WS_OVERLAPPEDWINDOW, adjusted.width, adjusted.height,
         m_xPos, m_yPos), "Failed to create window");
 }
 
@@ -174,7 +173,7 @@ void Core::resizeWindow()
 void Core::paintWidgets()
 {
     DEBUG_DrawCalls += 1;
-    std::cout << "total draw calls: " << DEBUG_DrawCalls << std::endl;
+    //std::cout << "total draw calls: " << DEBUG_DrawCalls << std::endl;
     throwIfFailed(createGraphicsResource(), "Failed to create graphics resources");
     
     PAINTSTRUCT painStruct;
@@ -185,11 +184,11 @@ void Core::paintWidgets()
 
     for (Widget* widget : m_displayWidgets)
     {
-        widget->draw(m_renderTarget, m_colorBrush);
+        widget->draw();
     }
     if (m_selectWidget && m_selectWidget->getWidgetType() == WidgetType::COMBOBOX)
     {
-        dynamic_cast<Combobox*>(m_selectWidget)->draw(m_renderTarget, m_colorBrush);
+        dynamic_cast<Combobox*>(m_selectWidget)->draw();
     }
 
     HRESULT hResult = m_renderTarget->EndDraw();
@@ -231,6 +230,10 @@ void Core::mouseMove(int posX, int posY, DWORD flags)
         if (m_clickWidget)
         {
             m_clickWidget->receiveEvent(new Event(EventType::HOLD_EVENT, x, y));
+        }
+        if (m_selectWidget)
+        {
+            m_selectWidget->receiveEvent(new Event(EventType::HOLD_EVENT, x, y));
         }
         return;
     }
@@ -325,7 +328,7 @@ void Core::processOtherKeys(uint32_t key)
 {
     if (m_selectWidget && m_selectWidget->getWidgetType() == WidgetType::TEXTEDIT)
     {
-        dynamic_cast<Textedit*>(m_selectWidget)->otherKeys(key);
+        dynamic_cast<Textedit*>(m_selectWidget)->otherKeys(key, m_pressedKeys);
     }
 }
 
@@ -412,11 +415,6 @@ HWND CoreInterface::getWindowHandle(Core* core)
     return core->m_windowHandle;
 }
 
-ID2D1Factory* CoreInterface::getFactory(Core* core)
-{
-    return core->m_factory;
-}
-
 IDWriteFactory* CoreInterface::getWriteFactory(Core* core)
 {
     return core->m_writeFactory;
@@ -425,6 +423,16 @@ IDWriteFactory* CoreInterface::getWriteFactory(Core* core)
 IWICImagingFactory* CoreInterface::getImageFactory(Core* core)
 { 
     return core->m_imageFactory;
+}
+
+ID2D1HwndRenderTarget* CoreInterface::getRenderTarget(Core* core)
+{
+    return core->m_renderTarget;
+}
+
+ID2D1SolidColorBrush* CoreInterface::getColorBrush(Core* core)
+{
+    return core->m_colorBrush;
 }
 
 void CoreInterface::addWidget(Core* core, Widget* widget)

@@ -24,8 +24,10 @@ Text::~Text()
 	safeReleaseInterface(&m_fontFormat);
 }
 
-void Text::draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Text::draw(D2D1_RECT_F rectangle, int start, int end)
 {
+	ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
+	ID2D1SolidColorBrush* brush = getColorBrush(m_core);
 	if (!m_fontFormat)
 	{
 		throwIfFailed(createFontFormat(), "Failed to create text format");
@@ -39,7 +41,9 @@ void Text::draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D
 	{
 		brush->SetColor(Color::d2d1(m_color));
 	}
-	renderTarget->DrawText(toWideString(m_text).c_str(), (uint32_t)m_text.size(), m_fontFormat, rectangle, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+	std::wstring temp = toWideString(m_text, start, end);
+	renderTarget->DrawText(temp.c_str(), temp.length(), m_fontFormat,
+		rectangle, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }
 
 void Text::setText(const std::string& text)
@@ -332,9 +336,13 @@ bool Random::randBool()
 	return (randFloat() <= 0.5) ? true : false;
 }
 
-std::wstring DINOGUI::toWideString(const std::string& string)
+std::wstring DINOGUI::toWideString(const std::string& string, int begin, int end)
 {
-	return std::wstring(string.begin(), string.end());
+	if (end == -1)
+	{
+		return std::wstring(string.begin(), string.end());
+	}
+	return std::wstring(string.begin() + begin, string.begin() + end);
 }
 
 void DINOGUI::throwIfFailed(HRESULT result, const std::string& message)

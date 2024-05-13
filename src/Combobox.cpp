@@ -30,10 +30,13 @@ Combobox::~Combobox()
     }
 }
 
-void Combobox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Combobox::draw()
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
-    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    basicDrawBackgroundBorder(rect);
+    ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
+    ID2D1SolidColorBrush* brush = getColorBrush(m_core);
+
     D2D1_RECT_F textRect = currentRect();
     textRect = { textRect.left, textRect.top, textRect.right - 16.0f, textRect.bottom };
     std::array<D2D1_POINT_2F, 3> points = getArrowPoints();
@@ -41,7 +44,7 @@ void Combobox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* b
     renderTarget->DrawLine(DPIHandler::adjusted(points[0]), DPIHandler::adjusted(points[1]), brush, m_theme->width2);
     renderTarget->DrawLine(DPIHandler::adjusted(points[1]), DPIHandler::adjusted(points[2]), brush, m_theme->width2);
     brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
-    m_boxText[m_currentIndex]->draw(textRect, renderTarget, brush);
+    m_boxText[m_currentIndex]->draw(textRect);
 
     if (m_selected)
     {
@@ -54,7 +57,7 @@ void Combobox::place(int x, int y)
     basicPlace(x, y);
 }
 
-void Combobox::clicked(float mouseX, float mouseY)
+void Combobox::clicked(float mouseX, float mouseY, bool hold)
 {
     if (m_dropdown)
     {
@@ -191,6 +194,6 @@ void Combobox::drawDropdown(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColor
             renderTarget->FillRectangle(DPIHandler::adjusted(boxRect), brush);
             brush->SetColor(Color::d2d1(m_theme->text2[(int)m_state]));
         }
-        m_boxText[i]->draw(DPIHandler::adjusted(boxRect), renderTarget, brush);
+        m_boxText[i]->draw(DPIHandler::adjusted(boxRect));
     }
 }

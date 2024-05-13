@@ -25,9 +25,11 @@ Slider::Slider(Core* core, bool vertical)
     }
 }
 
-void Slider::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Slider::draw()
 {
     D2D1_RECT_F rect = currentRect();
+    ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
+    ID2D1SolidColorBrush* brush = getColorBrush(m_core);
     if (m_vertical)
     {
         rect.left += 8.0f;
@@ -66,7 +68,7 @@ void Slider::place(int x, int y)
     basicPlace(x, y);
 }
 
-void Slider::clicked(float mouseX, float mouseY)
+void Slider::clicked(float mouseX, float mouseY, bool hold)
 {
     float pos = m_vertical ? mouseY - m_point.y : mouseX - m_point.x;
     float param = m_vertical ? m_size.height : m_size.width;

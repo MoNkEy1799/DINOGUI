@@ -182,7 +182,7 @@ void Widget::holdEvent(float mouseX, float mouseY)
 {
     if (m_holdable)
     {
-        clicked(mouseX, mouseY);
+        clicked(mouseX, mouseY, true);
         m_core->redrawScreen();
     }
 }
@@ -226,8 +226,10 @@ D2D1_RECT_F Widget::currentRect() const
     return { m_point.x, m_point.y, m_point.x + m_size.width, m_point.y + m_size.height };
 }
 
-void Widget::basicDrawBackgroundBorder(const D2D1_RECT_F& rect, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Widget::basicDrawBackgroundBorder(const D2D1_RECT_F& rect)
 {
+    ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
+    ID2D1SolidColorBrush* brush = getColorBrush(m_core);
     if (m_drawBackground)
     {
         brush->SetColor(Color::d2d1(m_theme->background[(int)m_state]));

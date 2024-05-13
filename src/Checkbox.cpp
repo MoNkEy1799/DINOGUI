@@ -34,18 +34,20 @@ void Checkbox::resize(int width, int height)
     calculateBoxAndTextLayout();
 }
 
-void Checkbox::draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush)
+void Checkbox::draw()
 {
     D2D1_RECT_F rect = DPIHandler::adjusted(currentRect());
     D2D1_RECT_F textRect = DPIHandler::adjusted(currentTextRect());
     D2D1_RECT_F boxRect = DPIHandler::adjusted(currentBoxRect());
-    basicDrawBackgroundBorder(rect, renderTarget, brush);
+    basicDrawBackgroundBorder(rect);
+    ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
+    ID2D1SolidColorBrush* brush = getColorBrush(m_core);
     brush->SetColor(Color::d2d1(m_theme->background2[(int)m_state]));
     renderTarget->FillRectangle(boxRect, brush);
     brush->SetColor(Color::d2d1(m_theme->border2[(int)m_state]));
     renderTarget->DrawRectangle(boxRect, brush, m_theme->width2);
     brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
-    m_text->draw(textRect, renderTarget, brush);
+    m_text->draw(textRect);
 
     if (m_checked)
     {

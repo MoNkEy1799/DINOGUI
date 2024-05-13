@@ -72,6 +72,7 @@ private:
 	std::vector<Widget*> m_displayWidgets;
 	std::vector<Container*> m_containers;
 	std::vector<Timer*> m_timers;
+	std::vector<uint32_t> m_pressedKeys;
 	Widget* m_hoverWidget;
 	Widget* m_clickWidget;
 	Widget* m_selectWidget;
@@ -105,9 +106,10 @@ protected:
 	CoreInterface() {}
 
 	static HWND getWindowHandle(Core* core);
-	static ID2D1Factory* getFactory(Core* core);
 	static IDWriteFactory* getWriteFactory(Core* core);
 	static IWICImagingFactory* getImageFactory(Core* core);
+	static ID2D1HwndRenderTarget* getRenderTarget(Core* core);
+	static ID2D1SolidColorBrush* getColorBrush(Core* core);
 
 	template<typename T>
 	static void addToVector(std::vector<T>& vec, T object)
@@ -185,7 +187,7 @@ public:
 	Text(Core* core, const std::string& text);
 	~Text();
 
-	void draw(D2D1_RECT_F rectangle, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+	void draw(D2D1_RECT_F rectangle, int start = 0, int end = -1);
 	void setText(const std::string& text);
 	void setFont(const Font& font);
 	void setColor(const Color& color);
@@ -248,10 +250,10 @@ public:
 	Widget& operator=(const Widget&) = delete;
 	Widget& operator=(Widget&&) = delete;
 
-	virtual void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) = 0;
+	virtual void draw() = 0;
 	virtual void place(int x, int y) = 0;
 	void centerPlace(int x, int y);
-	virtual void clicked(float mouseX, float mouseY) = 0;
+	virtual void clicked(float mouseX, float mouseY, bool hold = false) = 0;
 	virtual void resize(int width, int height);
 	
 	void show();
@@ -280,7 +282,7 @@ protected:
 	bool m_checked, m_selected;
 
 	D2D1_RECT_F currentRect() const;
-	void basicDrawBackgroundBorder(const D2D1_RECT_F& rect, ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush);
+	void basicDrawBackgroundBorder(const D2D1_RECT_F& rect);
 	void basicPlace(int x, int y);
 
 private:
@@ -302,9 +304,9 @@ public:
 	Button& operator=(const Button&) = delete;
 	Button& operator=(Button&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void draw() override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override;
+	void clicked(float mouseX, float mouseY, bool hold = false) override;
 
 	void connect(std::function<void()> function);
 	Text* getTextWidget();
@@ -326,9 +328,9 @@ public:
 	Label& operator=(const Label&) = delete;
 	Label& operator=(Label&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void draw() override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override {};
+	void clicked(float mouseX, float mouseY, bool hold = false) override {};
 
 	Text* getTextWidget();
 	void setText(const std::string& text);
@@ -348,9 +350,9 @@ public:
 	Checkbox& operator=(Checkbox&&) = delete;
 
 	void resize(int width, int height) override;
-	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void draw() override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override {};
+	void clicked(float mouseX, float mouseY, bool hold = false) override {};
 
 	Text* getTextWidget();
 	bool isChecked() const;
@@ -376,9 +378,9 @@ public:
 	Textedit& operator=(const Textedit&) = delete;
 	Textedit& operator=(Textedit&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void draw() override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override;
+	void clicked(float mouseX, float mouseY, bool hold = false) override;
 	void stopCursorTimer();
 
 	std::string getText() const;
@@ -386,7 +388,7 @@ public:
 	void setPlaceholderText(const std::string& text);
 
 	void keyInput(char key);
-	void otherKeys(uint32_t key);
+	void otherKeys(uint32_t key, const std::vector<uint32_t>& pressed);
 
 private:
 	Text* m_text;
@@ -396,13 +398,16 @@ private:
 	float m_lineHeight;
 	Timer* m_cursorTimer;
 	bool m_drawCursor, m_trailing;
-	uint32_t m_cursorPosition;
+	uint32_t m_cursorPosition, m_selectionCursor;
 
 	float calculateCharDimension(char character);
 	uint32_t getCursorPosition(float x) const;
+	float addCharWidths(uint32_t start, uint32_t stop) const;
 	void updateCursorPosition(bool increase);
+	std::pair<uint32_t, uint32_t> cursorOrder() const;
 
 	D2D1_RECT_F currentCursorLine() const;
+	D2D1_RECT_F selectionRect() const;
 
 	void switchCursor();
 	void restartCursorTimer();
@@ -418,9 +423,9 @@ public:
 	Image& operator=(const Image&) = delete;
 	Image& operator=(Image&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void draw() override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override {};
+	void clicked(float mouseX, float mouseY, bool hold = false) override {};
 
 	void loadImageFromFile(const std::string& filename);
 
@@ -442,9 +447,9 @@ public:
 	Canvas& operator=(const Canvas&) = delete;
 	Canvas& operator=(Canvas&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void draw() override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override {};
+	void clicked(float mouseX, float mouseY, bool hold = false) override {};
 
 	void antialias(bool b, float thickness = 2.0f);
 	void fill(const Color& color);
@@ -499,9 +504,9 @@ public:
 	Table& operator=(const Table&) = delete;
 	Table& operator=(Table&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void draw() override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override {};
+	void clicked(float mouseX, float mouseY, bool hold = false) override {};
 
 	void setCell(const std::string& text, int row, int col, int rowSpan = 1, int colSpan = 1);
 	std::vector<Text*> getTextWidgets();
@@ -532,9 +537,9 @@ public:
 	Combobox& operator=(const Combobox&) = delete;
 	Combobox& operator=(Combobox&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void draw() override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override;
+	void clicked(float mouseX, float mouseY, bool hold = false) override;
 	bool dropdownContains(float x, float y) const;
 	void setHoverIndex(float x, float y);
 	void setDropdown(bool drop = true);
@@ -568,9 +573,9 @@ public:
 	Slider& operator=(const Slider&) = delete;
 	Slider& operator=(Slider&&) = delete;
 
-	void draw(ID2D1HwndRenderTarget* renderTarget, ID2D1SolidColorBrush* brush) override;
+	void draw() override;
 	void place(int x, int y) override;
-	void clicked(float mouseX, float mouseY) override;
+	void clicked(float mouseX, float mouseY, bool hold = false) override;
 
 	void setVertical(bool vertical = true);
 	void setMaxTicks(int ticks);
