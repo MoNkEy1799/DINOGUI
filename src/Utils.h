@@ -29,8 +29,6 @@
 namespace DINOGUI
 {
 
-class Core;
-
 template<typename T>
 struct Point
 {

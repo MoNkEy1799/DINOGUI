@@ -24,7 +24,7 @@ Text::~Text()
 	safeReleaseInterface(&m_fontFormat);
 }
 
-void Text::draw(D2D1_RECT_F rectangle, int start, int end)
+void Text::draw(D2D1_RECT_F rectangle, int start, int end, float rightOff)
 {
 	ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
 	ID2D1SolidColorBrush* brush = getColorBrush(m_core);
@@ -35,7 +35,7 @@ void Text::draw(D2D1_RECT_F rectangle, int start, int end)
 	}
 	rectangle.left += 2.0f;
 	rectangle.top += 2.0f;
-	rectangle.right -= 2.0f;
+	rectangle.right -= 2.0f + rightOff;
 	rectangle.bottom -= 2.0f;
 	if (m_colorSet)
 	{

@@ -6,6 +6,9 @@
 #include <d2d1.h>
 #include <dwrite.h>
 #include <dwmapi.h>
+
+#include <gdiplus.h>
+
 #include <string>
 #include <limits>
 
@@ -36,6 +39,7 @@ Core::Core(const std::string& windowName, int width, int height, int x, int y)
     Size<int> adjusted = adjustedWindowSize(width, height);
     throwIfFailed(createWindow(toWideString(windowName).c_str(), WS_OVERLAPPEDWINDOW, adjusted.width, adjusted.height,
         m_xPos, m_yPos), "Failed to create window");
+    setIcon("Dino.png");
 }
 
 int Core::run()
@@ -58,6 +62,11 @@ LRESULT Core::HandleMessage(UINT messageCode, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         return createFactories();
+
+    case WM_SHOWWINDOW:
+        SendMessage(m_windowHandle, WM_SETICON, ICON_SMALL, (LPARAM)m_iconSmall);
+        SendMessage(m_windowHandle, WM_SETICON, ICON_BIG, (LPARAM)m_iconBig);
+        return DefWindowProc(m_windowHandle, messageCode, wParam, lParam);
 
     case WM_DESTROY:
         destroyWindow();
@@ -135,7 +144,7 @@ int Core::createFactories()
         return -1;
     }
     DPIHandler::Initialize(m_windowHandle);
-
+    
     return 0;
 }
 
@@ -357,21 +366,22 @@ void Core::setMaximumWindowSize(int width, int height)
     m_maxSize = { limitRange(width, m_minSize.width, MAX_WIN), limitRange(height, m_minSize.height, MAX_WIN) };
 }
 
-void Core::setIcon(const std::string& iconFile)
+void Core::setIcon(const std::string& iconFile, const std::string& which)
 {
-    HANDLE icon = LoadImage(GetModuleHandle(0), toWideString(iconFile).c_str(), IMAGE_BITMAP, 0, 0, 0);
-    DWORD errorMessageID = ::GetLastError();
+    Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+    uint64_t gdiplusToken;
+    Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
 
-    LPSTR messageBuffer = nullptr;
-
-    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-    std::string message(messageBuffer, size);
-
-    LocalFree(messageBuffer);
-    std::cout << message << std::endl;
-    SendMessage(m_windowHandle, WM_SETICON, ICON_SMALL, (LPARAM)icon);
-    SendMessage(m_windowHandle, WM_SETICON, ICON_BIG, (LPARAM)icon);
+    if (which == "small" || which == "both")
+    {
+        Gdiplus::Bitmap(toWideString(iconFile).c_str()).GetHICON(&m_iconSmall);
+    }
+    if (which == "big" || which == "both")
+    {
+        Gdiplus::Bitmap(toWideString(iconFile).c_str()).GetHICON(&m_iconBig);
+    }
+    
+    Gdiplus::GdiplusShutdown(gdiplusToken);
 }
 
 Widget* Core::getWidgetUnderMouse(float x, float y) const

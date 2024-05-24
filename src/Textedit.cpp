@@ -16,8 +16,6 @@ Textedit::Textedit(Core* core)
 {
     m_text = new Text(core, "");
     m_text->setAlignment(Alignment::LEFT);
-    m_cutoffText = new Text(core, "");
-    m_cutoffText->setAlignment(Alignment::LEFT);
     m_type = WidgetType::TEXTEDIT;
     ColorTheme::createDefault(m_theme, m_type);
     m_drawBackground = true;
@@ -33,7 +31,6 @@ Textedit::~Textedit()
 {
     delete m_text;
     delete m_placeholder;
-    delete m_cutoffText;
     delete m_cursorTimer;
 }
 
@@ -43,7 +40,8 @@ void Textedit::draw()
     basicDrawBackgroundBorder(rect);
     ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
     ID2D1SolidColorBrush* brush = getColorBrush(m_core);
-    if (m_trailing)
+    std::pair<uint32_t, uint32_t> cursor = cursorOrder();
+    if (addCharWidths(0, cursor.first) > rect.right - rect.left - 5.0f)
     {
         m_text->setAlignment(Alignment::RIGHT);
     }
@@ -52,7 +50,6 @@ void Textedit::draw()
         m_text->setAlignment(Alignment::LEFT);
     }
 
-    std::pair<uint32_t, uint32_t> cursor = cursorOrder();
     if (cursor.first != cursor.second)
     {
         D2D1_RECT_F select = DPIHandler::adjusted(selectionRect());
@@ -60,12 +57,12 @@ void Textedit::draw()
         renderTarget->FillRectangle(select, brush);
     }
     brush->SetColor(Color::d2d1(m_theme->text[(int)m_state]));
-    m_text->draw(rect);
+    m_text->draw(rect, 0, -1, 1.0f);
     if (cursor.first != cursor.second)
     {
         brush->SetColor(Color::d2d1(m_theme->text2[(int)m_state]));
         rect.left += addCharWidths(0, cursor.first);
-        m_text->draw(rect, cursor.first, cursor.second);
+        m_text->draw(rect, cursor.first, cursor.second, 1.0f);
     }
 
     if (m_text->fontFormatChanged)
@@ -192,8 +189,6 @@ void Textedit::keyInput(char key)
         updateCursorPosition(true);
     }
 
-    D2D1_RECT_F rect = currentRect();
-    m_trailing = addCharWidths(0, m_cursorPosition) > (rect.right - rect.left - 2.0f);
     m_core->redrawScreen();
 }
 
@@ -324,7 +319,7 @@ D2D1_RECT_F Textedit::currentCursorLine() const
     float yGap = (rect.bottom - rect.top - m_lineHeight) / 2.0f;
     float xGap = addCharWidths(0, m_cursorPosition);
     yGap = limitRange(yGap, 0.0f, 1e6f);
-    xGap = limitRange(xGap, 0.0f, rect.right - rect.left - 4.0f);
+    xGap = limitRange(xGap, 0.0f, rect.right - rect.left - 5.0f);
     return { rect.left + xGap + 2.0f, rect.top + yGap, rect.left + xGap + 2.0f, rect.bottom - yGap };
 }
 

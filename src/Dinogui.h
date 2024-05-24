@@ -2,6 +2,7 @@
 #pragma comment(lib, "D2d1.lib")
 #pragma comment(lib, "Dwrite.lib")
 #pragma comment(lib, "Dwmapi.lib")
+#pragma comment(lib, "Gdiplus.lib")
 #pragma comment(linker, "/ENTRY:mainCRTStartup")
 #define NOMINMAX
 
@@ -50,7 +51,7 @@ public:
 	void setFixedWindowSize(int width, int height);
 	void setMinimumWindowSize(int width, int height);
 	void setMaximumWindowSize(int width, int height);
-	void setIcon(const std::string& iconFile);
+	void setIcon(const std::string& iconFile, const std::string& which = "both");
 	ResizeState<int> resizeState;
 	void redrawScreen() const;
 	void Debug();
@@ -68,6 +69,7 @@ private:
 	ID2D1HwndRenderTarget* m_renderTarget;
 	ID2D1SolidColorBrush* m_colorBrush;
 	D2D1_POINT_2F m_mousePosition;
+	HICON m_iconSmall, m_iconBig;
 
 	std::vector<Widget*> m_widgets;
 	std::vector<Widget*> m_displayWidgets;
@@ -188,7 +190,7 @@ public:
 	Text(Core* core, const std::string& text);
 	~Text();
 
-	void draw(D2D1_RECT_F rectangle, int start = 0, int end = -1);
+	void draw(D2D1_RECT_F rectangle, int start = 0, int end = -1, float rightOff = 0.0f);
 	void setText(const std::string& text);
 	void setFont(const Font& font);
 	void setColor(const Color& color);
@@ -394,7 +396,6 @@ public:
 private:
 	Text* m_text;
 	Text* m_placeholder;
-	Text* m_cutoffText;
 	std::vector<float> m_charWidths;
 	float m_lineHeight;
 	Timer* m_cursorTimer;

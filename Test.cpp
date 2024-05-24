@@ -1,15 +1,8 @@
 #include "src/Dinogui.h"
 
-void testClickFunc(DINOGUI::Widget* wid, std::array<DINOGUI::Point<float>, 3>& points)
+void testClickFunc(DINOGUI::Core* c)
 {
-	DINOGUI::Random r;
-	r.seed();
-	DINOGUI::Point<float> p1 = { (float)r.randInt(0, 300), (float)r.randInt(0, 300) };
-	DINOGUI::Point<float> p2 = { (float)r.randInt(0, 300), (float)r.randInt(0, 300) };
-	DINOGUI::Point<float> p3 = { (float)r.randInt(0, 300), (float)r.randInt(0, 300) };
-	points = { p1, p2, p3 };
-	((DINOGUI::Canvas*)wid)->fill({ 255, 255, 255 });
-	((DINOGUI::Canvas*)wid)->drawTriangle(p1, p2, p3, { 0, 0, 255 });
+	
 }
 
 void func(DINOGUI::Widget* wid, std::array<DINOGUI::Point<float>, 3>& points, bool& a)
@@ -22,8 +15,8 @@ void func(DINOGUI::Widget* wid, std::array<DINOGUI::Point<float>, 3>& points, bo
 
 int main()
 {
-	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 400, 200);
-	//DINOGUI::Button* button = new DINOGUI::Button(core, "Button", [] { std::cout << "nice" << std::endl; });
+	DINOGUI::Core* core = new DINOGUI::Core("Test Window", 200, 200);
+	//DINOGUI::Button* button = new DINOGUI::Button(core, "Button", [core] { testClickFunc(core); });
 	/*DINOGUI::Button* button2 = new DINOGUI::Button(core, "Button2");
 	DINOGUI::Button* button3 = new DINOGUI::Button(core, "Button3");
 	DINOGUI::Label* label = new DINOGUI::Label(core, "Label");
@@ -36,14 +29,14 @@ int main()
 	DINOGUI::Slider* slider = new DINOGUI::Slider(core);
 	DINOGUI::Slider* slider2 = new DINOGUI::Slider(core, true);*/
 
-	//button->place(100, 0);
+	//button->place(50, 50);
 	/*button2->place(110, 70);
 	button3->place(50, 70);
 	label->place(120, 50);
 	checkbox->place(190, 50);*/
-	textedit->place(30, 30);
-	/*textedit->setPlaceholderText("Edit now");
-	image->place(50, 100);
+	textedit->place(50, 50);
+	textedit->setPlaceholderText("Edit now");
+	/*image->place(50, 100);
 	canvas->place(180, 100);
 	table->place(60, 500);
 	table->setLineWidth(4.0f);
@@ -82,7 +75,6 @@ int main()
 	button2->setCheckable();
 	button3->connect([canvas, &points, &antialias]() { func(canvas, points, antialias); });*/
 
-	core->setIcon("Dino.png");
 	core->run();
 	return 0;
 }
