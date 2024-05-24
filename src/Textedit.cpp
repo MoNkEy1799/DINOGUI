@@ -32,6 +32,8 @@ Textedit::Textedit(Core* core)
 Textedit::~Textedit()
 {
     delete m_text;
+    delete m_placeholder;
+    delete m_cutoffText;
     delete m_cursorTimer;
 }
 
@@ -41,6 +43,14 @@ void Textedit::draw()
     basicDrawBackgroundBorder(rect);
     ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
     ID2D1SolidColorBrush* brush = getColorBrush(m_core);
+    if (m_trailing)
+    {
+        m_text->setAlignment(Alignment::RIGHT);
+    }
+    else
+    {
+        m_text->setAlignment(Alignment::LEFT);
+    }
 
     std::pair<uint32_t, uint32_t> cursor = cursorOrder();
     if (cursor.first != cursor.second)
@@ -183,10 +193,7 @@ void Textedit::keyInput(char key)
     }
 
     D2D1_RECT_F rect = currentRect();
-    if (addCharWidths(0, m_cursorPosition) > (rect.right - rect.left - 2.0f))
-    {
-        m_trailing = true;
-    }
+    m_trailing = addCharWidths(0, m_cursorPosition) > (rect.right - rect.left - 2.0f);
     m_core->redrawScreen();
 }
 
@@ -230,13 +237,17 @@ void Textedit::otherKeys(uint32_t key, const std::vector<uint32_t>& pressed)
             text.erase(m_cursorPosition, 1);
             m_charWidths.erase(m_charWidths.begin() + m_cursorPosition);
             restartCursorTimer();
-            return;
         }
-        std::pair<uint32_t, uint32_t> cursor = cursorOrder();
-        text.erase(cursor.first, cursor.second - cursor.first);
-        m_cursorPosition = cursor.first;
-        m_selectionCursor = cursor.first;
+        else
+        {
+            std::pair<uint32_t, uint32_t> cursor = cursorOrder();
+            text.erase(cursor.first, cursor.second - cursor.first);
+            m_cursorPosition = cursor.first;
+            m_selectionCursor = cursor.first;
+        }
     }
+    D2D1_RECT_F rect = currentRect();
+    m_trailing = addCharWidths(0, m_cursorPosition) > (rect.right - rect.left - 2.0f);
 }
 
 float Textedit::calculateCharDimension(char character)
@@ -314,8 +325,7 @@ D2D1_RECT_F Textedit::currentCursorLine() const
     float xGap = addCharWidths(0, m_cursorPosition);
     yGap = limitRange(yGap, 0.0f, 1e6f);
     xGap = limitRange(xGap, 0.0f, rect.right - rect.left - 4.0f);
-    return { rect.left + xGap + 2.0f, rect.top + yGap,
-             rect.left + xGap + 2.0f, rect.bottom - yGap };
+    return { rect.left + xGap + 2.0f, rect.top + yGap, rect.left + xGap + 2.0f, rect.bottom - yGap };
 }
 
 D2D1_RECT_F Textedit::selectionRect() const

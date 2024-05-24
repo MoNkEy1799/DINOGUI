@@ -357,6 +357,23 @@ void Core::setMaximumWindowSize(int width, int height)
     m_maxSize = { limitRange(width, m_minSize.width, MAX_WIN), limitRange(height, m_minSize.height, MAX_WIN) };
 }
 
+void Core::setIcon(const std::string& iconFile)
+{
+    HANDLE icon = LoadImage(GetModuleHandle(0), toWideString(iconFile).c_str(), IMAGE_BITMAP, 0, 0, 0);
+    DWORD errorMessageID = ::GetLastError();
+
+    LPSTR messageBuffer = nullptr;
+
+    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+    std::string message(messageBuffer, size);
+
+    LocalFree(messageBuffer);
+    std::cout << message << std::endl;
+    SendMessage(m_windowHandle, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+    SendMessage(m_windowHandle, WM_SETICON, ICON_BIG, (LPARAM)icon);
+}
+
 Widget* Core::getWidgetUnderMouse(float x, float y) const
 {
     if (m_selectWidget && m_selectWidget->getWidgetType() == WidgetType::COMBOBOX)

@@ -50,6 +50,7 @@ public:
 	void setFixedWindowSize(int width, int height);
 	void setMinimumWindowSize(int width, int height);
 	void setMaximumWindowSize(int width, int height);
+	void setIcon(const std::string& iconFile);
 	ResizeState<int> resizeState;
 	void redrawScreen() const;
 	void Debug();

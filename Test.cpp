@@ -82,6 +82,7 @@ int main()
 	button2->setCheckable();
 	button3->connect([canvas, &points, &antialias]() { func(canvas, points, antialias); });*/
 
+	core->setIcon("Dino.png");
 	core->run();
 	return 0;
 }
