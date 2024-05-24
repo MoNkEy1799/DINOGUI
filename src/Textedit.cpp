@@ -12,7 +12,8 @@ using namespace DINOGUI;
 
 Textedit::Textedit(Core* core)
     : Widget(core), m_drawCursor(false), m_cursorTimer(nullptr), m_trailing(false),
-      m_cursorPosition(0), m_selectionCursor(0), m_lineHeight(0.0f), m_text(nullptr), m_placeholder(nullptr)
+      m_cursorPosition(0), m_selectionCursor(0), m_cutoffPosition(0), m_lineHeight(0.0f),
+      m_text(nullptr), m_placeholder(nullptr)
 {
     m_text = new Text(core, "");
     m_text->setAlignment(Alignment::LEFT);
@@ -41,14 +42,36 @@ void Textedit::draw()
     ID2D1HwndRenderTarget* renderTarget = getRenderTarget(m_core);
     ID2D1SolidColorBrush* brush = getColorBrush(m_core);
     std::pair<uint32_t, uint32_t> cursor = cursorOrder();
-    if (addCharWidths(0, cursor.first) > rect.right - rect.left - 5.0f)
+
+    if (addCharWidths(m_cutoffPosition, cursor.first) > rect.right - rect.left - 5.0f)
     {
         m_text->setAlignment(Alignment::RIGHT);
+        m_trailing = true;
+        m_cutoffPosition = cursor.first;
     }
     else
     {
-        m_text->setAlignment(Alignment::LEFT);
+        /*m_text->setAlignment(Alignment::LEFT);
+        m_trailing = false;*/
     }
+
+    /*if (cursor.first > m_cutoffPosition)
+    if (addCharWidths(m_cutoffPosition, cursor.first) > rect.right - rect.left - 5.0f)
+    {
+        m_text->setAlignment(Alignment::RIGHT);
+        m_trailing = true;
+        m_cutoffPosition = cursor.first;
+    }
+    else
+    {
+        if (revAddCharWidths(m_cutoffPosition, cursor.first) > rect.right - rect.left - 5.0f)
+        {
+            m_text->setAlignment(Alignment::LEFT);
+            m_trailing = false;
+            m_cutoffPosition = cursor.first;
+            std::cout << "no trail" << std::endl;
+        }
+    }*/
 
     if (cursor.first != cursor.second)
     {
@@ -316,11 +339,19 @@ std::pair<uint32_t, uint32_t> Textedit::cursorOrder() const
 D2D1_RECT_F Textedit::currentCursorLine() const
 {
     D2D1_RECT_F rect = currentRect();
+    std::cout << m_cutoffPosition << " | " << m_cursorPosition << std::endl;
+    float xGap = addCharWidths(m_cutoffPosition, m_cursorPosition);
     float yGap = (rect.bottom - rect.top - m_lineHeight) / 2.0f;
-    float xGap = addCharWidths(0, m_cursorPosition);
     yGap = limitRange(yGap, 0.0f, 1e6f);
     xGap = limitRange(xGap, 0.0f, rect.right - rect.left - 5.0f);
-    return { rect.left + xGap + 2.0f, rect.top + yGap, rect.left + xGap + 2.0f, rect.bottom - yGap };
+    float side = rect.left + 2.0f;
+    if (m_trailing)
+    {
+        side = rect.right - 3.0f;
+        xGap *= -1;
+    }
+    std::cout << side << " # " << xGap << std::endl;
+    return { side + xGap, rect.top + yGap, side + xGap, rect.bottom - yGap };
 }
 
 D2D1_RECT_F Textedit::selectionRect() const
