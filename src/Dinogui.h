@@ -399,13 +399,12 @@ private:
 	std::vector<float> m_charWidths;
 	float m_lineHeight;
 	Timer* m_cursorTimer;
-	bool m_drawCursor, m_trailing;
+	bool m_drawCursor, m_leftbound;
 	uint32_t m_cursorPosition, m_selectionCursor, m_cutoffPosition;
 
 	float calculateCharDimension(char character);
 	uint32_t getCursorPosition(float x) const;
 	float addCharWidths(uint32_t start, uint32_t stop) const;
-	float revAddCharWidths(uint32_t start, uint32_t end) const;
 	void updateCursorPosition(bool increase);
 	std::pair<uint32_t, uint32_t> cursorOrder() const;
 
